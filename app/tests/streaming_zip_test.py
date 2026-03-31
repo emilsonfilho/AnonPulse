@@ -6,7 +6,6 @@ app = FastAPI()
 
 @app.get("/exportar-feedbacks")
 def exportar_feedbacks():
-    zip_stream = gerar_zip_streaming()
     return StreamingResponse(
         gerar_zip_streaming(),
         media_type="application/zip",
