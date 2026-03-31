@@ -64,7 +64,7 @@ def mock_deltalake():
 
 def gerar_linha_csv(registro):
     buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=campos, quoting=csv.QUOTE_MINIMAL)
+    writer = csv.DictWriter(buffer, fieldnames=campos, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
     writer.writerow(registro)
     return buffer.getvalue()
 
