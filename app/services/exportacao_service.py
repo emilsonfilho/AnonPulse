@@ -3,6 +3,8 @@ from datetime import datetime
 import hashlib
 import zipstream
 import zipfile
+import csv
+import io
 
 # Mapeamento extraído da planilha com múltiplas alocações
 alocacao_monitores = {
@@ -35,6 +37,8 @@ alocacao_monitores = {
 
 tipos_feedback = ['Elogio', 'Crítica', 'Sugestão']
 
+campos = ['id', 'disciplina', 'nome_monitor', 'tipo_mensagem', 'texto_feedback', 'data_submissao', 'hash_aluno']
+
 def mock_deltalake():
     """
     Função dublê que o Membro 3 (Você) vai usar para testar o streaming 
@@ -62,17 +66,22 @@ def mock_deltalake():
         
     return feedbacks_mock
 
-def gerar_csv_streaming():
-    yield "id,disciplina,nome_monitor,tipo_mensagem,texto_feedback,data_submissao,hash_aluno\n"
+def gerar_linha_csv(registro):
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=campos, quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(registro)
+    return buffer.getvalue()
 
+def gerar_csv_streaming():
     # TODO: Substituir a função mock_deltalake() pela consulta real ao Delta Lake quando estiver pronta.
+    yield ",".join(campos) + "\n"
+
     for registro in mock_deltalake():
-        yield ",".join(str(valor) for valor in registro.values()) + "\n"
+        yield gerar_linha_csv(registro)
 
 def gerar_bytes_csv():
     for linha in gerar_csv_streaming():
         yield linha.encode('utf-8')
-
 
 def gerar_zip_streaming():
     zf =  zipstream.ZipFile(mode='w', compression=zipfile.ZIP_DEFLATED)
