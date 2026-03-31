@@ -207,6 +207,6 @@ marimo/_lsp/
 __marimo__/
 
 # Delta Lake
-app/databse
+app/databse/
 *.parquet
 _delta_log/
