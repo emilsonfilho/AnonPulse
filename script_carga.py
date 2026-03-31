@@ -52,12 +52,12 @@ def gerar_carga_inicial():
     nomes_monitores = list(alocacao_monitores.keys())
 
     # TODO: Integrar com o Pydantic quando o Willa fizer
-    for id in range(1, 1001):
+    for feedback_id in range(1, 1001):
         monitor_escolhido = random.choice(nomes_monitores)
         disciplina_escolhida = random.choice(alocacao_monitores[monitor_escolhido])
 
         feedbacks.append({
-            'id': id,
+            'id': feedback_id,
             'disciplina': disciplina_escolhida,
             'nome_monitor': monitor_escolhido,
             'tipo_mensagem': random.choice(tipos_feedback),
