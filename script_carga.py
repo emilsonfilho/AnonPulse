@@ -66,6 +66,13 @@ def gerar_carga_inicial():
             'hash_aluno': faker.sha256()
         })
 
+    # TODO: Integrar com a função do Iago que salva a tabela no Delta Lake.
+    # Exemplo: delta_repository.bulk_insert(feedbacks)
+    
+    # TODO: Pedir para o Membro 1 criar uma função que atualiza o arquivo .seq.
+    # Como inserimos 1000 registros, o arquivo .seq deve ser forçado a iniciar com o valor 1000.
+    # Exemplo: controle_id.set_valor_atual(1000)
+
     return feedbacks
 
 if __name__ == "__main__":
