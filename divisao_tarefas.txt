@@ -1,0 +1,16 @@
+Divisão de Tarefas do Projeto de Persistência
+
+Membro 1: Iago de Oliveira Lô
+1. Modelagem e implementação do banco de dados com Delta Lake
+2. Leitura incremental em lotes.
+
+Membro 2: Antônio Willian de Oliveira
+1. Configuração da arquitetura da API com FastAPI
+2. Criação das rotas HTTP
+3. Integração dos retornos via StreamingResponse 
+4. Implementação do endpoint de criptografia/Hash
+
+Membro 3: Francisco Emilson Santos Souza Filho 
+1. Implementação dos endpoints de streaming de CSV e ZIP
+2. script de carga via Faker
+3. Setup do pyproject.toml e gerenciamento do projeto.
