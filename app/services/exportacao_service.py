@@ -40,10 +40,6 @@ tipos_feedback = ['Elogio', 'Crítica', 'Sugestão']
 campos = ['id', 'disciplina', 'nome_monitor', 'tipo_mensagem', 'texto_feedback', 'data_submissao', 'hash_aluno']
 
 def mock_deltalake():
-    """
-    Função dublê que o Membro 3 (Você) vai usar para testar o streaming 
-    enquanto o Membro 1 não termina o banco Delta Lake real.
-    """
     feedbacks_mock = []
     nomes_monitores = list(alocacao_monitores.keys())
     
