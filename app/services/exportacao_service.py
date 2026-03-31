@@ -1,7 +1,7 @@
 import random
 from datetime import datetime
 import hashlib
-import io
+import zipstream
 import zipfile
 
 # Mapeamento extraído da planilha com múltiplas alocações
@@ -62,8 +62,6 @@ def mock_deltalake():
         
     return feedbacks_mock
 
-caminho_zip = ''
-
 def gerar_csv_streaming():
     yield "id,disciplina,nome_monitor,tipo_mensagem,texto_feedback,data_submissao,hash_aluno\n"
 
@@ -71,23 +69,31 @@ def gerar_csv_streaming():
     for registro in mock_deltalake():
         yield ",".join(str(valor) for valor in registro.values()) + "\n"
 
+def gerar_bytes_csv():
+    for linha in gerar_csv_streaming():
+        yield linha.encode('utf-8')
+
+
 def gerar_zip_streaming():
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-        with zf.open('feedbacks.csv', 'w') as csvf:
-          for linha in gerar_csv_streaming():
-            csvf.write(linha.encode('utf-8'))
+    zf =  zipstream.ZipFile(mode='w', compression=zipfile.ZIP_DEFLATED)
+    zf.write_iter('feedbacks.csv', gerar_bytes_csv())
+    
+    return zf
 
-            chunk = buffer.getvalue()
-            if chunk:
-                yield chunk
-                buffer.seek(0)
-                buffer.truncate()
-    yield buffer.getvalue()
-              
-
-# Se você rodar esse arquivo solto, ele imprime a lista no terminal pra você ver se deu bom:
 if __name__ == "__main__":
-    dados_teste = mock_deltalake()
-    for linha in dados_teste:
-        print(linha)
+    print("--- Testando o Streaming de CSV ---")
+    for linha in gerar_csv_streaming():
+        print(linha, end='')
+    
+    print("\n--- Testando o Streaming de ZIP ---")
+    pacote = b''
+    for chunk in gerar_zip_streaming():
+        pacote += chunk
+        print(f"Recebendo chunk de bytes: { len(chunk) } bytes")
+
+    nome_arquivo = 'feedbacks_teste.zip'
+    with open(nome_arquivo, 'wb') as f:
+        f.write(pacote)
+
+    print("\n--- Verificando integridade do arquivo ZIP ---")
+    
