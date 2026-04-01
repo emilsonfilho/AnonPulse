@@ -41,7 +41,7 @@ async def request_validation_handler(
         ErrorResponse.from_http_status(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             message="Erro de validação nos dados enviados",
-            details=exc.errors(),
+            details=[exc.errors()],
         )
     )
 

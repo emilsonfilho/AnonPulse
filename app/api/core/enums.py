@@ -6,3 +6,9 @@ class MessageType(str, Enum):
     CRITICA = "Crítica"
     DUVIDA = "Dúvida"
     SUGESTAO = "Sugestão"
+
+
+class HashAlgorithm(str, Enum):
+    MD5 = "MD5"
+    SHA1 = "SHA-1"
+    SHA256 = "SHA-256"

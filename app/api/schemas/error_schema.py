@@ -1,20 +1,20 @@
 from pydantic import BaseModel
 from http import HTTPStatus
-from typing import Sequence, Any
+from typing import Any
 
 
 class ErrorResponse(BaseModel):
     status_code: HTTPStatus
     error: str
     message: str
-    details: Sequence[Any] | dict[str, Any] | list[Any] | None = None
+    details: dict[str, Any] | list[Any] | None = None
 
     @classmethod
     def from_http_status(
         cls,
         status_code: HTTPStatus,
         message: str,
-        details: Sequence[Any] | dict[str, Any] | list[Any] | None = None,
+        details: dict[str, Any] | list[Any] | None = None,
         error: str | None = None,
     ) -> "ErrorResponse":
         return ErrorResponse(
