@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from models.feedback import Feedback
 from api.schemas.feedback_schema import FeedbackResponse, CreateFeedbackRequest
-from api.core.enums import MessageType
+from api.core.enums import HashAlgorithm, MessageType
+from services.hash_service import HashService
 from http import HTTPStatus
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
@@ -20,8 +21,17 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
     Endpoint para criar um novo feedback. Recebe os dados do feedback e retorna o feedback criado.
     """
 
-    new_feedback = Feedback.model_validate(feedback_request.model_dump())
+    data = feedback_request.model_dump()
 
-    return FeedbackResponse.model_validate(
-        new_feedback.model_dump(exclude={"hash_aluno"})
-    )
+    identificador_aluno = data.pop("identificador_aluno")
+
+    hash_gerado = HashService.generate_hash(identificador_aluno, HashAlgorithm.SHA256)
+
+    data["hash_aluno"] = hash_gerado
+
+    new_feedback = Feedback.model_validate(data)
+
+    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente.
+    # Exemplo: delta_repository.insert(new_feedback)
+
+    return FeedbackResponse.model_validate(new_feedback.model_dump())
