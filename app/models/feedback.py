@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from api.core.enums import MessageType
+from app.api.core.enums import MessageType
 from datetime import datetime, timezone
 
 

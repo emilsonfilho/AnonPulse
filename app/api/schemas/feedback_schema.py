@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Annotated
-from api.core.enums import HashAlgorithm, MessageType
+from app.api.core.enums import HashAlgorithm, MessageType
 from datetime import datetime
 
 
@@ -41,6 +41,13 @@ class CreateFeedbackRequest(BaseModel):
             description="Identificador do aluno, como matrícula ou nome",
         ),
     ]
+
+
+class UpdateFeedbackRequest(BaseModel):
+    disciplina: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    nome_monitor: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    tipo_mensagem: MessageType | None = None
+    texto_feedback: Annotated[str, Field(min_length=2, max_length=100)] | None = None
 
 
 class FeedbackResponse(BaseModel):
