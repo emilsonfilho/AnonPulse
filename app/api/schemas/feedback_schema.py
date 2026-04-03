@@ -43,6 +43,13 @@ class CreateFeedbackRequest(BaseModel):
     ]
 
 
+class UpdateFeedbackRequest(BaseModel):
+    disciplina: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    nome_monitor: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    tipo_mensagem: MessageType | None = None
+    texto_feedback: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+
+
 class FeedbackResponse(BaseModel):
     id: int
     disciplina: str
