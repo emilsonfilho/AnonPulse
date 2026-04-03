@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from models.feedback import Feedback
-from api.schemas.feedback_schema import FeedbackResponse, CreateFeedbackRequest
-from api.core.enums import HashAlgorithm, MessageType
-from services.hash_service import HashService
+from app.models.feedback import Feedback
+from app.api.schemas.feedback_schema import FeedbackResponse, CreateFeedbackRequest
+from app.api.core.enums import HashAlgorithm, MessageType
+from app.services.hash_service import HashService
 from http import HTTPStatus
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])

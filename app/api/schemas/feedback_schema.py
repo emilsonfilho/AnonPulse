@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Annotated
-from api.core.enums import HashAlgorithm, MessageType
+from app.api.core.enums import HashAlgorithm, MessageType
 from datetime import datetime
 
 

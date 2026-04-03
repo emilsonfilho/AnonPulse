@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from api.schemas.error_schema import ErrorResponse
+from app.api.schemas.error_schema import ErrorResponse
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse
