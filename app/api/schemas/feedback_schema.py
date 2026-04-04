@@ -44,10 +44,10 @@ class CreateFeedbackRequest(BaseModel):
 
 
 class UpdateFeedbackRequest(BaseModel):
-    disciplina: Annotated[str, Field(min_length=2, max_length=100)] | None = None
-    nome_monitor: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    disciplina: Annotated[str | None, Field(min_length=2, max_length=100)] = None
+    nome_monitor: Annotated[str | None, Field(min_length=2, max_length=100)] = None
     tipo_mensagem: MessageType | None = None
-    texto_feedback: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    texto_feedback: Annotated[str | None, Field(min_length=2, max_length=100)] = None
 
 
 class FeedbackResponse(BaseModel):

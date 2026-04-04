@@ -6,7 +6,6 @@ from app.api.schemas.feedback_schema import (
     UpdateFeedbackRequest,
 )
 from app.api.schemas.pagination_schema import PaginatedResponse
-from app.api.core.enums import MessageType
 from http import HTTPStatus
 from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 from app.services.feedback_service import FeedbackService
@@ -54,13 +53,11 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
     name="Buscar Feedback por ID",
     description="Retorna um feedback específico pelo seu ID.",
 )
-async def get_feedback(
+async def get_feedback_by_id(
     feedback_id: int = Path(..., description="ID numérico do feedback"),
 ) -> FeedbackResponse:
     """Endpoint para buscar um feedback específico."""
-    # TODO: Membro 1 conectará -> delta_repository.get(feedback_id)
-    # Exemplo temporário para não quebrar a API:
-    pass
+    return feedback_service.obter_feedback_por_id(feedback_id)
 
 
 @api_router.get(
@@ -71,9 +68,6 @@ async def get_feedback(
     response_description="Lista paginada de feedbacks.",
 )
 async def list_feedbacks(
-    message_type: MessageType | None = Query(
-        None, alias="type", description="Filtrar por tipo de mensagem"
-    ),
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
 ):
@@ -104,9 +98,10 @@ async def update_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
 ) -> FeedbackResponse:
     """Endpoint para atualizar um feedback existente. Recebe o ID do feedback a ser atualizado e os dados para atualização, retornando o feedback atualizado."""
-    data = feedback_request.model_dump(exclude_unset=True)
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para buscar o feedback existente, aplicar as atualizações e salvar as alterações.
-    pass
+
+    feedback_service.atualizar_feedback(feedback_id, feedback_request)
+
+    return feedback_service.obter_feedback_por_id(feedback_id)
 
 
 @api_router.delete(
@@ -121,7 +116,8 @@ async def delete_feedback(
 ) -> None:
     """Endpoint para deletar um feedback existente. Recebe o ID do feedback a ser deletado e remove o feedback correspondente."""
 
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para deletar o feedback com base no ID fornecido.
+    feedback_service.deletar_feedback(feedback_id=feedback_id)
+
     return None
 
 

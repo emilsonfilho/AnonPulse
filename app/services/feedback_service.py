@@ -1,19 +1,17 @@
+from datetime import datetime, timezone
 from itertools import islice
-from pathlib import Path
 
-from app.api.core.enums import HashAlgorithm
+from app.api.core.enums import HashAlgorithm, MessageType
 from app.api.routers.feedback import CreateFeedbackRequest, UpdateFeedbackRequest
 from app.api.schemas.feedback_schema import FeedbackResponse
 from app.database.delta_manager import FeedbackRepository
 from app.models.feedback import Feedback
 from app.services.hash_service import HashService
 
-table_path = Path("./data/feedback_delta_table")
-
 
 class FeedbackService:
-    def __init__(self):
-        self.feedback_repository = FeedbackRepository(table_path.as_posix())
+    def __init__(self) -> None:
+        self.feedback_repository = FeedbackRepository("data/feedbacks_delta")
 
     def criar_feedback(self, dados: CreateFeedbackRequest) -> FeedbackResponse:
         data = dados.model_dump()
@@ -44,8 +42,25 @@ class FeedbackService:
 
         return [FeedbackResponse.model_validate(item) for item in items]
 
-    def deletar_feedback(self, feedback_id: int):
+    def obter_feedback_por_id(self, feedback_id: int) -> FeedbackResponse:
+        # feedback = self.feedback_repository.read_by_id(feedback_id)
+        # if not feedback:
+        #     raise ResourceNotFoundException(f"Feedback com ID {feedback_id} não encontrado.")
+        # return FeedbackResponse.model_validate(feedback)
+        return FeedbackResponse(
+            id=feedback_id,
+            disciplina="Exemplo de Disciplina",
+            nome_monitor="Exemplo de Monitor",
+            tipo_mensagem=MessageType.ELOGIO,  # Exemplo de tipo de mensagem
+            texto_feedback="Este é um feedback de exemplo.",
+            data_submissao=datetime.now(timezone.utc),  # Exemplo de data de submissão
+            hash_aluno="exemplohashaluno1234567890abcdef",  # Exemplo de hash do aluno
+        )
+
+    def deletar_feedback(self, feedback_id: int) -> None:
         self.feedback_repository.delete(feedback_id)
 
     def atualizar_feedback(self, feedback_id: int, novos_dados: UpdateFeedbackRequest):
-        self.feedback_repository.update(feedback_id, novos_dados.model_dump())
+        self.feedback_repository.update(
+            feedback_id, novos_dados.model_dump(exclude_none=True, exclude_unset=True)
+        )
