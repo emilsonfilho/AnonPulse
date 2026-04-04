@@ -20,7 +20,7 @@ class FeedbackRepository:
             ("nome_monitor", pa.string()),
             ("tipo_mensagem", pa.string()),
             ("texto_feedback", pa.string()),
-            ("data_submissao", pa.string()),
+            ("data_submissao", pa.timestamp("ms")),
             ("hash_aluno", pa.string())
         ])
 
