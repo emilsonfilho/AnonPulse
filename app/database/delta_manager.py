@@ -27,10 +27,10 @@ class FeedbackRepository:
     def insert(self, dados: dict):
         new_id = self.seq_manager.get_next_id()
 
-        dados["id"] = new_id
+        dados_com_id = {**dados, "id": new_id}
 
         # Converter os dados para o formato necessário para criar uma tabela Delta
-        dados_coluna = {chave: [valor] for chave, valor in dados.items()}
+        dados_coluna = {chave: [valor] for chave, valor in dados_com_id.items()}
         tabela = pa.Table.from_pydict(dados_coluna, schema=self.schema)
 
         write_deltalake(self.table_path, tabela, mode="append")
