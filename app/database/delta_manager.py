@@ -64,7 +64,6 @@ class FeedbackRepository:
     def vacuum(self, retention_hours: int = 168, enforce_retention_duration: bool = True):
         tabela = DeltaTable(self.table_path)
         
-        # Use uma retenção segura por padrão; só sobrescreva explicitamente em cenários controlados
         tabela.vacuum(
             retention_hours=retention_hours,
             enforce_retention_duration=enforce_retention_duration
