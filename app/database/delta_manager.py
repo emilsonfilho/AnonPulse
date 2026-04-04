@@ -61,8 +61,11 @@ class FeedbackRepository:
         )
     
     # Método para limpeza de arquivos antigos e otimização do armazenamento
-    def vacuum(self):
+    def vacuum(self, retention_hours: int = 168, enforce_retention_duration: bool = True):
         tabela = DeltaTable(self.table_path)
         
-        # Tempo para deleção completa definido momentaneamente como 0h
-        tabela.vacuum(retention_hours=0, enforce_retention_duration=False)
+        # Use uma retenção segura por padrão; só sobrescreva explicitamente em cenários controlados
+        tabela.vacuum(
+            retention_hours=retention_hours,
+            enforce_retention_duration=enforce_retention_duration
+        )
