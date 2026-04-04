@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
-from api.routers.feedback import api_router as feedback_router
-from api.routers.hash import api_router as hash_router
-from api.core.exceptions.custom_exceptions import (
+from app.api.routers.feedback import api_router as feedback_router
+from app.api.routers.hash import api_router as hash_router
+from app.api.core.exceptions.custom_exceptions import (
     ResourceNotFoundException,
     DomainValidationException,
 )
-from api.core.exceptions.handlers import (
+from app.api.core.exceptions.handlers import (
     resource_not_found_handler,
     domain_validation_handler,
     http_handler,
