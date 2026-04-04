@@ -82,7 +82,7 @@ async def get_feedback(
     response_description="Lista paginada de feedbacks.",
 )
 async def list_feedbacks(
-    type: MessageType | None = Query(None, description="Filtrar por tipo de mensagem"),
+    message_type: MessageType | None = Query(None, alias="type", description="Filtrar por tipo de mensagem"),
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
 ):
