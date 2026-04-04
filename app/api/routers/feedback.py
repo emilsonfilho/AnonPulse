@@ -1,4 +1,8 @@
 from fastapi import APIRouter, Query, Path
+from fastapi.responses import (
+    FileResponse,
+    StreamingResponse
+)
 from app.models.feedback import Feedback
 from app.api.schemas.feedback_schema import (
     FeedbackResponse,
@@ -9,6 +13,7 @@ from app.api.schemas.pagination_schema import PaginatedResponse
 from app.api.core.enums import HashAlgorithm, MessageType
 from app.services.hash_service import HashService
 from http import HTTPStatus
+from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
 
@@ -130,3 +135,39 @@ async def delete_feedback(
 
     # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para deletar o feedback com base no ID fornecido.
     return None
+
+@api_router.get(
+    path="/exportar/csv",
+    name="Exportar Feedbacks para CSV",
+    description="Exporta os feedbacks registrados para um arquivo CSV.",
+    response_description="Arquivo CSV contendo os feedbacks exportados.",
+    response_class=StreamingResponse,
+)
+def export_feedbacks_csv() -> StreamingResponse:
+    """Endpoint para exportar os feedbacks registrados para um arquivo CSV. Retorna o arquivo CSV gerado."""
+
+    return StreamingResponse(
+        gerar_bytes_csv(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=feedbacks.csv"
+        },  
+    )
+
+@api_router.get(
+    path="/exportar/zip",
+    name="Exportar Feedbacks para ZIP",
+    description="Exporta os feedbacks registrados para um arquivo ZIP contendo o CSV.",
+    response_description="Arquivo ZIP contendo o CSV dos feedbacks exportados.",
+    response_class=StreamingResponse,
+)
+def export_feedbacks_zip() -> StreamingResponse:
+    """Endpoint para exportar os feedbacks registrados para um arquivo ZIP contendo o CSV. Retorna o arquivo ZIP gerado."""
+
+    return StreamingResponse(
+        gerar_zip_streaming(),
+        media_type="text/zip",
+        headers={
+            "Content-Disposition": "attachment; filename=feedbacks.zip"
+        },  
+    )
