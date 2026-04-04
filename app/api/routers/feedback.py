@@ -1,21 +1,18 @@
 from fastapi import APIRouter, Query, Path
-from fastapi.responses import (
-    FileResponse,
-    StreamingResponse
-)
-from app.models.feedback import Feedback
+from fastapi.responses import FileResponse, StreamingResponse
 from app.api.schemas.feedback_schema import (
     FeedbackResponse,
     CreateFeedbackRequest,
     UpdateFeedbackRequest,
 )
 from app.api.schemas.pagination_schema import PaginatedResponse
-from app.api.core.enums import HashAlgorithm, MessageType
-from app.services.hash_service import HashService
+from app.api.core.enums import MessageType
 from http import HTTPStatus
 from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
+from app.services.feedback_service import FeedbackService
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
+feedback_service = FeedbackService()
 
 
 @api_router.get(
@@ -48,20 +45,7 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
     Endpoint para criar um novo feedback. Recebe os dados do feedback e retorna o feedback criado.
     """
 
-    data = feedback_request.model_dump()
-
-    identificador_aluno = data.pop("identificador_aluno")
-
-    hash_gerado = HashService.generate_hash(identificador_aluno, HashAlgorithm.SHA256)
-
-    data["hash_aluno"] = hash_gerado
-
-    new_feedback = Feedback.model_validate(data)
-
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente.
-    # Exemplo: delta_repository.insert(new_feedback)
-
-    return FeedbackResponse.model_validate(new_feedback.model_dump())
+    return feedback_service.criar_feedback(feedback_request)
 
 
 @api_router.get(
@@ -87,7 +71,9 @@ async def get_feedback(
     response_description="Lista paginada de feedbacks.",
 )
 async def list_feedbacks(
-    message_type: MessageType | None = Query(None, alias="type", description="Filtrar por tipo de mensagem"),
+    message_type: MessageType | None = Query(
+        None, alias="type", description="Filtrar por tipo de mensagem"
+    ),
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
 ):
@@ -96,8 +82,10 @@ async def list_feedbacks(
     """
     skip = (page - 1) * size
 
+    items = feedback_service.obter_feedbacks(skip=skip, limit=size)
+
     return PaginatedResponse(
-        items=[],  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para buscar os feedbacks com base no skip e size.
+        items=items,
         total=0,  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
         limit=size,
         skip=skip,
@@ -136,6 +124,7 @@ async def delete_feedback(
     # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para deletar o feedback com base no ID fornecido.
     return None
 
+
 @api_router.get(
     path="/exportar/csv",
     name="Exportar Feedbacks para CSV",
@@ -149,10 +138,9 @@ def export_feedbacks_csv() -> StreamingResponse:
     return StreamingResponse(
         gerar_bytes_csv(),
         media_type="text/csv",
-        headers={
-            "Content-Disposition": "attachment; filename=feedbacks.csv"
-        },  
+        headers={"Content-Disposition": "attachment; filename=feedbacks.csv"},
     )
+
 
 @api_router.get(
     path="/exportar/zip",
@@ -167,7 +155,5 @@ def export_feedbacks_zip() -> StreamingResponse:
     return StreamingResponse(
         gerar_zip_streaming(),
         media_type="text/zip",
-        headers={
-            "Content-Disposition": "attachment; filename=feedbacks.zip"
-        },  
+        headers={"Content-Disposition": "attachment; filename=feedbacks.zip"},
     )
