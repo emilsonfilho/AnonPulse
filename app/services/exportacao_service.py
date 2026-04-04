@@ -1,3 +1,4 @@
+from app.database.delta_manager import FeedbackRepository
 import random
 from datetime import datetime
 import hashlib
@@ -39,29 +40,6 @@ tipos_feedback = ['Elogio', 'Crítica', 'Sugestão']
 
 campos = ['id', 'disciplina', 'nome_monitor', 'tipo_mensagem', 'texto_feedback', 'data_submissao', 'hash_aluno']
 
-def mock_deltalake():
-    feedbacks_mock = []
-    nomes_monitores = list(alocacao_monitores.keys())
-    
-    for id_falso in range(1, 11): # Gerando só 10 registros para teste rápido
-        monitor_sorteado = random.choice(nomes_monitores)
-        disciplina_correta = random.choice(alocacao_monitores[monitor_sorteado])
-        
-        # Criando um hash fake rapidinho usando a biblioteca nativa hashlib
-        hash_fake = hashlib.sha256(f"aluno_anonimo_{id_falso}".encode()).hexdigest()
-
-        feedbacks_mock.append({
-            'id': id_falso,
-            'disciplina': disciplina_correta,
-            'nome_monitor': monitor_sorteado,
-            'tipo_mensagem': random.choice(tipos_feedback),
-            'texto_feedback': f"Texto de teste simulando a mensagem do feedback {id_falso}.",
-            'data_submissao': datetime.now().isoformat(),
-            'hash_aluno': hash_fake
-        })
-        
-    return feedbacks_mock
-
 def gerar_linha_csv(registro):
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=campos, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
@@ -69,11 +47,12 @@ def gerar_linha_csv(registro):
     return buffer.getvalue()
 
 def gerar_csv_streaming():
-    # TODO: Substituir a função mock_deltalake() pela consulta real ao Delta Lake quando estiver pronta.
+    repo = FeedbackRepository(table_path="data/feedbacks_delta")
     yield ",".join(campos) + "\n"
 
-    for registro in mock_deltalake():
-        yield gerar_linha_csv(registro)
+    for lote in repo.read():
+        for registro in lote:
+            yield gerar_linha_csv(registro)
 
 def gerar_bytes_csv():
     for linha in gerar_csv_streaming():

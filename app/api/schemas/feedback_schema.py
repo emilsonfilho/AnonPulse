@@ -29,8 +29,8 @@ class CreateFeedbackRequest(BaseModel):
         str,
         Field(
             min_length=2,
-            max_length=100,
-            description="Texto do feedback, deve conter entre 2 e 100 caracteres",
+            max_length=5000,
+            description="Texto do feedback, deve conter entre 2 e 5000 caracteres",
         ),
     ]
     identificador_aluno: Annotated[
