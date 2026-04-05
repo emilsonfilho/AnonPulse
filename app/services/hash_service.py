@@ -1,9 +1,10 @@
-from hashlib import md5, sha1, sha256, sha3_256, blake2b
+from hashlib import blake2b, md5, sha1, sha3_256, sha256
+
 from app.api.core.enums import HashAlgorithm
 
 
 class HashService:
-    algorithms = {
+    _algorithms = {
         HashAlgorithm.MD5: md5,
         HashAlgorithm.SHA1: sha1,
         HashAlgorithm.SHA256: sha256,
@@ -14,7 +15,7 @@ class HashService:
     @classmethod
     def get_algorithm(cls, algorithm: HashAlgorithm):
         try:
-            return cls.algorithms[algorithm]
+            return cls._algorithms[algorithm]
         except KeyError:
             raise ValueError(f"Algoritmo não suportado: {algorithm}")
 

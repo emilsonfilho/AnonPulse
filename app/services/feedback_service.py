@@ -13,6 +13,12 @@ class FeedbackService:
     def __init__(self) -> None:
         self.feedback_repository = FeedbackRepository("data/feedbacks_delta")
 
+    def validate_feedback_exists(self, feedback_id):
+        if not self.feedback_repository.get_by_id(feedback_id):
+            raise ResourceNotFoundException(
+                f"Feedback com ID {feedback_id} não encontrado."
+            )
+
     def criar_feedback(self, dados: CreateFeedbackRequest) -> FeedbackResponse:
         data = dados.model_dump()
 
@@ -51,9 +57,13 @@ class FeedbackService:
         return FeedbackResponse.model_validate(feedback)
 
     def deletar_feedback(self, feedback_id: int) -> None:
+        self.validate_feedback_exists(feedback_id)
+
         self.feedback_repository.delete(feedback_id)
 
     def atualizar_feedback(self, feedback_id: int, novos_dados: UpdateFeedbackRequest):
+        self.validate_feedback_exists(feedback_id)
+
         self.feedback_repository.update(
             feedback_id, novos_dados.model_dump(exclude_none=True, exclude_unset=True)
         )

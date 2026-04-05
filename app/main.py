@@ -1,18 +1,19 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
-from app.api.routers.feedback import api_router as feedback_router
-from app.api.routers.hash import api_router as hash_router
+
 from app.api.core.exceptions.custom_exceptions import (
-    ResourceNotFoundException,
     DomainValidationException,
+    ResourceNotFoundException,
 )
 from app.api.core.exceptions.handlers import (
-    resource_not_found_handler,
     domain_validation_handler,
+    global_exception_handler,
     http_handler,
     request_validation_handler,
-    global_exception_handler,
+    resource_not_found_handler,
 )
+from app.api.routers.feedback import api_router as feedback_router
+from app.api.routers.hash import api_router as hash_router
 
 tags_metadata = [
     {"name": "Feedbacks", "description": "Operações relacionadas a feedbacks"},

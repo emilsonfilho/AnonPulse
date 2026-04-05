@@ -1,9 +1,10 @@
 from http import HTTPStatus
 
-from app.api.schemas.error_schema import ErrorResponse
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse
+
+from app.api.schemas.error_schema import ErrorResponse
 
 from .custom_exceptions import DomainValidationException, ResourceNotFoundException
 

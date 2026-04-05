@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class HashRequest(BaseModel):
     text: str = Field(
         title="Texto",

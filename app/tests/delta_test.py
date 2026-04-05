@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime
+
 from app.database.delta_manager import FeedbackRepository
 
 # 1. Configuração do ambiente de teste
@@ -19,8 +20,8 @@ dados_exemplo = {
     "nome_monitor": "Iago",
     "tipo_mensagem": "Elogio",
     "texto_feedback": "A persistência está funcionando!",
-    "data_submissao": datetime.now(), # Alterado para objeto datetime nativo
-    "hash_aluno": "hash123"
+    "data_submissao": datetime.now(),  # Alterado para objeto datetime nativo
+    "hash_aluno": "hash123",
 }
 
 id_gerado = repo.insert(dados_exemplo)

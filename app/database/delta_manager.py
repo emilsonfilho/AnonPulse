@@ -5,6 +5,7 @@ from deltalake import DeltaTable, write_deltalake
 
 from app.database.seq_manager import SequenceManager
 
+
 class FeedbackRepository:
     def __init__(self, table_path: str):
         self.table_path = table_path  # Pasta onde os arquivos Delta serão salvos
@@ -61,12 +62,12 @@ class FeedbackRepository:
 
     def update(self, feedback_id: int, novos_dados: dict):
         dados_formatados = {}
-        
+
         for k, v in novos_dados.items():
             # 1. Se for um Enum, pegamos apenas o texto dele (.value)
             # 2. Se não for Enum, mantemos o valor original
             valor_real = v.value if hasattr(v, "value") else v
-            
+
             # 3. Se o resultado for uma string, colocamos as aspas simples pro Delta
             if isinstance(valor_real, str):
                 dados_formatados[k] = f"'{valor_real}'"
@@ -74,10 +75,7 @@ class FeedbackRepository:
                 dados_formatados[k] = valor_real
 
         # Executa o update com os dados limpos
-        self._tabela.update(
-            predicate=f"id = {feedback_id}",
-            updates=dados_formatados
-        )
+        self._tabela.update(predicate=f"id = {feedback_id}", updates=dados_formatados)
 
     # Método para limpeza de arquivos antigos e otimização do armazenamento
     def vacuum(
