@@ -5,7 +5,6 @@ from deltalake import DeltaTable, write_deltalake
 
 from app.database.seq_manager import SequenceManager
 
-
 class FeedbackRepository:
     def __init__(self, table_path: str):
         self.table_path = table_path  # Pasta onde os arquivos Delta serão salvos
@@ -21,13 +20,16 @@ class FeedbackRepository:
                 ("nome_monitor", pa.string()),
                 ("tipo_mensagem", pa.string()),
                 ("texto_feedback", pa.string()),
-                ("data_submissao", pa.timestamp("ms")),
+                ("data_submissao", pa.timestamp("ms", tz="UTC")),
                 ("hash_aluno", pa.string()),
             ]
         )
 
     @property
     def _tabela(self):
+        caminho_log = os.path.join(self.table_path, "_delta_log")
+        if not os.path.exists(caminho_log):
+            return None
         return DeltaTable(self.table_path)
 
     def insert(self, dados: dict):
@@ -44,6 +46,9 @@ class FeedbackRepository:
         return new_id
 
     def read(self, batch_size: int = 100):
+        if not self._tabela:
+            return
+
         dataset = self._tabela.to_pyarrow_dataset()
         batches = dataset.to_batches(batch_size=batch_size)
 

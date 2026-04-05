@@ -2,6 +2,7 @@ from faker import Faker
 import random
 
 from app.database.delta_manager import FeedbackRepository
+from app.api.core.enums import MessageType
 
 disciplinas = [
     'Fundamentos de Programação', 
@@ -40,12 +41,6 @@ alocacao_monitores = {
 }
 # Será que valeria a pena relacionar disciplinas e monitores para constância na geração dos dados?
 
-tipos_feedback = [
-    'ELOGIO',
-    'RECLAMACAO',
-    'SUGESTAO',
-]
-
 def gerar_carga_inicial():
     faker = Faker('pt_BR')
     repo = FeedbackRepository("data/feedbacks_delta")
@@ -59,7 +54,7 @@ def gerar_carga_inicial():
         registro_feedback = {
             'disciplina': disciplina_escolhida,
             'nome_monitor': monitor_escolhido,
-            'tipo_mensagem': random.choice(tipos_feedback),
+            'tipo_mensagem': random.choice(list(MessageType)),
             'texto_feedback': faker.text(max_nb_chars=100),
             'data_submissao': faker.date_time_this_year(),
             'hash_aluno': faker.sha256()
