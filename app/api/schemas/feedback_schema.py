@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Annotated
-from app.api.core.enums import HashAlgorithm, MessageType
 from datetime import datetime
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
+from app.api.core.enums import HashAlgorithm, MessageType
 
 
 class CreateFeedbackRequest(BaseModel):
@@ -29,8 +31,8 @@ class CreateFeedbackRequest(BaseModel):
         str,
         Field(
             min_length=2,
-            max_length=100,
-            description="Texto do feedback, deve conter entre 2 e 100 caracteres",
+            max_length=5000,
+            description="Texto do feedback, deve conter entre 2 e 5000 caracteres",
         ),
     ]
     identificador_aluno: Annotated[
@@ -44,10 +46,10 @@ class CreateFeedbackRequest(BaseModel):
 
 
 class UpdateFeedbackRequest(BaseModel):
-    disciplina: Annotated[str, Field(min_length=2, max_length=100)] | None = None
-    nome_monitor: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    disciplina: Annotated[str | None, Field(min_length=2, max_length=100)] = None
+    nome_monitor: Annotated[str | None, Field(min_length=2, max_length=100)] = None
     tipo_mensagem: MessageType | None = None
-    texto_feedback: Annotated[str, Field(min_length=2, max_length=100)] | None = None
+    texto_feedback: Annotated[str | None, Field(min_length=2, max_length=100)] = None
 
 
 class FeedbackResponse(BaseModel):

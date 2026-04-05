@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Query, Path
-from app.models.feedback import Feedback
+from http import HTTPStatus
+
+from fastapi import APIRouter, Path, Query
+from fastapi.responses import StreamingResponse
+
 from app.api.schemas.feedback_schema import (
-    FeedbackResponse,
     CreateFeedbackRequest,
+    FeedbackResponse,
     UpdateFeedbackRequest,
 )
 from app.api.schemas.pagination_schema import PaginatedResponse
-from app.api.core.enums import HashAlgorithm, MessageType
-from app.services.hash_service import HashService
-from http import HTTPStatus
+from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
+from app.services.feedback_service import FeedbackService
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
+feedback_service = FeedbackService()
 
 
 @api_router.get(
@@ -24,10 +27,9 @@ async def count_feedbacks() -> dict[str, int]:
     """
     Endpoint para contar o número total de feedbacks registrados. Retorna um inteiro representando a contagem.
     """
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente. (Necesário o service de feedback para isso)
-    # Exemplo: total_feedbacks = delta_repository.count_feedbacks()
+    total_feedbacks = feedback_service.count_feedbacks()
 
-    return {"total_feedbacks": 0}
+    return {"total_feedbacks": total_feedbacks}
 
 
 @api_router.post(
@@ -43,20 +45,7 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
     Endpoint para criar um novo feedback. Recebe os dados do feedback e retorna o feedback criado.
     """
 
-    data = feedback_request.model_dump()
-
-    identificador_aluno = data.pop("identificador_aluno")
-
-    hash_gerado = HashService.generate_hash(identificador_aluno, HashAlgorithm.SHA256)
-
-    data["hash_aluno"] = hash_gerado
-
-    new_feedback = Feedback.model_validate(data)
-
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente.
-    # Exemplo: delta_repository.insert(new_feedback)
-
-    return FeedbackResponse.model_validate(new_feedback.model_dump())
+    return feedback_service.criar_feedback(feedback_request)
 
 
 @api_router.get(
@@ -65,13 +54,11 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
     name="Buscar Feedback por ID",
     description="Retorna um feedback específico pelo seu ID.",
 )
-async def get_feedback(
+async def get_feedback_by_id(
     feedback_id: int = Path(..., description="ID numérico do feedback"),
 ) -> FeedbackResponse:
     """Endpoint para buscar um feedback específico."""
-    # TODO: Membro 1 conectará -> delta_repository.get(feedback_id)
-    # Exemplo temporário para não quebrar a API:
-    pass
+    return feedback_service.obter_feedback_por_id(feedback_id)
 
 
 @api_router.get(
@@ -82,7 +69,6 @@ async def get_feedback(
     response_description="Lista paginada de feedbacks.",
 )
 async def list_feedbacks(
-    message_type: MessageType | None = Query(None, alias="type", description="Filtrar por tipo de mensagem"),
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
 ):
@@ -91,9 +77,11 @@ async def list_feedbacks(
     """
     skip = (page - 1) * size
 
+    items = feedback_service.obter_feedbacks(skip=skip, limit=size)
+
     return PaginatedResponse(
-        items=[],  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para buscar os feedbacks com base no skip e size.
-        total=0,  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
+        items=items,
+        total=feedback_service.count_feedbacks(),  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
         limit=size,
         skip=skip,
     )
@@ -111,9 +99,10 @@ async def update_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
 ) -> FeedbackResponse:
     """Endpoint para atualizar um feedback existente. Recebe o ID do feedback a ser atualizado e os dados para atualização, retornando o feedback atualizado."""
-    data = feedback_request.model_dump(exclude_unset=True)
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para buscar o feedback existente, aplicar as atualizações e salvar as alterações.
-    pass
+
+    feedback_service.atualizar_feedback(feedback_id, feedback_request)
+
+    return feedback_service.obter_feedback_por_id(feedback_id)
 
 
 @api_router.delete(
@@ -128,5 +117,40 @@ async def delete_feedback(
 ) -> None:
     """Endpoint para deletar um feedback existente. Recebe o ID do feedback a ser deletado e remove o feedback correspondente."""
 
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para deletar o feedback com base no ID fornecido.
+    feedback_service.deletar_feedback(feedback_id=feedback_id)
+
     return None
+
+
+@api_router.get(
+    path="/exportar/csv",
+    name="Exportar Feedbacks para CSV",
+    description="Exporta os feedbacks registrados para um arquivo CSV.",
+    response_description="Arquivo CSV contendo os feedbacks exportados.",
+    response_class=StreamingResponse,
+)
+def export_feedbacks_csv() -> StreamingResponse:
+    """Endpoint para exportar os feedbacks registrados para um arquivo CSV. Retorna o arquivo CSV gerado."""
+
+    return StreamingResponse(
+        gerar_bytes_csv(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=feedbacks.csv"},
+    )
+
+
+@api_router.get(
+    path="/exportar/zip",
+    name="Exportar Feedbacks para ZIP",
+    description="Exporta os feedbacks registrados para um arquivo ZIP contendo o CSV.",
+    response_description="Arquivo ZIP contendo o CSV dos feedbacks exportados.",
+    response_class=StreamingResponse,
+)
+def export_feedbacks_zip() -> StreamingResponse:
+    """Endpoint para exportar os feedbacks registrados para um arquivo ZIP contendo o CSV. Retorna o arquivo ZIP gerado."""
+
+    return StreamingResponse(
+        gerar_zip_streaming(),
+        media_type="text/zip",
+        headers={"Content-Disposition": "attachment; filename=feedbacks.zip"},
+    )

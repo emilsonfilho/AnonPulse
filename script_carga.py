@@ -1,6 +1,9 @@
 from faker import Faker
 import random
 
+from app.database.delta_manager import FeedbackRepository
+from app.api.core.enums import MessageType
+
 disciplinas = [
     'Fundamentos de Programação', 
     'Programação Orientada a Objetos', 
@@ -38,42 +41,26 @@ alocacao_monitores = {
 }
 # Será que valeria a pena relacionar disciplinas e monitores para constância na geração dos dados?
 
-tipos_feedback = [
-    'Elogio',
-    'Crítica',
-    'Sugestão',
-]
-
 def gerar_carga_inicial():
-    feedbacks = []
-
     faker = Faker('pt_BR')
+    repo = FeedbackRepository("data/feedbacks_delta")
 
     nomes_monitores = list(alocacao_monitores.keys())
 
-    # TODO: Integrar com o Pydantic quando o Willa fizer
-    for feedback_id in range(1, 1001):
+    for _ in range(1, 1001):
         monitor_escolhido = random.choice(nomes_monitores)
         disciplina_escolhida = random.choice(alocacao_monitores[monitor_escolhido])
 
-        feedbacks.append({
-            'id': feedback_id,
+        registro_feedback = {
             'disciplina': disciplina_escolhida,
             'nome_monitor': monitor_escolhido,
-            'tipo_mensagem': random.choice(tipos_feedback),
-            'texto_feedback': faker.paragraph(),
-            'data_submissao': faker.date_time_this_year().isoformat(),
+            'tipo_mensagem': random.choice(list(MessageType)),
+            'texto_feedback': faker.text(max_nb_chars=100),
+            'data_submissao': faker.date_time_this_year(),
             'hash_aluno': faker.sha256()
-        })
+        }
 
-    # TODO: Integrar com a função do Iago que salva a tabela no Delta Lake.
-    # Exemplo: delta_repository.bulk_insert(feedbacks)
-    
-    # TODO: Pedir para o Membro 1 criar uma função que atualiza o arquivo .seq.
-    # Como inserimos 1000 registros, o arquivo .seq deve ser forçado a iniciar com o valor 1000.
-    # Exemplo: controle_id.set_valor_atual(1000)
-
-    return feedbacks
+        repo.insert(registro_feedback)
 
 if __name__ == "__main__":
     print("Iniciando a população do banco...")

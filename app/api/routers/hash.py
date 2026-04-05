@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
+
 from app.api.core.enums import HashAlgorithm
 from app.api.schemas.feedback_schema import HashResponse
 from app.api.schemas.hash_schema import HashRequest
