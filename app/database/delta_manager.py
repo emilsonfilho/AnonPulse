@@ -26,6 +26,10 @@ class FeedbackRepository:
             ]
         )
 
+    @property
+    def _tabela(self):
+        return DeltaTable(self.table_path)
+        
     def insert(self, dados: dict):
         new_id = self.seq_manager.get_next_id()
 
@@ -40,10 +44,7 @@ class FeedbackRepository:
         return new_id
 
     def read(self, batch_size: int = 100):
-
-        tabela_delta = DeltaTable(self.table_path)
-
-        dataset = tabela_delta.to_pyarrow_dataset()
+        dataset = self._tabela.to_pyarrow_dataset()
         batches = dataset.to_batches(batch_size=batch_size)
 
         # Gerar os dados em lotes para evitar sobrecarregar a memória
@@ -51,30 +52,28 @@ class FeedbackRepository:
             yield pedaco.to_pylist()
 
     def delete(self, feedback_id: int):
-        tabela = DeltaTable(self.table_path)
-
-        tabela.delete(predicate=f"id = {feedback_id}")
+        self._tabela.delete(condition=f"id = {feedback_id}")
 
     def update(self, feedback_id: int, novos_dados: dict):
-        tabela = DeltaTable(self.table_path)
-        updates_sql = {}
-        for chave, valor in novos_dados.items():
-            if isinstance(valor, str):
-                # O .replace evita ataques de SQL Injection ou quebras se o aluno digitar aspas no texto
-                valor_seguro = valor.replace("'", "''")
-                updates_sql[chave] = f"'{valor_seguro}'"
-            else:
-                updates_sql[chave] = str(valor)
-
-        return tabela.update(predicate=f"id = {feedback_id}", updates=updates_sql)
-
-    # Método para limpeza de arquivos antigos e otimização do armazenamento
-    def vacuum(
-        self, retention_hours: int = 168, enforce_retention_duration: bool = True
-    ):
-        tabela = DeltaTable(self.table_path)
-
-        tabela.vacuum(
-            retention_hours=retention_hours,
-            enforce_retention_duration=enforce_retention_duration,
+        self._tabela.update(
+            condition=f"id = {feedback_id}",
+            updates=novos_dados
         )
+    
+    # Método para limpeza de arquivos antigos e otimização do armazenamento
+    def vacuum(self, retention_hours: int = 168, enforce_retention_duration: bool = True):
+        self._tabela.vacuum(
+            retention_hours=retention_hours,
+            enforce_retention_duration=enforce_retention_duration
+        )
+
+    def get_by_id(self, feedback_id: int) -> dict | None:
+        dados = self._tabela.to_pyarrow_table(filters=[("id", "=", feedback_id)]).to_pydict()
+
+        if dados["id"]:
+            return {chave: valor[0] for chave, valor in dados.items()}
+        else:
+            return None
+        
+    def count(self) -> int:
+        return self._tabela.to_pyarrow_dataset().count_rows()
