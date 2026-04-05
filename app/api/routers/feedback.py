@@ -151,6 +151,6 @@ def export_feedbacks_zip() -> StreamingResponse:
 
     return StreamingResponse(
         gerar_zip_streaming(),
-        media_type="text/zip",
+        media_type="application/zip",
         headers={"Content-Disposition": "attachment; filename=feedbacks.zip"},
     )

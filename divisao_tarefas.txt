@@ -1,5 +1,10 @@
 Divisão de Tarefas do Projeto de Persistência
 
+Alunos:
+Antônio Willian de Oliveira - Matrícula 567294 
+Francisco Emilson Santos Souza Filho - Matrícula 565685
+Iago de Oliveira Lô - 565321
+
 Membro 1: Iago de Oliveira Lô
 1. Modelagem e implementação do banco de dados com Delta Lake
 2. Leitura incremental em lotes.
@@ -14,3 +19,5 @@ Membro 3: Francisco Emilson Santos Souza Filho
 1. Implementação dos endpoints de streaming de CSV e ZIP
 2. script de carga via Faker
 3. Setup do pyproject.toml e gerenciamento do projeto.
+
+Todos: Integração das Funcionalidades
