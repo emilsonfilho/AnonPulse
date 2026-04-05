@@ -29,7 +29,7 @@ class FeedbackRepository:
     @property
     def _tabela(self):
         return DeltaTable(self.table_path)
-        
+
     def insert(self, dados: dict):
         new_id = self.seq_manager.get_next_id()
 
@@ -52,28 +52,29 @@ class FeedbackRepository:
             yield pedaco.to_pylist()
 
     def delete(self, feedback_id: int):
-        self._tabela.delete(condition=f"id = {feedback_id}")
+        self._tabela.delete(predicate=f"id = {feedback_id}")
 
     def update(self, feedback_id: int, novos_dados: dict):
-        self._tabela.update(
-            condition=f"id = {feedback_id}",
-            updates=novos_dados
-        )
-    
+        self._tabela.update(predicate=f"id = {feedback_id}", updates=novos_dados)
+
     # Método para limpeza de arquivos antigos e otimização do armazenamento
-    def vacuum(self, retention_hours: int = 168, enforce_retention_duration: bool = True):
+    def vacuum(
+        self, retention_hours: int = 168, enforce_retention_duration: bool = True
+    ):
         self._tabela.vacuum(
             retention_hours=retention_hours,
-            enforce_retention_duration=enforce_retention_duration
+            enforce_retention_duration=enforce_retention_duration,
         )
 
     def get_by_id(self, feedback_id: int) -> dict | None:
-        dados = self._tabela.to_pyarrow_table(filters=[("id", "=", feedback_id)]).to_pydict()
+        dados = self._tabela.to_pyarrow_table(
+            filters=[("id", "=", feedback_id)]
+        ).to_pydict()
 
         if dados["id"]:
             return {chave: valor[0] for chave, valor in dados.items()}
         else:
             return None
-        
+
     def count(self) -> int:
         return self._tabela.to_pyarrow_dataset().count_rows()

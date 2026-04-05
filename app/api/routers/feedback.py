@@ -25,10 +25,9 @@ async def count_feedbacks() -> dict[str, int]:
     """
     Endpoint para contar o número total de feedbacks registrados. Retorna um inteiro representando a contagem.
     """
-    # TODO: O Membro 1 conectará a camada de persistência aqui futuramente. (Necesário o service de feedback para isso)
-    # Exemplo: total_feedbacks = delta_repository.count_feedbacks()
+    total_feedbacks = feedback_service.count_feedbacks()
 
-    return {"total_feedbacks": 0}
+    return {"total_feedbacks": total_feedbacks}
 
 
 @api_router.post(
@@ -80,7 +79,7 @@ async def list_feedbacks(
 
     return PaginatedResponse(
         items=items,
-        total=0,  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
+        total=feedback_service.count_feedbacks(),  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
         limit=size,
         skip=skip,
     )

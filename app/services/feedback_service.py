@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
 from itertools import islice
 
-from app.api.core.enums import HashAlgorithm, MessageType
+from app.api.core.enums import HashAlgorithm
+from app.api.core.exceptions.custom_exceptions import ResourceNotFoundException
 from app.api.routers.feedback import CreateFeedbackRequest, UpdateFeedbackRequest
 from app.api.schemas.feedback_schema import FeedbackResponse
 from app.database.delta_manager import FeedbackRepository
@@ -43,19 +43,12 @@ class FeedbackService:
         return [FeedbackResponse.model_validate(item) for item in items]
 
     def obter_feedback_por_id(self, feedback_id: int) -> FeedbackResponse:
-        # feedback = self.feedback_repository.read_by_id(feedback_id)
-        # if not feedback:
-        #     raise ResourceNotFoundException(f"Feedback com ID {feedback_id} não encontrado.")
-        # return FeedbackResponse.model_validate(feedback)
-        return FeedbackResponse(
-            id=feedback_id,
-            disciplina="Exemplo de Disciplina",
-            nome_monitor="Exemplo de Monitor",
-            tipo_mensagem=MessageType.ELOGIO,  # Exemplo de tipo de mensagem
-            texto_feedback="Este é um feedback de exemplo.",
-            data_submissao=datetime.now(timezone.utc),  # Exemplo de data de submissão
-            hash_aluno="exemplohashaluno1234567890abcdef",  # Exemplo de hash do aluno
-        )
+        feedback = self.feedback_repository.get_by_id(feedback_id)
+        if not feedback:
+            raise ResourceNotFoundException(
+                f"Feedback com ID {feedback_id} não encontrado."
+            )
+        return FeedbackResponse.model_validate(feedback)
 
     def deletar_feedback(self, feedback_id: int) -> None:
         self.feedback_repository.delete(feedback_id)
@@ -64,3 +57,6 @@ class FeedbackService:
         self.feedback_repository.update(
             feedback_id, novos_dados.model_dump(exclude_none=True, exclude_unset=True)
         )
+
+    def count_feedbacks(self) -> int:
+        return self.feedback_repository.count()
