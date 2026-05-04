@@ -1,14 +1,12 @@
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
 
 from app.api.core.enums import MessageType
 
 
-class Feedback(BaseModel):
-    id: int = Field(
-        default=0
-    )  # O Default é necessário para evitar erros de validação, mas será sobrescrito ao criar um novo feedback
+class Feedback(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
     disciplina: str
     nome_monitor: str
     tipo_mensagem: MessageType

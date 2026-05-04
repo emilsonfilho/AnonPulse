@@ -11,6 +11,7 @@ from app.api.schemas.feedback_schema import (
 from app.api.schemas.pagination_schema import PaginatedResponse
 from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 from app.services.feedback_service import FeedbackService
+from fastapi_pagination import Page, paginate
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
 feedback_service = FeedbackService()
@@ -63,7 +64,7 @@ async def get_feedback_by_id(
 
 @api_router.get(
     path="/",
-    response_model=PaginatedResponse[FeedbackResponse],
+    response_model=Page[FeedbackResponse],
     name="Listar Feedbacks",
     description="Lista os feedbacks registrados com suporte a paginação.",
     response_description="Lista paginada de feedbacks.",
@@ -79,12 +80,7 @@ async def list_feedbacks(
 
     items = feedback_service.obter_feedbacks(skip=skip, limit=size)
 
-    return PaginatedResponse(
-        items=items,
-        total=feedback_service.count_feedbacks(),  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
-        limit=size,
-        skip=skip,
-    )
+    return paginate(items)
 
 
 @api_router.patch(
