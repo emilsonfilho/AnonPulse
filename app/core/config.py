@@ -7,7 +7,7 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./database/anonpulse.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///database/anonpulse.db")
 
     model_config = SettingsConfigDict(
         env_file=".env",
