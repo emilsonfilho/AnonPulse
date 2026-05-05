@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.api.core.enums import HashAlgorithm
-from app.api.schemas.hash_schema import HashRequest, HashResponse
+from app.core.enums import HashAlgorithm
+from app.schemas.hash_schema import HashRequest, HashResponse
 from app.services.hash_service import HashService
 
 api_router = APIRouter(prefix="/v1/hash", tags=["Hash"])

@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
 
-from app.api.core.exceptions.custom_exceptions import (
+from app.core.exceptions.custom_exceptions import (
     DomainValidationException,
     ResourceNotFoundException,
 )
-from app.api.core.exceptions.handlers import (
+from app.core.exceptions.handlers import (
     domain_validation_handler,
     global_exception_handler,
     http_handler,

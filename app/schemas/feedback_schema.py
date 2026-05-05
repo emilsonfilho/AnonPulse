@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from app.api.core.enums import MessageType
+from app.core.enums import MessageType
 
 
 class CreateFeedbackRequest(BaseModel):

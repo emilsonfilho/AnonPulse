@@ -4,7 +4,7 @@ from fastapi import APIRouter, Path, Query
 from fastapi.responses import StreamingResponse
 from fastapi_pagination import Page, paginate
 
-from app.api.schemas.feedback_schema import (
+from app.schemas.feedback_schema import (
     CreateFeedbackRequest,
     FeedbackResponse,
     UpdateFeedbackRequest,

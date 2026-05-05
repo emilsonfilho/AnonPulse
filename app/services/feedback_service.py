@@ -1,9 +1,9 @@
 from itertools import islice
 
-from app.api.core.enums import HashAlgorithm
-from app.api.core.exceptions.custom_exceptions import ResourceNotFoundException
+from app.core.enums import HashAlgorithm
+from app.core.exceptions.custom_exceptions import ResourceNotFoundException
 from app.api.routers.feedback import CreateFeedbackRequest, UpdateFeedbackRequest
-from app.api.schemas.feedback_schema import FeedbackResponse
+from app.schemas.feedback_schema import FeedbackResponse
 from app.database.delta_manager import FeedbackRepository
 from app.models.feedback import Feedback
 from app.services.hash_service import HashService

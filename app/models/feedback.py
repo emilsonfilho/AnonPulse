@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlmodel import SQLModel, Field
 
-from app.api.core.enums import MessageType
+from app.core.enums import MessageType
 
 
 class Feedback(SQLModel, table=True):
