@@ -2,16 +2,15 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Path, Query
 from fastapi.responses import StreamingResponse
+from fastapi_pagination import Page, paginate
 
 from app.api.schemas.feedback_schema import (
     CreateFeedbackRequest,
     FeedbackResponse,
     UpdateFeedbackRequest,
 )
-from app.api.schemas.pagination_schema import PaginatedResponse
 from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 from app.services.feedback_service import FeedbackService
-from fastapi_pagination import Page, paginate
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
 feedback_service = FeedbackService()

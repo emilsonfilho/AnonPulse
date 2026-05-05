@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from app.api.core.enums import HashAlgorithm, MessageType
+from app.api.core.enums import MessageType
 
 
 class CreateFeedbackRequest(BaseModel):
@@ -59,9 +59,4 @@ class FeedbackResponse(BaseModel):
     tipo_mensagem: MessageType
     texto_feedback: str
     data_submissao: datetime
-    hash_aluno: str
-
-
-class HashResponse(BaseModel):
-    algoritmo: HashAlgorithm
     hash_aluno: str

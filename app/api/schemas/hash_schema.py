@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from app.api.core.enums import HashAlgorithm
+
 
 class HashRequest(BaseModel):
     text: str = Field(
@@ -8,3 +10,8 @@ class HashRequest(BaseModel):
         min_length=6,
         max_length=255,
     )
+
+
+class HashResponse(BaseModel):
+    algoritmo: HashAlgorithm
+    hash_aluno: str
