@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
 
-from app.api.core.exceptions.custom_exceptions import (
+from app.core.exceptions.custom_exceptions import (
     DomainValidationException,
     ResourceNotFoundException,
 )
-from app.api.core.exceptions.handlers import (
+from app.core.exceptions.handlers import (
     domain_validation_handler,
     global_exception_handler,
     http_handler,
@@ -14,6 +14,7 @@ from app.api.core.exceptions.handlers import (
 )
 from app.api.routers.feedback import api_router as feedback_router
 from app.api.routers.hash import api_router as hash_router
+from fastapi_pagination import add_pagination
 
 tags_metadata = [
     {"name": "Feedbacks", "description": "Operações relacionadas a feedbacks"},
@@ -39,6 +40,7 @@ app = FastAPI(
     tags=tags_metadata,
 )
 
+add_pagination(app)
 
 app.add_exception_handler(DomainValidationException, domain_validation_handler)  # type: ignore
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)  # type: ignore

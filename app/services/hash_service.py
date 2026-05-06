@@ -1,6 +1,6 @@
 from hashlib import blake2b, md5, sha1, sha3_256, sha256
 
-from app.api.core.enums import HashAlgorithm
+from app.core.enums import HashAlgorithm
 
 
 class HashService:

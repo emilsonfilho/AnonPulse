@@ -1,4 +1,3 @@
-from app.database.delta_manager import FeedbackRepository
 import zipstream
 import zipfile
 import csv
@@ -56,12 +55,10 @@ def gerar_linha_csv(registro):
 
 
 def gerar_csv_streaming():
-    repo = FeedbackRepository(table_path="data/feedbacks_delta")
     yield ",".join(campos) + "\n"
 
-    for lote in repo.read():
-        for registro in lote:
-            yield gerar_linha_csv(registro)
+    # TODO: No futuro, o Iago vai criar um método no novo repositório para puxar os dados do PostgreSQL
+    # Exemplo futuro: for registro in session.exec(select(Feedback)): yield gerar_linha_csv(registro)
 
 
 def gerar_bytes_csv():

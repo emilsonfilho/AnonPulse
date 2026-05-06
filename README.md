@@ -35,29 +35,47 @@ O sistema foi construído aplicando conceitos avançados de Persistência de Arq
 O projeto utiliza um gerenciamento de dependências moderno e rápido. Recomendamos o uso da ferramenta `uv` (ou o setup padrão via `pyproject.toml`).
 
 ### 1. Clonar o repositório
+
 ```bash
 git clone [https://github.com/seu-usuario/AnonPulse.git](https://github.com/seu-usuario/AnonPulse.git)
 cd AnonPulse
 ```
 
 ### 2. Instalar as Dependências
+
 ```bash
 uv venv
-uv pip install -e .
+uv add -r requirements.txt
+```
+
+### 3. Iniciar o banco de dados PostgreSQL (se necessário)
+
+```bash
+docker compose up -d
 ```
 
 ### 3. Rodar a Carga Inicial dos Dados
+
 ```bash
-python script_carpa.py
+python script_carga.py
 ```
 
 ### 4. Iniciar o Servidor FastAPI
+
 ```bash
 fastapi dev app/main.py
 ```
 
+ou
+
+```bash
+uvicorn app.main:app --reload
+```
+
 ## 👥 Equipe e Divisão de Tarefas
+
 A arquitetura do trabalho foi dividida de forma modular, garantindo que as camadas de Banco de Dados, API e Serviços funcionassem de forma independente:
+
 1. Modelagem e implementação do banco de dados com Delta Lake (operações de Create, Insert, Update, Delete) e leitura incremental em lotes.
 2. Configuração da arquitetura da API com FastAPI, criação das rotas HTTP, integração dos retornos via StreamingResponse e implementação do endpoint de criptografia/Hash (F7).
 3. Implementação dos endpoints de streaming F5 e F6, script de carga via Faker e setup do pyproject.toml.

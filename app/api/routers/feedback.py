@@ -1,19 +1,18 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Path, Query
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi.responses import StreamingResponse
+from fastapi_pagination import Page, paginate
 
-from app.api.schemas.feedback_schema import (
+from app.schemas.feedback_schema import (
     CreateFeedbackRequest,
     FeedbackResponse,
     UpdateFeedbackRequest,
 )
-from app.api.schemas.pagination_schema import PaginatedResponse
 from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 from app.services.feedback_service import FeedbackService
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
-feedback_service = FeedbackService()
 
 
 @api_router.get(
@@ -23,7 +22,9 @@ feedback_service = FeedbackService()
     description="Retorna a contagem total de feedbacks registrados.",
     response_description="Número total de feedbacks.",
 )
-async def count_feedbacks() -> dict[str, int]:
+async def count_feedbacks(
+    feedback_service: FeedbackService = Depends(FeedbackService),
+) -> dict[str, int]:
     """
     Endpoint para contar o número total de feedbacks registrados. Retorna um inteiro representando a contagem.
     """
@@ -40,7 +41,10 @@ async def count_feedbacks() -> dict[str, int]:
     response_description="Feedback criado com sucesso.",
     status_code=HTTPStatus.CREATED,
 )
-async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackResponse:
+async def create_feedback(
+    feedback_request: CreateFeedbackRequest,
+    feedback_service: FeedbackService = Depends(FeedbackService),
+) -> FeedbackResponse:
     """
     Endpoint para criar um novo feedback. Recebe os dados do feedback e retorna o feedback criado.
     """
@@ -56,6 +60,7 @@ async def create_feedback(feedback_request: CreateFeedbackRequest) -> FeedbackRe
 )
 async def get_feedback_by_id(
     feedback_id: int = Path(..., description="ID numérico do feedback"),
+    feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> FeedbackResponse:
     """Endpoint para buscar um feedback específico."""
     return feedback_service.obter_feedback_por_id(feedback_id)
@@ -63,7 +68,7 @@ async def get_feedback_by_id(
 
 @api_router.get(
     path="/",
-    response_model=PaginatedResponse[FeedbackResponse],
+    response_model=Page[FeedbackResponse],
     name="Listar Feedbacks",
     description="Lista os feedbacks registrados com suporte a paginação.",
     response_description="Lista paginada de feedbacks.",
@@ -71,6 +76,7 @@ async def get_feedback_by_id(
 async def list_feedbacks(
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
+    feedback_service: FeedbackService = Depends(FeedbackService),
 ):
     """
     Endpoint para listar os feedbacks registrados com suporte a paginação. Retorna uma lista de feedbacks para a página solicitada.
@@ -79,12 +85,7 @@ async def list_feedbacks(
 
     items = feedback_service.obter_feedbacks(skip=skip, limit=size)
 
-    return PaginatedResponse(
-        items=items,
-        total=feedback_service.count_feedbacks(),  # TODO: O Membro 1 conectará a camada de persistência aqui futuramente para contar o total de feedbacks.
-        limit=size,
-        skip=skip,
-    )
+    return paginate(items)
 
 
 @api_router.patch(
@@ -97,6 +98,7 @@ async def list_feedbacks(
 async def update_feedback(
     feedback_request: UpdateFeedbackRequest,
     feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
+    feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> FeedbackResponse:
     """Endpoint para atualizar um feedback existente. Recebe o ID do feedback a ser atualizado e os dados para atualização, retornando o feedback atualizado."""
 
@@ -114,6 +116,7 @@ async def update_feedback(
 )
 async def delete_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser deletado"),
+    feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> None:
     """Endpoint para deletar um feedback existente. Recebe o ID do feedback a ser deletado e remove o feedback correspondente."""
 

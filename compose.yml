@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: docker.io/postgres:18.1-alpine
+    container_name: anonpulse-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-anonpulse}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-anonpulse}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
