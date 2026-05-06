@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from app.core.enums import MessageType
 
+
 class CreateFeedbackRequest(BaseModel):
     disciplina: Annotated[
         str,

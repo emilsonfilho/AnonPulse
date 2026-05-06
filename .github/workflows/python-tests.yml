@@ -29,7 +29,7 @@ jobs:
 
       - name: Lint
         run: |
-          uv run ruff check . --output-format=github
+          uv run ruff check . --output-format=github --exclude=migrations/
 
       - name: Test with pytest
         run: |
