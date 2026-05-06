@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from app.core.enums import MessageType
 
-
 class CreateFeedbackRequest(BaseModel):
     disciplina: Annotated[
         str,
@@ -54,8 +53,8 @@ class UpdateFeedbackRequest(BaseModel):
 
 class FeedbackResponse(BaseModel):
     id: int
-    disciplina: str
-    nome_monitor: str
+    disciplina_id: int
+    monitor_id: int
     tipo_mensagem: MessageType
     texto_feedback: str
     data_submissao: datetime

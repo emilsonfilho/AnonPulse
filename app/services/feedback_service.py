@@ -1,17 +1,16 @@
 from itertools import islice
-
+from datetime import datetime, timezone
 from app.core.enums import HashAlgorithm
 from app.core.exceptions.custom_exceptions import ResourceNotFoundException
 from app.api.routers.feedback import CreateFeedbackRequest, UpdateFeedbackRequest
 from app.schemas.feedback_schema import FeedbackResponse
-from app.database.delta_manager import FeedbackRepository
 from app.models.feedback import Feedback
 from app.services.hash_service import HashService
 
 
 class FeedbackService:
     def __init__(self) -> None:
-        self.feedback_repository = FeedbackRepository("data/feedbacks_delta")
+        pass # Instanciar Session do SQLModel aqui depois
 
     def validate_feedback_exists(self, feedback_id):
         if not self.feedback_repository.get_by_id(feedback_id):
@@ -20,53 +19,38 @@ class FeedbackService:
             )
 
     def criar_feedback(self, dados: CreateFeedbackRequest) -> FeedbackResponse:
-        data = dados.model_dump()
+        # data = dados.model_dump()
 
-        identificador_aluno = data.pop("identificador_aluno")
+        identificador_aluno = dados.identificador_aluno
 
         hash_gerado = HashService.generate_hash(
             identificador_aluno, HashAlgorithm.SHA256
         )
 
-        data["hash_aluno"] = hash_gerado
-
-        new_feedback = Feedback.model_validate(data)
-
-        new_id = self.feedback_repository.insert(new_feedback.model_dump())
-
-        new_feedback.id = new_id
-
-        return FeedbackResponse.model_validate(new_feedback.model_dump())
-
-    def obter_feedbacks(self, skip: int, limit: int) -> list[FeedbackResponse]:
-        def iterar_registros():
-            for lote in self.feedback_repository.read(batch_size=limit):
-                for registro in lote:
-                    yield registro
-
-        items = list(islice(iterar_registros(), skip, skip + limit))
-
-        return [FeedbackResponse.model_validate(item) for item in items]
-
-    def obter_feedback_por_id(self, feedback_id: int) -> FeedbackResponse:
-        feedback = self.feedback_repository.get_by_id(feedback_id)
-        if not feedback:
-            raise ResourceNotFoundException(
-                f"Feedback com ID {feedback_id} não encontrado."
-            )
-        return FeedbackResponse.model_validate(feedback)
-
-    def deletar_feedback(self, feedback_id: int) -> None:
-        self.validate_feedback_exists(feedback_id)
-
-        self.feedback_repository.delete(feedback_id)
-
-    def atualizar_feedback(self, feedback_id: int, novos_dados: UpdateFeedbackRequest):
-        self.validate_feedback_exists(feedback_id)
-
-        self.feedback_repository.update(
-            feedback_id, novos_dados.model_dump(exclude_none=True, exclude_unset=True)
+        # Mock para testes (implementar)
+        return FeedbackResponse(
+            id=1,
+            disciplina_id=10,  # ID fake de uma disciplina
+            monitor_id=5,       # ID fake de um monitor
+            tipo_mensagem=dados.tipo_mensagem,
+            texto_feedback=dados.texto_feedback,
+            data_submissao=datetime.now(timezone.utc),
+            hash_aluno=hash_gerado
         )
 
+    def obter_feedbacks(self, skip: int, limit: int) -> list[FeedbackResponse]:
+        # Mock temporario
+        return []
+
+    def obter_feedback_por_id(self, feedback_id: int) -> FeedbackResponse:
+        # Lança erro 404 automaticamente para testar o handler, já que não temos banco ainda
+        raise ResourceNotFoundException(f"Mock: Banco de dados ainda não conectado.")
+
+    def deletar_feedback(self, feedback_id: int) -> None:
+        pass
+
+    def atualizar_feedback(self, feedback_id: int, novos_dados: UpdateFeedbackRequest):
+        pass
+
     def count_feedbacks(self) -> int:
-        return self.feedback_repository.count()
+        return 0
