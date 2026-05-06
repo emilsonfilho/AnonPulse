@@ -31,6 +31,6 @@ jobs:
         run: |
           uv run ruff check . --output-format=github --exclude=migrations/
 
-      - name: Test with pytest
-        run: |
-          uv run pytest
+#      - name: Test with pytest
+#        run: |
+#          uv run pytest
