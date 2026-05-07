@@ -23,7 +23,7 @@ class UpdateProfessorRequest(BaseModel):
     name: Annotated[
         str | None,
         Field(
-            default=None
+            default=None,
             min_length=3,
             max_length=100,
             description="Nome do professor."
