@@ -16,10 +16,10 @@ class ProfessorBase(BaseModel):
         description="Email do professor."
     )
 
-class CreateProfessorBase(ProfessorBase):
+class CreateProfessorRequest(ProfessorBase):
     pass
 
-class UpdateProfessorBase(BaseModel):
+class UpdateProfessorRequest(BaseModel):
     name: Annotated[
         str | None,
         Field(
@@ -33,3 +33,6 @@ class UpdateProfessorBase(BaseModel):
         max_length=100,
         description="Email do professor."
     )
+
+class ProfessorResponse(ProfessorBase):
+    id: int
