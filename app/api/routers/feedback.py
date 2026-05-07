@@ -25,8 +25,18 @@ api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
 async def count_feedbacks(
     feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> dict[str, int]:
-    """
-    Endpoint para contar o número total de feedbacks registrados. Retorna um inteiro representando a contagem.
+    """Conta o total de feedbacks registrados no sistema.
+
+    Esta rota consulta a camada de serviço para obter a quantidade total de
+    feedbacks persistidos e devolve o resultado em um dicionário simples.
+
+    Args:
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        dict[str, int]: Dicionário contendo a chave ``total_feedbacks`` com o
+        número total de registros.
     """
     total_feedbacks = feedback_service.count_feedbacks()
 
@@ -45,8 +55,19 @@ async def create_feedback(
     feedback_request: CreateFeedbackRequest,
     feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> FeedbackResponse:
-    """
-    Endpoint para criar um novo feedback. Recebe os dados do feedback e retorna o feedback criado.
+    """Cria um novo feedback.
+
+    A rota recebe os dados validados do corpo da requisição e delega a criação
+    para a camada de serviço.
+
+    Args:
+        feedback_request: Payload com os dados necessários para criação do
+            feedback.
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        FeedbackResponse: Objeto com os dados do feedback criado.
     """
 
     return feedback_service.criar_feedback(feedback_request)
@@ -62,7 +83,16 @@ async def get_feedback_by_id(
     feedback_id: int = Path(..., description="ID numérico do feedback"),
     feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> FeedbackResponse:
-    """Endpoint para buscar um feedback específico."""
+    """Busca um feedback específico a partir do identificador.
+
+    Args:
+        feedback_id: Identificador numérico do feedback a ser consultado.
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        FeedbackResponse: Dados completos do feedback encontrado.
+    """
     return feedback_service.obter_feedback_por_id(feedback_id)
 
 
@@ -78,8 +108,21 @@ async def list_feedbacks(
     size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
     feedback_service: FeedbackService = Depends(FeedbackService),
 ):
-    """
-    Endpoint para listar os feedbacks registrados com suporte a paginação. Retorna uma lista de feedbacks para a página solicitada.
+    """Lista feedbacks com suporte a paginação.
+
+    A paginação é controlada pelos parâmetros ``page`` e ``size``. O cálculo
+    de deslocamento (offset) é feito localmente e os itens são obtidos via
+    camada de serviço.
+
+    Args:
+        page: Número da página (inicia em 1).
+        size: Quantidade de itens por página (entre 1 e 100).
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        Page[FeedbackResponse]: Estrutura paginada contendo os feedbacks da
+        página solicitada.
     """
     skip = (page - 1) * size
 
@@ -100,7 +143,21 @@ async def update_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
     feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> FeedbackResponse:
-    """Endpoint para atualizar um feedback existente. Recebe o ID do feedback a ser atualizado e os dados para atualização, retornando o feedback atualizado."""
+    """Atualiza um feedback existente.
+
+    A rota recebe o identificador do feedback e os campos de atualização.
+    Após a operação, realiza uma nova consulta para retornar o estado atual do
+    recurso.
+
+    Args:
+        feedback_request: Payload com os dados permitidos para atualização.
+        feedback_id: Identificador do feedback que será atualizado.
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        FeedbackResponse: Dados atualizados do feedback.
+    """
 
     feedback_service.atualizar_feedback(feedback_id, feedback_request)
 
@@ -118,7 +175,16 @@ async def delete_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser deletado"),
     feedback_service: FeedbackService = Depends(FeedbackService),
 ) -> None:
-    """Endpoint para deletar um feedback existente. Recebe o ID do feedback a ser deletado e remove o feedback correspondente."""
+    """Remove um feedback existente.
+
+    Args:
+        feedback_id: Identificador do feedback que será removido.
+        feedback_service: Dependência injetada com as regras de negócio de
+            feedback.
+
+    Returns:
+        None: Resposta sem corpo (HTTP 204) quando a remoção é concluída.
+    """
 
     feedback_service.deletar_feedback(feedback_id=feedback_id)
 
@@ -133,7 +199,12 @@ async def delete_feedback(
     response_class=StreamingResponse,
 )
 def export_feedbacks_csv() -> StreamingResponse:
-    """Endpoint para exportar os feedbacks registrados para um arquivo CSV. Retorna o arquivo CSV gerado."""
+    """Exporta feedbacks para um arquivo CSV em streaming.
+
+    Returns:
+        StreamingResponse: Fluxo de bytes no formato CSV com cabeçalho para
+        download do arquivo ``feedbacks.csv``.
+    """
 
     return StreamingResponse(
         gerar_bytes_csv(),
@@ -150,7 +221,12 @@ def export_feedbacks_csv() -> StreamingResponse:
     response_class=StreamingResponse,
 )
 def export_feedbacks_zip() -> StreamingResponse:
-    """Endpoint para exportar os feedbacks registrados para um arquivo ZIP contendo o CSV. Retorna o arquivo ZIP gerado."""
+    """Exporta feedbacks para um arquivo ZIP contendo o CSV.
+
+    Returns:
+        StreamingResponse: Fluxo de bytes no formato ZIP com cabeçalho para
+        download do arquivo ``feedbacks.zip``.
+    """
 
     return StreamingResponse(
         gerar_zip_streaming(),
