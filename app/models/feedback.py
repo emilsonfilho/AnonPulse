@@ -3,8 +3,6 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.models.subject import Subject
-    from app.models.monitor import Monitor
     from app.models.monitor_assignment import MonitorAssignment
     from app.models.enrollment import Enrollment
     from app.models.feedback_type import FeedbackType
