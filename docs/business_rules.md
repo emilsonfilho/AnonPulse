@@ -17,6 +17,8 @@
 - *V08*: O campo createdAt em Feedback deve ser atribuído automaticamente
 - *V09*: O campo `texto_feedback` (ou nome semelhante, ver no diagrama ER) não pode conter apenas espaços em branco ou caracteres de escape, p. ex., `\n`
 - *V10*: O campo `semestre_ideal` deve ser um número entre 1 e 5
+- *V11*: O campo `cod` na entidade Classroom deve ter exatamente 3 caracteres
+- *V12*: O campo `cod` na entidade Subject deve ter no máximo 9 caracteres
 
 ### Integridade de Relacionamentos
 - *IR01*: Um monitor só pode receber feedback por uma disciplina na qual ele está efetivamente vinculado. P. ex.: Não posso ser da turma de FUP-SI e dar Feedback para um monitor que está na turma de FUP-IA
