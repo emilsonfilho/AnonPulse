@@ -11,7 +11,7 @@ class MonitorBase(BaseModel):
         )
     ]
     registration: Annotated[
-        int,
+        str,
         Field(
             min_length=5,
             max_length=8,
@@ -45,4 +45,4 @@ class UpdateMonitorRequest(BaseModel):
     )
 
 class MonitorResponse(MonitorBase):
-    id: int
+    pass

@@ -11,6 +11,15 @@ class SubjectBase(BaseModel):
         )
     ]
 
+    cod: Annotated[
+        str,
+        Field(
+            min_length=9,
+            max_length=9,
+            description="Código de Cadeira"
+        )
+    ]
+
 class CreateSubjectRequest(SubjectBase):
     pass
 
@@ -26,4 +35,4 @@ class UpdateSubjectRequest(BaseModel):
     ]
 
 class SubjectResponse(SubjectBase):
-    id: int
+    pass
