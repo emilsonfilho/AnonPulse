@@ -1,62 +1,96 @@
-from datetime import datetime
 from typing import Annotated
-
-from pydantic import BaseModel, Field
-
-from app.core.enums import MessageType
+from pydantic import BaseModel, Field, field_validator
 
 
-class CreateFeedbackRequest(BaseModel):
-    disciplina: Annotated[
-        str,
-        Field(
-            min_length=2,
-            max_length=100,
-            description="Nome da disciplina, deve conter entre 2 e 100 caracteres",
-        ),
-    ]
-    nome_monitor: Annotated[
-        str,
-        Field(
-            min_length=2,
-            max_length=100,
-            description="Nome do monitor, deve conter entre 2 e 100 caracteres",
-        ),
-    ]
-    tipo_mensagem: MessageType = Field(
-        default_factory=lambda: MessageType.SUGESTAO,
-        description="Tipo da mensagem, pode ser SUGESTAO, RECLAMACAO ou ELOGIO",
-    )
-    texto_feedback: Annotated[
+def validate_empty_text(value:str) -> str:
+    if value is None:
+        return value
+    elif value.strip() == "":
+        raise ValueError("O texto não deve ser vazio")
+    else:
+        return value
+
+class FeedbackBase(BaseModel):
+    text: Annotated[
         str,
         Field(
             min_length=2,
             max_length=5000,
-            description="Texto do feedback, deve conter entre 2 e 5000 caracteres",
-        ),
+            description="Campo para texto do feedback"
+        )
     ]
-    identificador_aluno: Annotated[
-        str,
+
+    rating: Annotated[
+        int,
         Field(
-            min_length=3,
-            max_length=100,
-            description="Identificador do aluno, como matrícula ou nome",
-        ),
+            ge= 0,
+            le= 5,
+            description="Nota de avaliação do monitor"
+        )
     ]
+  
+
+    @field_validator("text")
+    @classmethod
+    def validate_fields(cls, v):
+        return validate_empty_text(v)
+    
+
+class CreateFeedbackRequest(FeedbackBase):
+    assignment_id: Annotated[
+        int,
+        Field(
+            description="ID da tarefa"
+        )
+    ]
+
+    enrollment_id: Annotated[
+        int,
+        Field(
+            description="ID da matrícula"
+        )
+    ]
+
+    type_id: Annotated[
+        int,
+        Field(
+            description="ID do tipo de feedback"
+        )
+    ]
+
 
 
 class UpdateFeedbackRequest(BaseModel):
-    disciplina: Annotated[str | None, Field(min_length=2, max_length=100)] = None
-    nome_monitor: Annotated[str | None, Field(min_length=2, max_length=100)] = None
-    tipo_mensagem: MessageType | None = None
-    texto_feedback: Annotated[str | None, Field(min_length=2, max_length=100)] = None
+    rating: Annotated[
+        int | None, 
+        Field(
+            default=None,
+            ge=0,
+            le=5,
+            description="Nota de avaliação do monitor"
+        )
+    ] 
+
+    text: Annotated[
+        str | None, 
+        Field(
+            default=None,
+            min_length=2,
+            max_length=5000,
+            description="Campo para texto do feedback"
+        )   
+    ]
+
+    @field_validator("text")
+    @classmethod
+    def validate_fields(cls, v):
+        return validate_empty_text(v)
+    
 
 
-class FeedbackResponse(BaseModel):
+class FeedbackResponse(FeedbackBase):
     id: int
-    disciplina_id: int
-    monitor_id: int
-    tipo_mensagem: MessageType
-    texto_feedback: str
-    data_submissao: datetime
-    hash_aluno: str
+    createdAt: str
+    assignment_id: int
+    enrollment_id: int
+    type_id: int
