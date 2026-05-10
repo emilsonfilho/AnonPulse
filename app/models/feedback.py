@@ -1,15 +1,24 @@
 from datetime import datetime, timezone
+from sqlmodel import SQLModel, Field, Relationship
+from typing import TYPE_CHECKING
 
-from sqlmodel import SQLModel, Field
-
-from app.core.enums import MessageType
-
+if TYPE_CHECKING:
+    from app.models.monitor_assignment import MonitorAssignment
+    from app.models.enrollment import Enrollment
+    from app.models.feedback_type import FeedbackType
 
 class Feedback(SQLModel, table=True):
+    __tablename__ = "feedbacks"
+
     id: int | None = Field(default=None, primary_key=True)
-    disciplina: str
-    nome_monitor: str
-    tipo_mensagem: MessageType
-    texto_feedback: str
-    data_submissao: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    hash_aluno: str
+    assignment_id: int = Field(foreign_key="monitor_assignments.id")
+    enrollment_id: int = Field(foreign_key="enrollments.id")
+    type_id: int = Field(foreign_key="feedback_types.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    text: str
+    rating: int
+
+    assignment: "MonitorAssignment" =  Relationship(back_populates="feedbacks")
+    enrollment: "Enrollment" = Relationship(back_populates="feedbacks")
+    type: "FeedbackType" = Relationship(back_populates="feedbacks")
+
