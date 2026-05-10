@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Path
 from fastapi.responses import StreamingResponse
-from fastapi_pagination import Page, paginate
+from fastapi_pagination import Page, paginate, Params
 
 from app.schemas.feedback_schema import (
     CreateFeedbackRequest,
@@ -104,8 +104,7 @@ async def get_feedback_by_id(
     response_description="Lista paginada de feedbacks.",
 )
 async def list_feedbacks(
-    page: int = Query(1, ge=1, description="Número da página"),
-    size: int = Query(10, ge=1, le=100, description="Tamanho da página"),
+    params: Params = Depends(),
     feedback_service: FeedbackService = Depends(FeedbackService),
 ):
     """Lista feedbacks com suporte a paginação.
@@ -124,9 +123,12 @@ async def list_feedbacks(
         Page[FeedbackResponse]: Estrutura paginada contendo os feedbacks da
         página solicitada.
     """
-    skip = (page - 1) * size
 
-    items = feedback_service.obter_feedbacks(skip=skip, limit=size)
+    # TODO: Futuramente, terá que adicionar Query params aqui para filtrar por data, nota, etc.
+
+    skip = (params.page - 1) * params.size
+
+    items = feedback_service.obter_feedbacks(skip=skip, limit=params.size)
 
     return paginate(items)
 

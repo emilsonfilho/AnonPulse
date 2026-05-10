@@ -14,13 +14,20 @@ from app.core.exceptions.handlers import (
 )
 from app.api.routers.feedback import api_router as feedback_router
 from app.api.routers.hash import api_router as hash_router
+from app.api.routers.professor import api_router as professor_router
+from app.api.routers.subject import api_router as subject_router
+from app.api.routers.classroom import api_router as classroom_router
 from fastapi_pagination import add_pagination
 
 tags_metadata = [
     {"name": "Feedbacks", "description": "Operações relacionadas a feedbacks"},
     {"name": "Hash", "description": "Operações relacionadas a geração de hash"},
+    {"name": "Professores", "description": "Operações relacionadas a professores"},
+    {"name": "Turmas", "description": "Operações relacionadas a turmas"},
+    {"name": "Disciplinas", "description": "Operações relacionadas a disciplinas"},
 ]
 
+PREFIX = "/api"
 
 app = FastAPI(
     title="AnonPulse",
@@ -40,13 +47,17 @@ app = FastAPI(
     tags=tags_metadata,
 )
 
-add_pagination(app)
-
 app.add_exception_handler(DomainValidationException, domain_validation_handler)  # type: ignore
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)  # type: ignore
 app.add_exception_handler(HTTPException, http_handler)  # type: ignore
 app.add_exception_handler(RequestValidationError, request_validation_handler)  # type: ignore
 app.add_exception_handler(Exception, global_exception_handler)
 
-app.include_router(feedback_router, prefix="/api")
-app.include_router(hash_router, prefix="/api")
+app.include_router(subject_router, prefix=PREFIX)
+app.include_router(professor_router, prefix=PREFIX)
+app.include_router(classroom_router, prefix=PREFIX)
+app.include_router(feedback_router, prefix=PREFIX)
+app.include_router(hash_router, prefix=PREFIX)
+
+
+add_pagination(app)
