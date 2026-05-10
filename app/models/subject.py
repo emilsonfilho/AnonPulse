@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 class Subject(SQLModel, table=True):
     __tablename__ = "subjects"
 
-    id: int | None = Field(default=None, primary_key=True)
+    cod: str = Field(primary_key=True)
     name: str
 
     classrooms: list["Classroom"] = Relationship(back_populates="subject")

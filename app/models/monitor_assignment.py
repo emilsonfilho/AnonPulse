@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -8,11 +8,14 @@ if TYPE_CHECKING:
 
 class MonitorAssignment(SQLModel, table=True):
     __tablename__ = "monitor_assignments"
+    __table_args__ = (
+        UniqueConstraint("monitor_registration", "classroom_cod", name="unique_monitor_classroom"),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
     weekly_hours: int
-    monitor_id: int = Field(foreign_key="monitors.id")
-    classroom_id: int = Field(foreign_key="classrooms.id")
+    monitor_registration: str = Field(foreign_key="monitors.registration")
+    classroom_cod: str = Field(foreign_key="classrooms.cod")
 
     monitor: "Monitor" = Relationship(back_populates="assignments")
     classroom: "Classroom" = Relationship(back_populates="assignments")
