@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Path
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
 
 from app.schemas.professor_schema import (
     CreateProfessorRequest,
@@ -66,8 +66,7 @@ async def list_professores(
     Returns:
         Page[ProfessorResponse]: Página contendo a lista de professores.
     """
-    professores = professor_service.list_professores(params)
-    return paginate(professores)
+    return professor_service.list_professores(params)
 
 
 @api_router.get(

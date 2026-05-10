@@ -66,7 +66,7 @@ async def list_subjects(
 
 
 @api_router.patch(
-    path="/{subject_id}",
+    path="/{subject_code}",
     response_model=SubjectResponse,
     name="Atualizar Disciplina",
     description="Atualiza os dados de uma disciplina existente.",
@@ -79,7 +79,7 @@ async def update_subject(
 ) -> SubjectResponse:
     """Atualiza os dados de uma disciplina existente.
 
-    A rota recebe o ID da disciplina a ser atualizada e os dados validados do
+    A rota recebe o código da disciplina a ser atualizada e os dados validados do
     corpo da requisição. Ela delega a atualização da disciplina para a camada
     de serviço, que é responsável por persistir as alterações e retornar os
     dados da disciplina atualizada.
