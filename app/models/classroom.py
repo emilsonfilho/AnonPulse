@@ -10,9 +10,8 @@ if TYPE_CHECKING:
 class Classroom(SQLModel, table=True):
     __tablename__ = "classrooms"
 
-    id: int | None = Field(default=None, primary_key=True)
-    semester: str
-    subject_id: int = Field(foreign_key="subjects.id")
+    cod: str = Field(primary_key=True)
+    subject_cod: str = Field(foreign_key="subjects.cod")
     professor_id: int = Field(foreign_key="professors.id")
 
     subject: "Subject" = Relationship(back_populates="classrooms")

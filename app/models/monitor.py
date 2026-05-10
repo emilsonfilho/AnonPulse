@@ -7,8 +7,7 @@ if TYPE_CHECKING:
 class Monitor(SQLModel, table=True):
     __tablename__ = "monitors"
 
-    id: int | None = Field(default= None, primary_key=True)
-    registration: str = Field(unique=True)
+    registration: str = Field(primary_key=True)
     name: str
     email: str
 

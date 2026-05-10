@@ -14,9 +14,9 @@ class Feedback(SQLModel, table=True):
     assignment_id: int = Field(foreign_key="monitor_assignments.id")
     enrollment_id: int = Field(foreign_key="enrollments.id")
     type_id: int = Field(foreign_key="feedback_types.id")
-    data_submissao: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    texto_feedback: str
-    rating: int | None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    text: str
+    rating: int
 
     assignment: "MonitorAssignment" =  Relationship(back_populates="feedbacks")
     enrollment: "Enrollment" = Relationship(back_populates="feedbacks")
