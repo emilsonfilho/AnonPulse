@@ -23,6 +23,8 @@ class SubjectService:
 
         if not subject:
             raise SubjectNotFoundException()
+        
+        return SubjectResponse.model_validate(subject)
 
 
     async def create(self, data: CreateSubjectRequest) -> SubjectResponse:
