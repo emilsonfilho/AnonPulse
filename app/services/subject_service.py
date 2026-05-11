@@ -10,7 +10,13 @@ class SubjectService:
         self.repository = repository
     
     async def list_subjects(self, params: Params) -> Page[SubjectResponse]:
-        return await self.repository.list_all() 
+        page = await self.repository.list_all(params)
+
+        page.items = [
+            SubjectResponse.model_validate(subject) for subject in page
+        ] 
+
+        return page
 
     async def get_subject_by_code(self, code: str) -> SubjectResponse:
         subject = await self.repository.get_by_code(code)

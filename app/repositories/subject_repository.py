@@ -3,7 +3,6 @@ from fastapi_pagination import Params, Page
 from app.models.subject import Subject
 from sqlalchemy import select
 from typing import Any
-from app.schemas.subject_schema import SubjectResponse
 
 class SubjectRepository:
     def __init__(self, session: AsyncSession):
@@ -17,7 +16,7 @@ class SubjectRepository:
 
         return subject
 
-    async def list_all(self, params: Params) -> Page[SubjectResponse]:
+    async def list_all(self, params: Params) -> Page[Subject]:
         # To-Do
         pass
 
