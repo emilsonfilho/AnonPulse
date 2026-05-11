@@ -10,7 +10,6 @@ from app.schemas.subject_schema import (
 )
 
 from app.services.subject_service import SubjectService
-from app.repositories.subject_repository import SubjectRepository
 
 from app.api.dependencies.services import get_subject_service
 
