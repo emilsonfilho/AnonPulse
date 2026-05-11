@@ -31,7 +31,7 @@ class SubjectService(BaseService):
         return Mapper.to_response(subject, SubjectResponse)
 
 
-    async def create(self, data: CreateSubjectRequest) -> SubjectResponse:
+    async def create_subject(self, data: CreateSubjectRequest) -> SubjectResponse:
         subject_exists = await self.repository.get_by_code(data.cod)
 
         if (subject_exists):

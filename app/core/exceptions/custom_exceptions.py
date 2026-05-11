@@ -19,3 +19,16 @@ class SubjectNotFoundException(Exception):
         message = "Disciplina não enconotrada."
         super().__init__(message)
         self.message = message
+
+# Monitor Exceptions
+class MonitorAlreadyExistsExcepion(Exception):
+    def __init__(self, registration: str) -> None:
+        message = f"Já existe um monitor(a) com a matrícula {registration}"
+        super().__init__(message)
+        self.message = message
+
+class MonitorNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Monitor(a) não encontrado(a)."
+        super().__init__(message)
+        self.message = message
