@@ -5,18 +5,17 @@ from app.models import Subject
 from app.core.exceptions.custom_exceptions import SubjectAlreadyExistsExcepion, SubjectNotFoundException
 from app.core.mapper import Mapper
 from app.repositories.subject_repository import SubjectRepository
+from app.services.base_service import BaseService
 
-class SubjectService:
+class SubjectService(BaseService):
     def __init__(self, repository: SubjectRepository) -> None:
         self.repository = repository
 
     async def _get_subject_or_raise(self, code: str) -> Subject:
-        subject = await self.repository.get_by_code(code)
-
-        if not subject:
-            raise SubjectNotFoundException()
-
-        return subject
+        return self.get_or_raise(
+            lambda: self.repository.get_by_code(code),
+            SubjectNotFoundException
+        )
     
     async def list_subjects(self, params: Params) -> Page[SubjectResponse]:
         page = await self.repository.list_all(params)
