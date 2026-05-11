@@ -1,0 +1,9 @@
+{
+	"Todo Python": {
+		"prefix": "todo",
+		"body": [
+			"# To-Do\npass\n$0"
+		],
+		"description": "Substitui todo por # To-Do"
+	}
+}
