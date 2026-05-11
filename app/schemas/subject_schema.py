@@ -1,5 +1,5 @@
 from typing import Annotated
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from .orm_base_schema import ORMBaseSchema
 
 class SubjectBase(BaseModel):
