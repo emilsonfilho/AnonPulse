@@ -10,7 +10,8 @@ class DomainValidationException(Exception):
         self.message = message
 
 class SubjectAlreadyExistsExcepion(Exception):
-    def __init__(self, message: str) -> None:
+    def __init__(self, code: str) -> None:
+        message = f"Já existe uma disciplina com o código {code}."
         super().__init__(message)
         self.message = message
 

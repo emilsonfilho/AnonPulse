@@ -35,9 +35,7 @@ class SubjectService(BaseService):
         subject_exists = await self.repository.get_by_code(data.cod)
 
         if (subject_exists):
-            raise SubjectAlreadyExistsExcepion(
-                f"Já existe uma disciplina com o código {data.cod}."
-            )
+            raise SubjectAlreadyExistsExcepion()
 
         subject = Subject(**data.model_dump())
         new_subject = await self.repository.create(subject)
