@@ -32,3 +32,16 @@ class MonitorNotFoundException(Exception):
         message = "Monitor(a) não encontrado(a)."
         super().__init__(message)
         self.message = message
+
+# Professor Exceptions
+class ProfessorAlreadyExistsExcepion(Exception):
+    def __init__(self, id: int) -> None:
+        message = f"Já existe um professor com id {id}"
+        super().__init__(message)
+        self.message = message
+
+class ProfessorNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Disciplina não enconotrada."
+        super().__init__(message)
+        self.message = message
