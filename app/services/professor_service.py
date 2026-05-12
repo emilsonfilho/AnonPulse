@@ -10,8 +10,7 @@ class ProfessorService(BaseService[Professor, CreateProfessorRequest, UpdateProf
             repository=repository,
             response_schema=ProfessorResponse,
             not_found_exception=ProfessorNotFoundException,
-            already_exists_exception=ProfessorAlreadyExistsExcepion
         )
 
     async def create(self, request: CreateProfessorRequest) -> ProfessorResponse:
-        return await super().create(request, identifier_value=request.id)
+        return await super().create(request)

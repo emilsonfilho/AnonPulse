@@ -17,7 +17,7 @@ class SubjectAlreadyExistsExcepion(Exception):
 
 class SubjectNotFoundException(Exception):
     def __init__(self) -> None:
-        message = "Disciplina não enconotrada."
+        message = "Disciplina não encontrada."
         super().__init__(message)
         self.message = message
 
@@ -35,14 +35,44 @@ class MonitorNotFoundException(Exception):
         self.message = message
 
 # Professor Exceptions
-class ProfessorAlreadyExistsExcepion(Exception):
-    def __init__(self, id: int) -> None:
-        message = f"Já existe um professor com id {id}"
+class ProfessorNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Professor(a) não encontrado(a)."
         super().__init__(message)
         self.message = message
 
-class ProfessorNotFoundException(Exception):
+class EnrollmentAlreadyExistsExcepion(Exception):
+    def __init__(self, id: int) -> None:
+        message = f"Já existe uma matrícula com id {id}"
+        super().__init__(message)
+        self.message = message
+
+class EnrollmentNotFoundException(Exception):
     def __init__(self) -> None:
-        message = "Disciplina não enconotrada."
+        message = "Matrícula não encontrada."
+        super().__init__(message)
+        self.message = message
+
+class ClassroomAlreadyExistsExcepion(Exception):
+    def __init__(self, cod: str) -> None:
+        message = f"Já existe uma turma com o código {cod}"
+        super().__init__(message)
+        self.message = message
+
+class ClassroomNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Turma não encontrada."
+        super().__init__(message)
+        self.message = message
+
+class StudentAlreadyExistsExcepion(Exception):
+    def __init__(self, registration: str) -> None:
+        message = f"Já existe um(a) aluno(a) com a matrícula {registration}"
+        super().__init__(message)
+        self.message = message
+
+class StudentNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Aluno(a) não encontrado(a)."
         super().__init__(message)
         self.message = message

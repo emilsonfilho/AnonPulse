@@ -15,7 +15,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respons
             repository: BaseRepository,
             response_schema: Type[ResponseSchemaType],
             not_found_exception: Type[Exception],
-            already_exists_exception: Type[Exception]
+            already_exists_exception: Type[Exception] | None = None
     ) -> None:
         self.repository = repository
         self.response_schema = self.response_schema
@@ -43,11 +43,12 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respons
         obj = await self.get_or_raise(identifier)
         return Mapper.to_response(obj, self.response_schema)
     
-    async def create(self, request: CreateSchemaType, identifier_value: Any) -> ResponseSchemaType:
-        obj_exists = await self.repository.get(identifier_value)
+    async def create(self, request: CreateSchemaType, identifier_value: Any | None = None) -> ResponseSchemaType:
+        if identifier_value is not None:
+            obj_exists = await self.repository.get(identifier_value)
 
-        if obj_exists:
-            raise self.already_exists_exception()
+            if obj_exists:
+                raise self.already_exists_exception()
         
         obj = self.repository.model(**request.model_dump())
         new_obj = await self.repository.create(obj)
