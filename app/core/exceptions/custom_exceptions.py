@@ -65,6 +65,12 @@ class ClassroomNotFoundException(Exception):
         super().__init__(message)
         self.message = message
 
+class ClassroomHasEnrollmentsException(Exception):
+    def __init__(self, cod: str) -> None:
+        message = f"Não é possível deletar a turma '{cod}' porque ela já possui alunos matriculados."
+        super().__init__(message)
+        self.message = message 
+
 class StudentAlreadyExistsExcepion(Exception):
     def __init__(self, registration: str) -> None:
         message = f"Já existe um(a) aluno(a) com a matrícula {registration}"
