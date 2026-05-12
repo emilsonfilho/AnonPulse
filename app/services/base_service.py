@@ -48,7 +48,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respons
             obj_exists = await self.repository.get(identifier_value)
 
             if obj_exists:
-                raise self.already_exists_exception()
+                raise self.already_exists_exception(identifier_value)
         
         obj = self.repository.model(**request.model_dump())
         new_obj = await self.repository.create(obj)

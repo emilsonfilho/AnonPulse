@@ -94,3 +94,9 @@ class MonitorAssignmentHasFeedbackException(Exception):
         message = f"Não é possível remover a alocação de ID {assignment_id} pois ela já possui feedbacks registrados."
         super().__init__(message)
         self.message = message
+
+class MonitorAssignmentNotFoundException(Exception):
+    def __init__(self) -> None:
+        message = "Alocação não encontrada."
+        super().__init__(message)
+        self.message = message
