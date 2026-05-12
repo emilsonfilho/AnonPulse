@@ -100,3 +100,9 @@ class MonitorAssignmentNotFoundException(Exception):
         message = "Alocação não encontrada."
         super().__init__(message)
         self.message = message
+
+class FeedbackNotFoundException(Exception):
+    def __init__(self, id: int) -> None:
+        message = f"Feedback com ID {id} não encontrado."
+        super().__init__(message)
+        self.message = message

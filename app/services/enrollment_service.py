@@ -23,8 +23,8 @@ class EnrollmentService(BaseService[Enrollment, CreateEnrollmentRequest, UpdateE
         
         enrollment = Enrollment(
             **request.model_dump(),
-            isActive=True,
-            enrolledAt=date.today()
+            is_active=True,
+            enrolled_at=date.today()
         )
         new_enrollment = await self.repository.create(enrollment)
 

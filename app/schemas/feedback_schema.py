@@ -37,6 +37,8 @@ class FeedbackBase(BaseModel):
     
 
 class CreateFeedbackRequest(FeedbackBase):
+    # Temos que adicionar a matrícula do aluno para que ele dê hash
+
     assignment_id: Annotated[
         int,
         Field(
