@@ -1,9 +1,7 @@
 from app.core.exceptions.custom_exceptions import MonitorAlreadyExistsExcepion, MonitorNotFoundException
-from app.core.mapper import Mapper
 from app.services.base_service import BaseService
 from app.repositories.monitor_repository import MonitorRepository
 from app.schemas.monitor_schema import MonitorResponse, CreateMonitorRequest
-from app.models.monitor import Monitor
 
 class MonitorService(BaseService):
     def __init__(self, repository: MonitorRepository) -> None:

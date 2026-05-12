@@ -5,5 +5,41 @@
 			"# To-Do\npass\n$0"
 		],
 		"description": "Substitui todo por # To-Do"
+	},
+	"Repository Template": {
+		"prefix": "repo",
+		"body": [
+		"from sqlalchemy.ext.asyncio import AsyncSession",
+		"",
+		"from app.repositories.base_repository import BaseRepository",
+		"from app.models.${1:model_lower} import ${2:Model}",
+		"",
+		"class ${2:Model}Repository(BaseRepository):",
+		"    def __init__(self, session: AsyncSession) -> None:",
+		"        super().__init__(model=${2:Model}, session=session)"
+		],
+		"description": "Create repository template"
+	},
+	"Service Template": {
+		"prefix": "service",
+		"body": [
+		"from app.core.exceptions.custom_exceptions import ${1:Model}AlreadyExistsExcepion, ${1:Model}NotFoundException",
+		"from app.services.base_service import BaseService",
+		"from app.repositories.${2:model_lower}_repository import ${1:Model}Repository",
+		"from app.schemas.${2:model_lower}_schema import ${1:Model}Response, Create${1:Model}Request",
+		"",
+		"class ${1:Model}Service(BaseService):",
+		"    def __init__(self, repository: ${1:Model}Repository) -> None:",
+		"        super().__init__(",
+		"            repository=repository,",
+		"            response_schema=${1:Model}Response,",
+		"            not_found_exception=${1:Model}NotFoundException,",
+		"            already_exists_exception=${1:Model}AlreadyExistsExcepion",
+		"        )",
+		"",
+		"    async def create(self, request: Create${1:Model}Request) -> ${1:Model}Response:",
+		"        return await super().create(request, identifier_value=request.${3:identifier})"
+		],
+		"description": "Create service template"
 	}
 }
