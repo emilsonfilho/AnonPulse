@@ -7,21 +7,11 @@ from app.models.monitor import Monitor
 
 class MonitorService(BaseService):
     def __init__(self, repository: MonitorRepository) -> None:
-        self.repository = repository
-
-    async def _get_monitor_or_raise(self, registration: str):
-        return self.get_or_raise(
-            registration,
-            MonitorNotFoundException
+        super().__init__(
+            repository=MonitorRepository,
+            response_schema=MonitorResponse,
+            not_found_exception=MonitorNotFoundException,
+            already_exists_exception=MonitorAlreadyExistsExcepion
         )
-
-    async def create_monitor(self, data: CreateMonitorRequest) -> MonitorResponse:
-        monitor = await self.repository.get_by_registration(data.registration)  
-        
-        if monitor:
-            raise MonitorAlreadyExistsExcepion()
-        
-        monitor = Monitor(**data.model_dump())
-        new_monitor = self.repository.create(monitor)
-
-        return Mapper.to_response(new_monitor, MonitorResponse) 
+    async def create(self, request: CreateMonitorRequest) -> MonitorResponse:
+        return await super().create(request, identifier_value=request.registration)
