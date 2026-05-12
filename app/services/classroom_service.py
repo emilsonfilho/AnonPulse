@@ -1,9 +1,10 @@
 from app.core.exceptions.custom_exceptions import ClassroomAlreadyExistsExcepion, ClassroomNotFoundException, ClassroomHasEnrollmentsException
 from app.services.base_service import BaseService
 from app.repositories.classroom_repository import ClassroomRepository
-from app.schemas.classroom_schema import ClassroomResponse, CreateClassroomRequest
+from app.schemas.classroom_schema import ClassroomResponse, CreateClassroomRequest, UpdateClassroomRequest
+from app.models.classroom import Classroom
 
-class ClassroomService(BaseService):
+class ClassroomService(BaseService[Classroom, CreateClassroomRequest, UpdateClassroomRequest, ClassroomResponse]):
     def __init__(self, repository: ClassroomRepository) -> None:
         super().__init__(
             repository=repository,

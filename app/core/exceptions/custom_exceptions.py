@@ -82,3 +82,15 @@ class StudentNotFoundException(Exception):
         message = "Aluno(a) não encontrado(a)."
         super().__init__(message)
         self.message = message
+
+class MonitorAssignmentAlreadyExistsException(Exception):
+    def __init__(self, monitor_registration: str, classroom_cod: str) -> None:
+        message = f"O monitor '{monitor_registration}' já está alocado na turma '{classroom_cod}'."
+        super().__init__(message)
+        self.message = message
+
+class MonitorAssignmentHasFeedbackException(Exception):
+    def __init__(self, assignment_id: int) -> None:
+        message = f"Não é possível remover a alocação de ID {assignment_id} pois ela já possui feedbacks registrados."
+        super().__init__(message)
+        self.message = message
