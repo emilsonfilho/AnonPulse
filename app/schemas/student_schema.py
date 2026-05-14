@@ -14,5 +14,8 @@ class StudentBase(BaseModel):
 class CreateStudentRequest(StudentBase):
     pass
 
+class UpdateStudentRequest(StudentBase):
+    pass
+
 class StudentResponse(StudentBase):
     id: int

@@ -9,6 +9,10 @@ from app.schemas.subject_schema import (
     UpdateSubjectRequest,
 )
 
+from app.services.subject_service import SubjectService
+
+from app.api.dependencies.services import get_subject_service
+
 api_router = APIRouter(prefix="/v1/disciplinas", tags=["Disciplinas"])
 
 
@@ -22,7 +26,7 @@ api_router = APIRouter(prefix="/v1/disciplinas", tags=["Disciplinas"])
 )
 async def create_subject(
     subject_request: CreateSubjectRequest,
-    subject_service,  #: SubjectService = Depends(SubjectService),
+    service: SubjectService = Depends(get_subject_service)
 ) -> SubjectResponse:
     """Cria uma nova disciplina.
 
@@ -38,8 +42,7 @@ async def create_subject(
     Returns:
         SubjectResponse: Dados da disciplina criada.
     """
-    subject = subject_service.create_subject(subject_request)
-    return subject
+    return await service.create_subject(subject_request)
 
 
 @api_router.get(

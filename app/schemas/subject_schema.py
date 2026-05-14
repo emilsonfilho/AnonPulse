@@ -1,5 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
+from .orm_base_schema import ORMBaseSchema
 
 class SubjectBase(BaseModel):
     name: Annotated[
@@ -14,7 +15,7 @@ class SubjectBase(BaseModel):
     cod: Annotated[
         str,
         Field(
-            min_length=9,
+            min_length=6,
             max_length=9,
             description="Código de Cadeira"
         )
@@ -34,5 +35,5 @@ class UpdateSubjectRequest(BaseModel):
         )
     ]
 
-class SubjectResponse(SubjectBase):
+class SubjectResponse(SubjectBase, ORMBaseSchema):
     pass
