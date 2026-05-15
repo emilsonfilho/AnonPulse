@@ -1,13 +1,22 @@
-from datetime import date
+from datetime import datetime, timezone
 
 from app.core.exceptions.custom_exceptions import FeedbackNotFoundException
 from app.core.mapper import Mapper
-from app.services.base_service import BaseService
-from app.repositories.feedback_repository import FeedbackRepository
-from app.schemas.feedback_schema import FeedbackResponse, CreateFeedbackRequest, UpdateFeedbackRequest
 from app.models.feedback import Feedback
+from app.repositories.feedback_repository import FeedbackRepository
+from app.schemas.feedback_schema import (
+    CreateFeedbackRequest,
+    FeedbackResponse,
+    UpdateFeedbackRequest,
+)
+from app.services.base_service import BaseService
 
-class FeedbackService(BaseService[Feedback, CreateFeedbackRequest, UpdateFeedbackRequest, FeedbackResponse]):
+
+class FeedbackService(
+    BaseService[
+        Feedback, CreateFeedbackRequest, UpdateFeedbackRequest, FeedbackResponse
+    ]
+):
     def __init__(self, repository: FeedbackRepository) -> None:
         super().__init__(
             repository=repository,
@@ -17,8 +26,7 @@ class FeedbackService(BaseService[Feedback, CreateFeedbackRequest, UpdateFeedbac
 
     async def create(self, request: CreateFeedbackRequest) -> FeedbackResponse:
         feedback = Feedback(
-            **request.model_dump(),
-            created_at=date.today()
+            **request.model_dump(), created_at=datetime.now(timezone.utc)
         )
 
         new_feedback = await self.repository.create(feedback)

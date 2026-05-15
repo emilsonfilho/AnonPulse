@@ -1,12 +1,12 @@
 from app.core.exceptions.custom_exceptions import ProfessorNotFoundException
+from app.models.professor import Professor
 from app.repositories.professor_repository import ProfessorRepository
-from app.services.base_service import BaseService
 from app.schemas.professor_schema import (
-    ProfessorResponse,
     CreateProfessorRequest,
+    ProfessorResponse,
     UpdateProfessorRequest,
 )
-from app.models.professor import Professor
+from app.services.base_service import BaseService
 
 
 class ProfessorService(
