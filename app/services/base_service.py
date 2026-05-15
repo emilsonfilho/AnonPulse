@@ -37,7 +37,9 @@ class BaseService(
     async def list_all(self, params: Params) -> Page[ResponseSchemaType]:
         page = await self.repository.list_all(params)
 
-        page.items = [Mapper.to_response(obj, self.response_schema) for obj in page]
+        page.items = [
+            Mapper.to_response(obj, self.response_schema) for obj in page.items
+        ]
 
         return page
 

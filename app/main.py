@@ -1,9 +1,31 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi_pagination import add_pagination
 
+from app.api.routers.classroom import api_router as classroom_router
+from app.api.routers.feedback import api_router as feedback_router
+from app.api.routers.hash import api_router as hash_router
+from app.api.routers.professor import api_router as professor_router
+from app.api.routers.subject import api_router as subject_router
 from app.core.exceptions.custom_exceptions import (
+    ClassroomAlreadyExistsException,
+    ClassroomHasEnrollmentsException,
+    ClassroomNotFoundException,
     DomainValidationException,
+    EnrollmentAlreadyExistsException,
+    EnrollmentNotFoundException,
+    FeedbackNotFoundException,
+    MonitorAlreadyExistsException,
+    MonitorAssignmentAlreadyExistsException,
+    MonitorAssignmentHasFeedbackException,
+    MonitorAssignmentNotFoundException,
+    MonitorNotFoundException,
+    ProfessorNotFoundException,
     ResourceNotFoundException,
+    StudentAlreadyExistsException,
+    StudentNotFoundException,
+    SubjectAlreadyExistsException,
+    SubjectNotFoundException,
 )
 from app.core.exceptions.handlers import (
     domain_validation_handler,
@@ -11,13 +33,9 @@ from app.core.exceptions.handlers import (
     http_handler,
     request_validation_handler,
     resource_not_found_handler,
+    custom_not_found_handler,
+    custom_conflict_handler,
 )
-from app.api.routers.feedback import api_router as feedback_router
-from app.api.routers.hash import api_router as hash_router
-from app.api.routers.professor import api_router as professor_router
-from app.api.routers.subject import api_router as subject_router
-from app.api.routers.classroom import api_router as classroom_router
-from fastapi_pagination import add_pagination
 
 tags_metadata = [
     {"name": "Feedbacks", "description": "Operações relacionadas a feedbacks"},
@@ -52,6 +70,30 @@ app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)
 app.add_exception_handler(HTTPException, http_handler)  # type: ignore
 app.add_exception_handler(RequestValidationError, request_validation_handler)  # type: ignore
 app.add_exception_handler(Exception, global_exception_handler)
+
+for exc in [
+    SubjectNotFoundException,
+    MonitorNotFoundException,
+    ProfessorNotFoundException,
+    EnrollmentNotFoundException,
+    ClassroomNotFoundException,
+    StudentNotFoundException,
+    MonitorAssignmentNotFoundException,
+    FeedbackNotFoundException,
+]:
+    app.add_exception_handler(exc, custom_not_found_handler)  # type: ignore
+
+for exc in [
+    SubjectAlreadyExistsException,
+    MonitorAlreadyExistsException,
+    EnrollmentAlreadyExistsException,
+    ClassroomAlreadyExistsException,
+    ClassroomHasEnrollmentsException,
+    StudentAlreadyExistsException,
+    MonitorAssignmentAlreadyExistsException,
+    MonitorAssignmentHasFeedbackException,
+]:
+    app.add_exception_handler(exc, custom_conflict_handler)  # type: ignore
 
 app.include_router(subject_router, prefix=PREFIX)
 app.include_router(professor_router, prefix=PREFIX)
