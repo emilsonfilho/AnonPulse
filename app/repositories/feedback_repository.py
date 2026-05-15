@@ -3,7 +3,7 @@ from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlmodel import select
 from sqlalchemy import func
-from typing import Any, Optional
+from typing import Any
 from datetime import datetime
 
 from app.repositories.base_repository import BaseRepository

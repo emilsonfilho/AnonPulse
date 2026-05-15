@@ -1,4 +1,4 @@
-from app.core.exceptions.custom_exceptions import ClassroomAlreadyExistsExcepion, ClassroomNotFoundException, ClassroomHasEnrollmentsException
+from app.core.exceptions.custom_exceptions import ClassroomAlreadyExistsException, ClassroomNotFoundException, ClassroomHasEnrollmentsException
 from app.services.base_service import BaseService
 from app.repositories.classroom_repository import ClassroomRepository
 from app.schemas.classroom_schema import ClassroomResponse, CreateClassroomRequest, UpdateClassroomRequest
@@ -10,7 +10,7 @@ class ClassroomService(BaseService[Classroom, CreateClassroomRequest, UpdateClas
             repository=repository,
             response_schema=ClassroomResponse,
             not_found_exception=ClassroomNotFoundException,
-            already_exists_exception=ClassroomAlreadyExistsExcepion
+            already_exists_exception=ClassroomAlreadyExistsException
         )
 
     async def create(self, request: CreateClassroomRequest) -> ClassroomResponse:

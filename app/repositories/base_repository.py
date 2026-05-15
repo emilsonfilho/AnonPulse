@@ -22,7 +22,7 @@ class BaseRepository(Generic[ModelType]):
         
     async def create(self, obj: ModelType) -> ModelType:
         self.session.add(obj)
-        await self.session.comit()
+        await self.session.commit()
         await self.session.refresh(obj)
         return obj
         
