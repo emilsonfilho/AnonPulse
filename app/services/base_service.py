@@ -18,7 +18,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respons
             already_exists_exception: Type[Exception] | None = None
     ) -> None:
         self.repository = repository
-        self.response_schema = self.response_schema
+        self.response_schema = response_schema
         self.not_found_exception = not_found_exception
         self.already_exists_exception = already_exists_exception
 

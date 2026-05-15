@@ -1,4 +1,4 @@
-from app.core.exceptions.custom_exceptions import ProfessorAlreadyExistsExcepion, ProfessorNotFoundException
+from app.core.exceptions.custom_exceptions import ProfessorAlreadyExistsException, ProfessorNotFoundException
 from app.repositories.professor_repository import ProfessorRepository
 from app.services.base_service import BaseService
 from app.schemas.professor_schema import ProfessorResponse, CreateProfessorRequest, UpdateProfessorRequest

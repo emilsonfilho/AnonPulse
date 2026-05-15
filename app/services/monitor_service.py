@@ -1,4 +1,4 @@
-from app.core.exceptions.custom_exceptions import MonitorAlreadyExistsExcepion, MonitorNotFoundException
+from app.core.exceptions.custom_exceptions import MonitorAlreadyExistsException, MonitorNotFoundException
 from app.services.base_service import BaseService
 from app.repositories.monitor_repository import MonitorRepository
 from app.schemas.monitor_schema import MonitorResponse, CreateMonitorRequest, UpdateMonitorRequest
@@ -10,7 +10,7 @@ class MonitorService(BaseService[Monitor, CreateMonitorRequest, UpdateMonitorReq
             repository=MonitorRepository,
             response_schema=MonitorResponse,
             not_found_exception=MonitorNotFoundException,
-            already_exists_exception=MonitorAlreadyExistsExcepion
+            already_exists_exception=MonitorAlreadyExistsException
         )
     async def create(self, request: CreateMonitorRequest) -> MonitorResponse:
         return await super().create(request, identifier_value=request.registration)

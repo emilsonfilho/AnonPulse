@@ -1,4 +1,4 @@
-from app.core.exceptions.custom_exceptions import StudentAlreadyExistsExcepion, StudentNotFoundException
+from app.core.exceptions.custom_exceptions import StudentAlreadyExistsException, StudentNotFoundException
 from app.services.base_service import BaseService
 from app.repositories.student_repository import StudentRepository
 from app.schemas.student_schema import StudentResponse, CreateStudentRequest, UpdateStudentRequest
@@ -10,7 +10,7 @@ class StudentService(BaseService[Student, CreateStudentRequest, UpdateStudentReq
             repository=repository,
             response_schema=StudentResponse,
             not_found_exception=StudentNotFoundException,
-            already_exists_exception=StudentAlreadyExistsExcepion
+            already_exists_exception=StudentAlreadyExistsException
         )
 
     async def create(self, request: CreateStudentRequest) -> StudentResponse:

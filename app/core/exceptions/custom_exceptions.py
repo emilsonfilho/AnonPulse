@@ -9,7 +9,7 @@ class DomainValidationException(Exception):
         super().__init__(message)
         self.message = message
 
-class SubjectAlreadyExistsExcepion(Exception):
+class SubjectAlreadyExistsException(Exception):
     def __init__(self, code: str) -> None:
         message = f"Já existe uma disciplina com o código {code}."
         super().__init__(message)
@@ -22,7 +22,7 @@ class SubjectNotFoundException(Exception):
         self.message = message
 
 # Monitor Exceptions
-class MonitorAlreadyExistsExcepion(Exception):
+class MonitorAlreadyExistsException(Exception):
     def __init__(self, registration: str) -> None:
         message = f"Já existe um monitor(a) com a matrícula {registration}"
         super().__init__(message)
@@ -41,7 +41,7 @@ class ProfessorNotFoundException(Exception):
         super().__init__(message)
         self.message = message
 
-class EnrollmentAlreadyExistsExcepion(Exception):
+class EnrollmentAlreadyExistsException(Exception):
     def __init__(self, id: int) -> None:
         message = f"Já existe uma matrícula com id {id}"
         super().__init__(message)
@@ -53,7 +53,7 @@ class EnrollmentNotFoundException(Exception):
         super().__init__(message)
         self.message = message
 
-class ClassroomAlreadyExistsExcepion(Exception):
+class ClassroomAlreadyExistsException(Exception):
     def __init__(self, cod: str) -> None:
         message = f"Já existe uma turma com o código {cod}"
         super().__init__(message)
@@ -71,7 +71,7 @@ class ClassroomHasEnrollmentsException(Exception):
         super().__init__(message)
         self.message = message 
 
-class StudentAlreadyExistsExcepion(Exception):
+class StudentAlreadyExistsException(Exception):
     def __init__(self, registration: str) -> None:
         message = f"Já existe um(a) aluno(a) com a matrícula {registration}"
         super().__init__(message)

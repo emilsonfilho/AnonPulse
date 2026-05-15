@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.core.exceptions.custom_exceptions import EnrollmentNotFoundException, EnrollmentAlreadyExistsExcepion
+from app.core.exceptions.custom_exceptions import EnrollmentNotFoundException, EnrollmentAlreadyExistsException
 from app.core.mapper import Mapper
 from app.services.base_service import BaseService
 from app.repositories.enrollment_repository import EnrollmentRepository
@@ -19,7 +19,7 @@ class EnrollmentService(BaseService[Enrollment, CreateEnrollmentRequest, UpdateE
         already_enrolled = await self.repository.check_existing(request.student_id, request.classroom_cod)
 
         if already_enrolled:
-            raise EnrollmentAlreadyExistsExcepion(request.student_id, request.classroom_cod)
+            raise EnrollmentAlreadyExistsException(request.student_id, request.classroom_cod)
         
         enrollment = Enrollment(
             **request.model_dump(),
