@@ -1,13 +1,15 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Path
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
 
 from app.schemas.classroom_schema import (
     ClassroomResponse,
     CreateClassroomRequest,
     UpdateClassroomRequest,
 )
+from app.services.classroom_service import ClassroomService
+from app.api.dependencies.services import get_classroom_service
 
 api_router = APIRouter(prefix="/v1/turmas", tags=["Turmas"])
 
@@ -22,7 +24,7 @@ api_router = APIRouter(prefix="/v1/turmas", tags=["Turmas"])
 )
 async def create_classroom(
     classroom_request: CreateClassroomRequest,
-    classroom_service,  #: ClassroomService = Depends(ClassroomService),
+    classroom_service: ClassroomService = Depends(get_classroom_service),
 ) -> ClassroomResponse:
     """Cria uma nova turma.
 
@@ -38,7 +40,7 @@ async def create_classroom(
     Returns:
         ClassroomResponse: Dados da turma criada.
     """
-    classroom = classroom_service.create_classroom(classroom_request)
+    classroom = await classroom_service.create(classroom_request)
     return classroom
 
 
@@ -50,7 +52,7 @@ async def create_classroom(
     response_description="Dados da turma encontrada.",
 )
 async def get_classroom_by_code(
-    classroom_service,  #: ClassroomService = Depends(ClassroomService),
+    classroom_service: ClassroomService = Depends(get_classroom_service),
     classroom_code: str = Path(..., description="Código da turma a ser consultada"),
 ) -> ClassroomResponse:
     """Busca os dados de uma turma específica pelo seu código.
@@ -66,7 +68,7 @@ async def get_classroom_by_code(
     Returns:
         ClassroomResponse: Dados da turma encontrada.
     """
-    classroom = classroom_service.get_classroom_by_code(classroom_code)
+    classroom = await classroom_service.get_by_id(classroom_code)
     return classroom
 
 
@@ -78,7 +80,7 @@ async def get_classroom_by_code(
     response_description="Lista de turmas paginada.",
 )
 async def list_classrooms(
-    classroom_service,  #: ClassroomService = Depends(ClassroomService)
+    classroom_service: ClassroomService = Depends(get_classroom_service),
     params: Params = Depends(),
 ) -> Page[ClassroomResponse]:
     """Lista as turmas cadastradas.
@@ -94,8 +96,8 @@ async def list_classrooms(
     Returns:
         Page[ClassroomResponse]: Página contendo a lista de turmas.
     """
-    classrooms = classroom_service.list_classrooms(params)
-    return paginate(classrooms)
+    classrooms = await classroom_service.list_all(params)
+    return classrooms
 
 
 @api_router.patch(
@@ -107,7 +109,7 @@ async def list_classrooms(
 )
 async def update_classroom(
     classroom_request: UpdateClassroomRequest,
-    classroom_service,  #: ClassroomService = Depends(ClassroomService),
+    classroom_service: ClassroomService = Depends(get_classroom_service),
     classroom_code: str = Path(..., description="Código da turma a ser atualizada"),
 ) -> ClassroomResponse:
     """Atualiza os dados de uma turma existente.
@@ -126,7 +128,7 @@ async def update_classroom(
     Returns:
         ClassroomResponse: Dados da turma atualizada.
     """
-    classroom = classroom_service.update_classroom(classroom_code, classroom_request)
+    classroom = await classroom_service.update(classroom_code, classroom_request)
     return classroom
 
 
@@ -138,7 +140,7 @@ async def update_classroom(
     response_description="Turma excluída com sucesso.",
 )
 async def delete_classroom(
-    classroom_service,  #: ClassroomService = Depends(ClassroomService),
+    classroom_service: ClassroomService = Depends(get_classroom_service),
     classroom_code: str = Path(..., description="Código da turma a ser excluída"),
 ) -> None:
     """Exclui uma turma existente.
@@ -153,4 +155,4 @@ async def delete_classroom(
         Returns:
         None
     """
-    classroom_service.delete_classroom(classroom_code)
+    await classroom_service.delete(classroom_code)
