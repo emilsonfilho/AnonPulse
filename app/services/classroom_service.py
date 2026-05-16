@@ -33,8 +33,6 @@ class ClassroomService(
         classroom = await self.get_or_raise(cod)
 
         if classroom.enrollments:
-            raise ClassroomHasEnrollmentsException(
-                "Não é possível excluir uma turma que possui matrículas associadas."
-            )
+            raise ClassroomHasEnrollmentsException(classroom.cod)
 
         await self.repository.delete(cod)
