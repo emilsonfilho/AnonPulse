@@ -15,15 +15,11 @@ class BaseRepository(Generic[ModelType]):
         self.session = session
 
     async def get(self, identifier: Any) -> ModelType | None:
-        result = await self.session.get(self.model, identifier)
-        await self.session.commit()
-        return result
+        return await self.session.get(self.model, identifier)
 
     async def list_all(self, params: Params) -> Page[ModelType]:
         query = select(self.model)
-        result = await paginate(self.session, query, params)
-        await self.session.commit()
-        return result
+        return await paginate(self.session, query, params)
 
     async def create(self, obj: ModelType) -> ModelType:
         self.session.add(obj)

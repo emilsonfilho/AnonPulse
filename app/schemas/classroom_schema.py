@@ -6,8 +6,8 @@ class ClassroomBase(BaseModel):
     cod: Annotated[
         str,
         Field(
-            min_length=3,
-            max_length=3,
+            min_length=5,
+            max_length=10,
             description="Código de turma",
             examples=["QXD0154", "QXD0155", "QXD0156"],
         ),
@@ -25,7 +25,7 @@ class CreateClassroomRequest(ClassroomBase):
 class UpdateClassroomRequest(BaseModel):
     cod: Annotated[
         str | None,
-        Field(default=None, min_length=3, max_length=3, description="Código de turma"),
+        Field(default=None, min_length=5, max_length=10, description="Código de turma"),
     ]
 
 
