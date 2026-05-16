@@ -50,4 +50,4 @@ class EnrollmentService(
     async def delete(self, id: int) -> None:
         await self.get_or_raise(id)
 
-        await self.repository.update(id, {"isActive": False})
+        await self.repository.update(id, {"is_active": False})
