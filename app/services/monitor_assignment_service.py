@@ -47,7 +47,7 @@ class MonitorAssignmentService(
         return Mapper.to_response(new_assignment, self.response_schema)
 
     async def delete(self, id: int) -> None:
-        assignment = self.get_or_raise(id)
+        assignment = await self.get_or_raise(id)
 
         if assignment.feedbacks:
             raise MonitorAssignmentHasFeedbackException(id)
