@@ -1,3 +1,5 @@
+"""Dependências para injeção de serviços da aplicação."""
+
 from fastapi import Depends
 
 from app.services.classroom_service import ClassroomService
@@ -21,22 +23,26 @@ from app.api.dependencies.repositories import get_feedback_repository
 def get_classroom_service(
     repository: ClassroomRepository = Depends(get_classroom_repository),
 ) -> ClassroomService:
+    """Retorna uma instância do serviço de salas de aula."""
     return ClassroomService(repository)
 
 
 def get_professor_service(
     repository: ProfessorRepository = Depends(get_professor_repository),
 ) -> ProfessorService:
+    """Retorna uma instância do serviço de professores."""
     return ProfessorService(repository)
 
 
 def get_subject_service(
     repository: SubjectRepository = Depends(get_subject_repository),
 ) -> SubjectService:
+    """Retorna uma instância do serviço de disciplinas."""
     return SubjectService(repository)
 
 
 def get_feedback_service(
     repository: FeedbackRepository = Depends(get_feedback_repository),
 ) -> FeedbackService:
-    return FeedbackService()
+    """Retorna uma instância do serviço de feedback."""
+    return FeedbackService(repository)

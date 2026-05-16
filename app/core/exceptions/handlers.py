@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 
 from app.schemas.error_schema import ErrorResponse
@@ -112,7 +113,7 @@ async def custom_conflict_handler(
 
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    #  logger.error(f"Erro inesperado em {request.url}: {repr(exc)}")
+    logger.error(f"Erro inesperado em {request.url}: {repr(exc)}")
 
     return _json_error_response(
         ErrorResponse.from_http_status(
