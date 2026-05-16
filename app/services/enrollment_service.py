@@ -35,7 +35,7 @@ class EnrollmentService(
 
         if already_enrolled:
             raise EnrollmentAlreadyExistsException(
-                request.student_id,
+                getattr(already_enrolled, "id"),
             )
 
         enrollment = Enrollment(
