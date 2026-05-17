@@ -8,6 +8,8 @@ from app.schemas.professor_schema import (
     ProfessorResponse,
     UpdateProfessorRequest,
 )
+from app.services.professor_service import ProfessorService
+from app.api.dependencies.services import get_professor_service
 
 api_router = APIRouter(prefix="/v1/professores", tags=["Professores"])
 
@@ -22,7 +24,7 @@ api_router = APIRouter(prefix="/v1/professores", tags=["Professores"])
 )
 async def create_professor(
     professor_request: CreateProfessorRequest,
-    professor_service,  #: ProfessorService = Depends(ProfessorService),
+    professor_service: ProfessorService = Depends(get_professor_service),
 ) -> ProfessorResponse:
     """Cria um novo professor.
 
@@ -38,7 +40,7 @@ async def create_professor(
     Returns:
         ProfessorResponse: Dados do professor criado.
     """
-    professor = professor_service.create_professor(professor_request)
+    professor = await professor_service.create(professor_request)
     return professor
 
 
@@ -50,7 +52,7 @@ async def create_professor(
     response_description="Lista de professores paginada.",
 )
 async def list_professores(
-    professor_service,  #: ProfessorService = Depends(ProfessorService)
+    professor_service: ProfessorService = Depends(get_professor_service),
     params: Params = Depends(),
 ) -> Page[ProfessorResponse]:
     """Lista os professores cadastrados.
@@ -66,7 +68,7 @@ async def list_professores(
     Returns:
         Page[ProfessorResponse]: Página contendo a lista de professores.
     """
-    return professor_service.list_professores(params)
+    return await professor_service.list_all(params)
 
 
 @api_router.get(
@@ -77,7 +79,7 @@ async def list_professores(
     response_description="Dados do professor encontrado.",
 )
 async def get_professor_by_id(
-    professor_service,  #: ProfessorService = Depends(ProfessorService),
+    professor_service: ProfessorService = Depends(get_professor_service),
     professor_id: int = Path(
         ..., description="Identificador numérico do professor a ser consultado."
     ),
@@ -96,7 +98,7 @@ async def get_professor_by_id(
     Returns:
         ProfessorResponse: Dados do professor encontrado.
     """
-    professor = professor_service.get_professor_by_id(professor_id)
+    professor = await professor_service.get_by_id(professor_id)
     return professor
 
 
@@ -109,7 +111,7 @@ async def get_professor_by_id(
 )
 async def update_professor(
     professor_request: UpdateProfessorRequest,
-    professor_service,  #: ProfessorService = Depends(ProfessorService),
+    professor_service: ProfessorService = Depends(get_professor_service),
     professor_id: int = Path(
         ..., description="Identificador numérico do professor a ser atualizado."
     ),
@@ -130,9 +132,7 @@ async def update_professor(
     Returns:
         ProfessorResponse: Dados do professor atualizado.
     """
-    updated_professor = professor_service.update_professor(
-        professor_id, professor_request
-    )
+    updated_professor = await professor_service.update(professor_id, professor_request)
     return updated_professor
 
 
@@ -144,7 +144,7 @@ async def update_professor(
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def delete_professor(
-    professor_service,  #: ProfessorService = Depends(ProfessorService),
+    professor_service: ProfessorService = Depends(get_professor_service),
     professor_id: int = Path(
         ..., description="Identificador numérico do professor a ser excluído."
     ),
@@ -163,5 +163,5 @@ async def delete_professor(
     Returns:
         None: A resposta não contém conteúdo.
     """
-    professor_service.delete_professor(professor_id)
+    await professor_service.delete(professor_id)
     return None

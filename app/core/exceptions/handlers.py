@@ -2,11 +2,31 @@ from http import HTTPStatus
 
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 
 from app.schemas.error_schema import ErrorResponse
 
-from .custom_exceptions import DomainValidationException, ResourceNotFoundException
+from .custom_exceptions import (
+    ClassroomAlreadyExistsException,
+    ClassroomHasEnrollmentsException,
+    ClassroomNotFoundException,
+    DomainValidationException,
+    EnrollmentAlreadyExistsException,
+    EnrollmentNotFoundException,
+    FeedbackNotFoundException,
+    MonitorAlreadyExistsException,
+    MonitorAssignmentAlreadyExistsException,
+    MonitorAssignmentHasFeedbackException,
+    MonitorAssignmentNotFoundException,
+    MonitorNotFoundException,
+    ProfessorNotFoundException,
+    ResourceNotFoundException,
+    StudentAlreadyExistsException,
+    StudentNotFoundException,
+    SubjectAlreadyExistsException,
+    SubjectNotFoundException,
+)
 
 
 def _json_error_response(error: ErrorResponse) -> JSONResponse:
@@ -56,8 +76,44 @@ async def http_handler(_: Request, exc: HTTPException) -> JSONResponse:
     )
 
 
+async def custom_not_found_handler(
+    _: Request,
+    exc: SubjectNotFoundException
+    | MonitorNotFoundException
+    | ProfessorNotFoundException
+    | EnrollmentNotFoundException
+    | ClassroomNotFoundException
+    | StudentNotFoundException
+    | MonitorAssignmentNotFoundException
+    | FeedbackNotFoundException,
+) -> JSONResponse:
+    return _json_error_response(
+        ErrorResponse.from_http_status(
+            status_code=HTTPStatus.NOT_FOUND, message=exc.message
+        )
+    )
+
+
+async def custom_conflict_handler(
+    _: Request,
+    exc: SubjectAlreadyExistsException
+    | MonitorAlreadyExistsException
+    | EnrollmentAlreadyExistsException
+    | ClassroomAlreadyExistsException
+    | ClassroomHasEnrollmentsException
+    | StudentAlreadyExistsException
+    | MonitorAssignmentAlreadyExistsException
+    | MonitorAssignmentHasFeedbackException,
+) -> JSONResponse:
+    return _json_error_response(
+        ErrorResponse.from_http_status(
+            status_code=HTTPStatus.CONFLICT, message=exc.message
+        )
+    )
+
+
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    #  logger.error(f"Erro inesperado em {request.url}: {repr(exc)}")
+    logger.error(f"Erro inesperado em {request.url}: {repr(exc)}")
 
     return _json_error_response(
         ErrorResponse.from_http_status(

@@ -3,15 +3,13 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, Path
 from fastapi_pagination import Page, Params
 
+from app.api.dependencies.services import get_subject_service
 from app.schemas.subject_schema import (
     CreateSubjectRequest,
     SubjectResponse,
     UpdateSubjectRequest,
 )
-
 from app.services.subject_service import SubjectService
-
-from app.api.dependencies.services import get_subject_service
 
 api_router = APIRouter(prefix="/v1/disciplinas", tags=["Disciplinas"])
 
@@ -26,7 +24,7 @@ api_router = APIRouter(prefix="/v1/disciplinas", tags=["Disciplinas"])
 )
 async def create_subject(
     subject_request: CreateSubjectRequest,
-    service: SubjectService = Depends(get_subject_service)
+    service: SubjectService = Depends(get_subject_service),
 ) -> SubjectResponse:
     """Cria uma nova disciplina.
 
@@ -42,7 +40,7 @@ async def create_subject(
     Returns:
         SubjectResponse: Dados da disciplina criada.
     """
-    return await service.create_subject(subject_request)
+    return await service.create(subject_request)
 
 
 @api_router.get(
@@ -53,7 +51,7 @@ async def create_subject(
     response_description="Lista de disciplinas paginada.",
 )
 async def list_subjects(
-    subject_service,  #: SubjectService = Depends(SubjectService)
+    subject_service: SubjectService = Depends(get_subject_service),
     params: Params = Depends(),
 ) -> Page[SubjectResponse]:
     """Lista as disciplinas cadastradas.
@@ -65,7 +63,7 @@ async def list_subjects(
         subject_service: Dependência injetada com as regras de negócio de
             disciplinas.
         params: Parâmetros de paginação extraídos da query string."""
-    return subject_service.list_subjects(params)
+    return await subject_service.list_all(params)
 
 
 @api_router.patch(
@@ -77,7 +75,7 @@ async def list_subjects(
 )
 async def update_subject(
     subject_request: UpdateSubjectRequest,
-    subject_service,  #: SubjectService = Depends(SubjectService),
+    subject_service: SubjectService = Depends(get_subject_service),
     subject_code: str = Path(..., description="Código da disciplina a ser atualizada"),
 ) -> SubjectResponse:
     """Atualiza os dados de uma disciplina existente.
@@ -96,7 +94,7 @@ async def update_subject(
     Returns:
         SubjectResponse: Dados da disciplina atualizada.
     """
-    subject = subject_service.update_subject(subject_code, subject_request)
+    subject = await subject_service.update(subject_code, subject_request)
     return subject
 
 
@@ -108,7 +106,7 @@ async def update_subject(
     response_description="Dados da disciplina encontrada.",
 )
 async def get_subject_by_code(
-    subject_service,  #: SubjectService = Depends(SubjectService),
+    subject_service: SubjectService = Depends(get_subject_service),
     subject_code: str = Path(..., description="Código da disciplina a ser consultada"),
 ) -> SubjectResponse:
     """Busca os dados de uma disciplina específica pelo seu código.
@@ -124,7 +122,7 @@ async def get_subject_by_code(
     Returns:
         SubjectResponse: Dados da disciplina encontrada.
     """
-    subject = subject_service.get_subject_by_code(subject_code)
+    subject = await subject_service.get_by_id(subject_code)
     return subject
 
 
@@ -136,7 +134,7 @@ async def get_subject_by_code(
     response_description="Disciplina excluída com sucesso.",
 )
 async def delete_subject(
-    subject_service,  #: SubjectService = Depends(SubjectService),
+    subject_service: SubjectService = Depends(get_subject_service),
     subject_code: str = Path(..., description="Código da disciplina a ser excluída"),
 ) -> None:
     """Exclui uma disciplina existente.
@@ -151,4 +149,4 @@ async def delete_subject(
     Returns:
         None
     """
-    subject_service.delete_subject(subject_code)
+    await subject_service.delete(subject_code)
