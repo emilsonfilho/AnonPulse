@@ -129,3 +129,17 @@ class FeedbackAlreadyExistsException(Exception):
         message = f"Já existe um feedback com ID {id}."
         super().__init__(message)
         self.message = message
+
+
+class DocumentNotFoundException(Exception):
+    def __init__(self, id: int) -> None:
+        message = f"Documento com ID {id} não encontrado."
+        super().__init__(message)
+        self.message = message
+
+
+class DocumentNotExistsException(Exception):
+    def __init__(self) -> None:
+        message = "Arquivo não encontrado no servidor."
+        super().__init__(message)
+        self.message = message

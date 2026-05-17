@@ -1,16 +1,15 @@
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.schemas.document_schema import CreateDocumentRequest
+
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from app.models.document import Document
+from app.repositories.base_repository import BaseRepository
 
-class DocumentRepository:
+class DocumentRepository(BaseRepository[Document]):
     def __init__(self, session: AsyncSession):
-        self.session = session
+        super().__init__(model=Document, session=session)
     
-    async def create(self, data: CreateDocumentRequest) -> Document:
-        new_document = Document(**data.model_dump())
-
-        self.session.add(new_document)
-        await self.session.commit()
-        await self.session.refresh(new_document)
-
-        return new_document
+    async def list_by_assignment(self, assignment_id: int, params: Params) -> Page[Document]:
+        query = select(self.model).where(self.model.assignment_id == assignment_id)
+        return await paginate(self.session, query, params)
