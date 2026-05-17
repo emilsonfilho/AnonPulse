@@ -26,6 +26,7 @@ from .custom_exceptions import (
     StudentNotFoundException,
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
+    FeedbackAlreadyExistsException,
 )
 
 
@@ -103,7 +104,8 @@ async def custom_conflict_handler(
     | ClassroomHasEnrollmentsException
     | StudentAlreadyExistsException
     | MonitorAssignmentAlreadyExistsException
-    | MonitorAssignmentHasFeedbackException,
+    | MonitorAssignmentHasFeedbackException
+    | FeedbackAlreadyExistsException,
 ) -> JSONResponse:
     return _json_error_response(
         ErrorResponse.from_http_status(
