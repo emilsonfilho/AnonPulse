@@ -12,6 +12,7 @@ from app.models.subject import Subject
 from app.models.classroom import Classroom
 from app.models.monitor_assignment import MonitorAssignment
 
+
 class FeedbackRepository(BaseRepository[Feedback]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=Feedback, session=session)
@@ -19,15 +20,17 @@ class FeedbackRepository(BaseRepository[Feedback]):
     async def search_by_text(self, term: str, params: Params) -> Page[Feedback]:
         search_term = f"%{term}%"
 
-        query =(
+        query = (
             select(self.model)
             .where(self.model.text.ilike(search_term))
             .order_by(self.model.createdAt.desc())
-        ) 
+        )
 
         return await paginate(self.session, query, params)
-    
-    async def list_by_monitor(self, monitor_registration: str, params: Params) -> Page[Feedback]:
+
+    async def list_by_monitor(
+        self, monitor_registration: str, params: Params
+    ) -> Page[Feedback]:
         query = (
             select(self.model)
             .join(MonitorAssignment)
@@ -35,7 +38,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         )
 
         return await paginate(self.session, query, params)
-    
+
     async def count_by_monitor(self, params: Params) -> Page[Any]:
         query = (
             select(MonitorAssignment.monitor_registration, func.count(self.model.id))
@@ -44,7 +47,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         )
 
         return await paginate(self.session, query, params)
-    
+
     async def count_by_subject(self, params: Params) -> Page[Any]:
         query = (
             select(Subject.name, func.count(self.model.id))
@@ -56,13 +59,13 @@ class FeedbackRepository(BaseRepository[Feedback]):
         )
 
         return await paginate(self.session, query, params)
-    
+
     async def list_by_date_range(
-            self,
-            params: Params,
-            start_date: datetime | None = None, 
-            end_date: datetime | None = None
-        ) -> Page[Feedback]:
+        self,
+        params: Params,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> Page[Feedback]:
 
         query = select(self.model).order_by(self.model.createdAt.desc())
 
