@@ -7,6 +7,7 @@ from .monitor import Monitor
 from .professor import Professor
 from .student import Student
 from .subject import Subject
+from .document import Document
 
 __all__ = [
     "Classroom",
@@ -17,5 +18,6 @@ __all__ = [
     "Monitor",
     "Professor",
     "Student",
-    "Subject"
+    "Subject",
+    "Document"
 ]

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Path
-from fastapi_pagination import Page, Params
+from fastapi_pagination import Params
 
 from app.schemas.classroom_schema import (
     ClassroomResponse,
@@ -10,6 +10,7 @@ from app.schemas.classroom_schema import (
 )
 from app.services.classroom_service import ClassroomService
 from app.api.dependencies.services import get_classroom_service
+from app.schemas.custom_page import Page
 
 api_router = APIRouter(prefix="/v1/turmas", tags=["Turmas"])
 

@@ -1,34 +1,39 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+from app.schemas.professor_schema import ProfessorSelectResponse
+from app.schemas.subject_schema import SubjectResponse
+from app.schemas.enrollment_schema import EnrollmentResponse
 
 class ClassroomBase(BaseModel):
     cod: Annotated[
         str,
         Field(
-            min_length=5,
+            min_length=3,
             max_length=10,
             description="Código de turma",
             examples=["QXD0154", "QXD0155", "QXD0156"],
         ),
     ]
 
-
-class CreateClassroomRequest(ClassroomBase):
     subject_cod: Annotated[
-        str, Field(min_length=9, max_length=9, description="Código de Cadeira")
+        str, Field(min_length=7, max_length=9, description="Código de Cadeira")
     ]
 
     professor_id: Annotated[int, Field(description="ID do professor")]
+
+class CreateClassroomRequest(ClassroomBase):
+    pass
 
 
 class UpdateClassroomRequest(BaseModel):
     cod: Annotated[
         str | None,
-        Field(default=None, min_length=5, max_length=10, description="Código de turma"),
+        Field(default=None, min_length=3, max_length=10, description="Código de turma"),
     ]
 
-
-class ClassroomResponse(ClassroomBase):
-    subject_cod: str
-    professor_id: int
+class ClassroomResponse(ClassroomBase, ORMBaseSchema):
+    professor: ProfessorSelectResponse | None = None
+    subject: SubjectResponse | None = None
+    enrollments: list[EnrollmentResponse] | None = None
