@@ -14,6 +14,7 @@ from app.core.exceptions.custom_exceptions import (
     DomainValidationException,
     EnrollmentAlreadyExistsException,
     EnrollmentNotFoundException,
+    FeedbackAlreadyExistsException,
     FeedbackNotFoundException,
     MonitorAlreadyExistsException,
     MonitorAssignmentAlreadyExistsException,
@@ -92,6 +93,7 @@ for exc in [
     StudentAlreadyExistsException,
     MonitorAssignmentAlreadyExistsException,
     MonitorAssignmentHasFeedbackException,
+    FeedbackAlreadyExistsException,
 ]:
     app.add_exception_handler(exc, custom_conflict_handler)  # type: ignore
 
