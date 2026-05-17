@@ -143,3 +143,4 @@ class DocumentNotExistsException(Exception):
         message = "Arquivo não encontrado no servidor."
         super().__init__(message)
         self.message = message
+        self.message = message
