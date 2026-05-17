@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.dependencies.session import get_session
 from app.repositories.classroom_repository import ClassroomRepository
@@ -10,6 +10,7 @@ from app.repositories.subject_repository import SubjectRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.monitor_repository import MonitorRepository
 from app.repositories.monitor_assignment_repository import MonitorAssignmentRepository
+from app.repositories.document_repository import DocumentRepository
 
 
 def get_subject_repository(session: AsyncSession = Depends(get_session)):
@@ -42,3 +43,7 @@ def get_monitor_assignment_repository(session: AsyncSession = Depends(get_sessio
 
 def get_enrollment_repository(session: AsyncSession = Depends(get_session)):
     return EnrollmentRepository(session)
+
+
+def get_document_repository(session: AsyncSession = Depends(get_session)):
+    return DocumentRepository(session)

@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from app.api.dependencies.repositories import (
     get_classroom_repository,
+    get_document_repository,
     get_enrollment_repository,
     get_feedback_repository,
     get_monitor_assignment_repository,
@@ -21,6 +22,7 @@ from app.repositories.professor_repository import ProfessorRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.subject_repository import SubjectRepository
 from app.services.classroom_service import ClassroomService
+from app.services.document_service import DocumentService
 from app.services.enrollment_service import EnrollmentService
 from app.services.feedback_service import FeedbackService
 from app.services.monitor_assignment_service import MonitorAssignmentService
@@ -86,3 +88,10 @@ def get_enrollment_service(
 ) -> EnrollmentService:
     """Retorna uma instância do serviço de matrículas."""
     return EnrollmentService(repository)
+
+
+def get_document_service(
+    repository=Depends(get_document_repository),
+) -> DocumentService:
+    """Retorna uma instância do serviço de documentos."""
+    return DocumentService(repository)

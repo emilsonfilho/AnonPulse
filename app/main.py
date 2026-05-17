@@ -11,6 +11,7 @@ from app.api.routers.student import api_router as student_router
 from app.api.routers.monitor import api_router as monitor_router
 from app.api.routers.enrollment import api_router as enrollment_router
 from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
+from app.api.routers.document import api_router as document_router
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,
     ClassroomHasEnrollmentsException,
@@ -52,6 +53,7 @@ tags_metadata = [
     {"name": "Alunos", "description": "Operações relacionadas a alunos"},
     {"name": "Monitores", "description": "Operações relacionadas a monitores"},
     {"name": "Monitorias", "description": "Operações relacionadas a monitorias"},
+    {"name": "Documentos", "description": "Operações relacionadas a documentos"},
 ]
 
 PREFIX = "/api"
@@ -114,5 +116,6 @@ app.include_router(monitor_router, prefix=PREFIX)
 app.include_router(monitor_assignment_router, prefix=PREFIX)
 app.include_router(feedback_router, prefix=PREFIX)
 app.include_router(hash_router, prefix=PREFIX)
+app.include_router(document_router, prefix=PREFIX)
 
 add_pagination(app)
