@@ -11,6 +11,13 @@ class DocumentBase(BaseModel):
 class CreateDocumentRequest(DocumentBase):
     pass
 
+class UpdateDocumentRequest(BaseModel):
+    original_filename: str | None = None
+    content_type: str | None = None
+    extension: str | None = None
+    size_bytes: int | None = None
+    assignment_id: int | None = None
+
 class DocumentResponse(DocumentBase):
     id: int
     created_at: datetime
