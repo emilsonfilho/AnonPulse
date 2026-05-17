@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from app.models.monitor import Monitor
     from app.models.classroom import Classroom
     from app.models.feedback import Feedback
+    from app.models.document import Document
 
 class MonitorAssignment(SQLModel, table=True):
     __tablename__ = "monitor_assignments"
@@ -20,5 +21,6 @@ class MonitorAssignment(SQLModel, table=True):
     monitor: "Monitor" = Relationship(back_populates="assignments")
     classroom: "Classroom" = Relationship(back_populates="assignments")
     feedbacks: list["Feedback"] = Relationship(back_populates="assignment")
+    documents: list["Document"] = Relationship(back_populates="assignment")
 
 
