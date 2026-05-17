@@ -7,6 +7,11 @@ from app.api.routers.feedback import api_router as feedback_router
 from app.api.routers.hash import api_router as hash_router
 from app.api.routers.professor import api_router as professor_router
 from app.api.routers.subject import api_router as subject_router
+from app.api.routers.student import api_router as student_router
+from app.api.routers.monitor import api_router as monitor_router
+from app.api.routers.enrollment import api_router as enrollment_router
+from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
+from app.api.routers.document import api_router as document_router
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,
     ClassroomHasEnrollmentsException,
@@ -44,6 +49,11 @@ tags_metadata = [
     {"name": "Professores", "description": "Operações relacionadas a professores"},
     {"name": "Turmas", "description": "Operações relacionadas a turmas"},
     {"name": "Disciplinas", "description": "Operações relacionadas a disciplinas"},
+    {"name": "Matrículas", "description": "Operações relacionadas a matrículas"},
+    {"name": "Alunos", "description": "Operações relacionadas a alunos"},
+    {"name": "Monitores", "description": "Operações relacionadas a monitores"},
+    {"name": "Monitorias", "description": "Operações relacionadas a monitorias"},
+    {"name": "Documentos", "description": "Operações relacionadas a documentos"},
 ]
 
 PREFIX = "/api"
@@ -100,8 +110,12 @@ for exc in [
 app.include_router(subject_router, prefix=PREFIX)
 app.include_router(professor_router, prefix=PREFIX)
 app.include_router(classroom_router, prefix=PREFIX)
+app.include_router(enrollment_router, prefix=PREFIX)
+app.include_router(student_router, prefix=PREFIX)
+app.include_router(monitor_router, prefix=PREFIX)
+app.include_router(monitor_assignment_router, prefix=PREFIX)
 app.include_router(feedback_router, prefix=PREFIX)
 app.include_router(hash_router, prefix=PREFIX)
-
+app.include_router(document_router, prefix=PREFIX)
 
 add_pagination(app)
