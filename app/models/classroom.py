@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from app.models.enrollment import Enrollment
     from app.models.monitor_assignment import MonitorAssignment
 
+
 class Classroom(SQLModel, table=True):
     __tablename__ = "classrooms"
 

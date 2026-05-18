@@ -24,7 +24,6 @@ api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
     description="Retorna a contagem total de feedbacks registrados.",
     response_description="Número total de feedbacks.",
 )
-
 async def count_feedbacks(
     feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> dict[str, int]:
@@ -84,7 +83,9 @@ async def create_feedback(
     response_description="Resultados de feedbacks correspondentes ao termo de busca.",
 )
 async def search_feedbacks(
-    q: str = Query(..., min_length=1, description="Termo parcial para buscar no texto do feedback"),
+    q: str = Query(
+        ..., min_length=1, description="Termo parcial para buscar no texto do feedback"
+    ),
     params: Params = Depends(),
     feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> Page[FeedbackResponse]:
@@ -256,20 +257,24 @@ async def delete_feedback(
 
     return None
 
+
 @api_router.get("/student/{registration}", response_model=Page[FeedbackResponse])
 async def list_student_feedbacks(
     registration: str,
     params: Params = Depends(),
-    service: FeedbackService = Depends(get_feedback_service)
+    service: FeedbackService = Depends(get_feedback_service),
 ):
     """Rota Complexa: Lista todos os feedbacks efetuados por um estudante de forma anônima e detalhada."""
     return await service.list_by_student(raw_registration=registration, params=params)
+
 
 @api_router.get("/monitor/{registration}", response_model=Page[FeedbackResponse])
 async def list_monitor_feedbacks(
     registration: str,
     params: Params = Depends(),
-    service: FeedbackService = Depends(get_feedback_service)
+    service: FeedbackService = Depends(get_feedback_service),
 ):
     """Rota Complexa: Lista todos os feedbacks recebidos por um monitor de forma anônima e detalhada."""
-    return await service.list_by_monitor(monitor_registration=registration, params=params)
+    return await service.list_by_monitor(
+        monitor_registration=registration, params=params
+    )

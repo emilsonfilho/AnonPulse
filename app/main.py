@@ -2,18 +2,19 @@ from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi_pagination import add_pagination
 from sqlalchemy.exc import IntegrityError
+from scalar_fastapi import get_scalar_api_reference
 
 from app.api.routers.classroom import api_router as classroom_router
-from app.api.routers.feedback import api_router as feedback_router
-from app.api.routers.hash import api_router as hash_router
-from app.api.routers.professor import api_router as professor_router
-from app.api.routers.subject import api_router as subject_router
-from app.api.routers.student import api_router as student_router
-from app.api.routers.monitor import api_router as monitor_router
-from app.api.routers.enrollment import api_router as enrollment_router
-from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
 from app.api.routers.document import api_router as document_router
+from app.api.routers.enrollment import api_router as enrollment_router
+from app.api.routers.feedback import api_router as feedback_router
 from app.api.routers.feedback_type import api_router as feedback_type_router
+from app.api.routers.hash import api_router as hash_router
+from app.api.routers.monitor import api_router as monitor_router
+from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
+from app.api.routers.professor import api_router as professor_router
+from app.api.routers.student import api_router as student_router
+from app.api.routers.subject import api_router as subject_router
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,
     ClassroomHasEnrollmentsException,
@@ -36,13 +37,13 @@ from app.core.exceptions.custom_exceptions import (
     SubjectNotFoundException,
 )
 from app.core.exceptions.handlers import (
+    custom_conflict_handler,
+    custom_not_found_handler,
     domain_validation_handler,
     global_exception_handler,
     http_handler,
     request_validation_handler,
     resource_not_found_handler,
-    custom_not_found_handler,
-    custom_conflict_handler,
     sqlaclgemy_integrity_handler,
 )
 
@@ -57,7 +58,10 @@ tags_metadata = [
     {"name": "Monitores", "description": "Operações relacionadas a monitores"},
     {"name": "Monitorias", "description": "Operações relacionadas a monitorias"},
     {"name": "Documentos", "description": "Operações relacionadas a documentos"},
-    {"name": "Tipos de Feedback", "description": "Operações relacionadas a tipos de feedback"},
+    {
+        "name": "Tipos de Feedback",
+        "description": "Operações relacionadas a tipos de feedback",
+    },
 ]
 
 PREFIX = "/api"
@@ -123,5 +127,11 @@ app.include_router(feedback_type_router, prefix=PREFIX)
 app.include_router(feedback_router, prefix=PREFIX)
 app.include_router(hash_router, prefix=PREFIX)
 app.include_router(document_router, prefix=PREFIX)
+
+
+@app.get(f"{PREFIX}/scalar", include_in_schema=False)
+async def scalar_docs():
+    return get_scalar_api_reference(openapi_url=app.openapi_url, title=app.title)
+
 
 add_pagination(app)

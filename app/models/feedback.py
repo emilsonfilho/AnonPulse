@@ -7,17 +7,17 @@ if TYPE_CHECKING:
     from app.models.enrollment import Enrollment
     from app.models.feedback_type import FeedbackType
 
+
 class Feedback(SQLModel, table=True):
     __tablename__ = "feedbacks"
 
     id: int | None = Field(default=None, primary_key=True)
     assignment_id: int = Field(foreign_key="monitor_assignments.id")
-    registration: str
     type_id: int = Field(foreign_key="feedback_types.id")
+    registration: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     text: str
     rating: int
 
-    assignment: "MonitorAssignment" =  Relationship(back_populates="feedbacks")
+    assignment: "MonitorAssignment" = Relationship(back_populates="feedbacks")
     type: "FeedbackType" = Relationship(back_populates="feedbacks")
-
