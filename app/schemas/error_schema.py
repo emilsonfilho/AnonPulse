@@ -3,7 +3,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-
 class ErrorResponse(BaseModel):
     status_code: HTTPStatus
     error: str
@@ -24,3 +23,5 @@ class ErrorResponse(BaseModel):
             message=message,
             details=details,
         )
+    # sim, apaga a linha do email e deixa sem ela
+    # ele atualiza so o que tu botar

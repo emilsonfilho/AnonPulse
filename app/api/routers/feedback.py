@@ -1,16 +1,18 @@
+from datetime import date
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Path
-from fastapi.responses import StreamingResponse
-from fastapi_pagination import Page, paginate, Params
+from fastapi import APIRouter, Depends, Path, Query
+from fastapi_pagination import Params
 
 from app.schemas.feedback_schema import (
     CreateFeedbackRequest,
     FeedbackResponse,
+    FeedbackSubjectReportResponse,
     UpdateFeedbackRequest,
 )
-from app.services.exportacao_service import gerar_bytes_csv, gerar_zip_streaming
 from app.services.feedback_service import FeedbackService
+from app.api.dependencies.services import get_feedback_service
+from app.schemas.custom_page import Page
 
 api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
 
@@ -22,8 +24,9 @@ api_router = APIRouter(prefix="/v1/feedbacks", tags=["Feedbacks"])
     description="Retorna a contagem total de feedbacks registrados.",
     response_description="Número total de feedbacks.",
 )
+
 async def count_feedbacks(
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> dict[str, int]:
     """Conta o total de feedbacks registrados no sistema.
 
@@ -38,7 +41,7 @@ async def count_feedbacks(
         dict[str, int]: Dicionário contendo a chave ``total_feedbacks`` com o
         número total de registros.
     """
-    total_feedbacks = feedback_service.count_feedbacks()
+    total_feedbacks = await feedback_service.count_feedbacks()
 
     return {"total_feedbacks": total_feedbacks}
 
@@ -53,7 +56,7 @@ async def count_feedbacks(
 )
 async def create_feedback(
     feedback_request: CreateFeedbackRequest,
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> FeedbackResponse:
     """Cria um novo feedback.
 
@@ -70,7 +73,71 @@ async def create_feedback(
         FeedbackResponse: Objeto com os dados do feedback criado.
     """
 
-    return feedback_service.criar_feedback(feedback_request)
+    return await feedback_service.create(feedback_request)
+
+
+@api_router.get(
+    path="/search",
+    response_model=Page[FeedbackResponse],
+    name="Buscar Feedbacks por Texto",
+    description="Busca feedbacks por texto parcial no campo de mensagem.",
+    response_description="Resultados de feedbacks correspondentes ao termo de busca.",
+)
+async def search_feedbacks(
+    q: str = Query(..., min_length=1, description="Termo parcial para buscar no texto do feedback"),
+    params: Params = Depends(),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
+) -> Page[FeedbackResponse]:
+    """Pesquisa feedbacks pelo texto fornecido e retorna resultados paginados."""
+    return await feedback_service.search(q, params)
+
+
+@api_router.get(
+    path="/filter",
+    response_model=Page[FeedbackResponse],
+    name="Filtrar Feedbacks por Data",
+    description="Filtra feedbacks por intervalo de data ou por ano de criação.",
+    response_description="Resultados de feedbacks filtrados por data ou ano.",
+)
+async def filter_feedbacks(
+    params: Params = Depends(),
+    start_date: date | None = Query(
+        None,
+        description="Data inicial do intervalo no formato YYYY-MM-DD",
+    ),
+    end_date: date | None = Query(
+        None,
+        description="Data final do intervalo no formato YYYY-MM-DD",
+    ),
+    year: int | None = Query(
+        None,
+        description="Ano de criação para filtrar feedbacks",
+        ge=1900,
+    ),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
+) -> Page[FeedbackResponse]:
+    """Filtra feedbacks por data inicial, final ou por ano."""
+    return await feedback_service.list_by_date(
+        params=params,
+        start_date=start_date,
+        end_date=end_date,
+        year=year,
+    )
+
+
+@api_router.get(
+    path="/reports/subjects",
+    response_model=Page[FeedbackSubjectReportResponse],
+    name="Relatório de Feedbacks por Disciplina",
+    description="Gera um relatório paginado de quantidade de feedbacks por disciplina.",
+    response_description="Quantidade de feedbacks agrupada por disciplina.",
+)
+async def report_feedbacks_by_subject(
+    params: Params = Depends(),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
+) -> Page[FeedbackSubjectReportResponse]:
+    """Relatório multi-entidade de feedbacks agrupados por disciplina."""
+    return await feedback_service.report_by_subject(params)
 
 
 @api_router.get(
@@ -81,7 +148,7 @@ async def create_feedback(
 )
 async def get_feedback_by_id(
     feedback_id: int = Path(..., description="ID numérico do feedback"),
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> FeedbackResponse:
     """Busca um feedback específico a partir do identificador.
 
@@ -93,7 +160,7 @@ async def get_feedback_by_id(
     Returns:
         FeedbackResponse: Dados completos do feedback encontrado.
     """
-    return feedback_service.obter_feedback_por_id(feedback_id)
+    return await feedback_service.get_by_id(feedback_id)
 
 
 @api_router.get(
@@ -105,7 +172,8 @@ async def get_feedback_by_id(
 )
 async def list_feedbacks(
     params: Params = Depends(),
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    q: str | None = None,
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ):
     """Lista feedbacks com suporte a paginação.
 
@@ -124,13 +192,10 @@ async def list_feedbacks(
         página solicitada.
     """
 
-    # TODO: Futuramente, terá que adicionar Query params aqui para filtrar por data, nota, etc.
+    if q:
+        return await feedback_service.search(q, params)
 
-    skip = (params.page - 1) * params.size
-
-    items = feedback_service.obter_feedbacks(skip=skip, limit=params.size)
-
-    return paginate(items)
+    return await feedback_service.list_all(params)
 
 
 @api_router.patch(
@@ -143,7 +208,7 @@ async def list_feedbacks(
 async def update_feedback(
     feedback_request: UpdateFeedbackRequest,
     feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> FeedbackResponse:
     """Atualiza um feedback existente.
 
@@ -161,9 +226,8 @@ async def update_feedback(
         FeedbackResponse: Dados atualizados do feedback.
     """
 
-    feedback_service.atualizar_feedback(feedback_id, feedback_request)
-
-    return feedback_service.obter_feedback_por_id(feedback_id)
+    feedback = await feedback_service.update(feedback_id, feedback_request)
+    return feedback
 
 
 @api_router.delete(
@@ -175,7 +239,7 @@ async def update_feedback(
 )
 async def delete_feedback(
     feedback_id: int = Path(..., description="ID do feedback a ser deletado"),
-    feedback_service: FeedbackService = Depends(FeedbackService),
+    feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> None:
     """Remove um feedback existente.
 
@@ -188,50 +252,24 @@ async def delete_feedback(
         None: Resposta sem corpo (HTTP 204) quando a remoção é concluída.
     """
 
-    feedback_service.deletar_feedback(feedback_id=feedback_id)
+    await feedback_service.delete(feedback_id)
 
     return None
 
+@api_router.get("/student/{registration}", response_model=Page[FeedbackResponse])
+async def list_student_feedbacks(
+    registration: str,
+    params: Params = Depends(),
+    service: FeedbackService = Depends(get_feedback_service)
+):
+    """Rota Complexa: Lista todos os feedbacks efetuados por um estudante de forma anônima e detalhada."""
+    return await service.list_by_student(raw_registration=registration, params=params)
 
-@api_router.get(
-    path="/exportar/csv",
-    name="Exportar Feedbacks para CSV",
-    description="Exporta os feedbacks registrados para um arquivo CSV.",
-    response_description="Arquivo CSV contendo os feedbacks exportados.",
-    response_class=StreamingResponse,
-)
-def export_feedbacks_csv() -> StreamingResponse:
-    """Exporta feedbacks para um arquivo CSV em streaming.
-
-    Returns:
-        StreamingResponse: Fluxo de bytes no formato CSV com cabeçalho para
-        download do arquivo ``feedbacks.csv``.
-    """
-
-    return StreamingResponse(
-        gerar_bytes_csv(),
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=feedbacks.csv"},
-    )
-
-
-@api_router.get(
-    path="/exportar/zip",
-    name="Exportar Feedbacks para ZIP",
-    description="Exporta os feedbacks registrados para um arquivo ZIP contendo o CSV.",
-    response_description="Arquivo ZIP contendo o CSV dos feedbacks exportados.",
-    response_class=StreamingResponse,
-)
-def export_feedbacks_zip() -> StreamingResponse:
-    """Exporta feedbacks para um arquivo ZIP contendo o CSV.
-
-    Returns:
-        StreamingResponse: Fluxo de bytes no formato ZIP com cabeçalho para
-        download do arquivo ``feedbacks.zip``.
-    """
-
-    return StreamingResponse(
-        gerar_zip_streaming(),
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=feedbacks.zip"},
-    )
+@api_router.get("/monitor/{registration}", response_model=Page[FeedbackResponse])
+async def list_monitor_feedbacks(
+    registration: str,
+    params: Params = Depends(),
+    service: FeedbackService = Depends(get_feedback_service)
+):
+    """Rota Complexa: Lista todos os feedbacks recebidos por um monitor de forma anônima e detalhada."""
+    return await service.list_by_monitor(monitor_registration=registration, params=params)

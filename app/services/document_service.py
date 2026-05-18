@@ -1,7 +1,13 @@
+"""Serviço de gerenciamento de documentos.
+
+Este módulo fornece funcionalidades para upload, download, atualização e exclusão
+de documentos, com validação de tipo MIME e armazenamento em disco.
+"""
+
 import os 
 import shutil
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from fastapi_pagination import Page, Params
 
 from app.core.mapper import Mapper
@@ -17,10 +23,26 @@ from app.core.exceptions.custom_exceptions import DocumentNotFoundException, Doc
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+ALLOWED_MIME_TYPES = [
+    "application/pdf"
+]
+
+
 class DocumentService(
     BaseService[Document, CreateDocumentRequest, UpdateDocumentRequest, DocumentResponse]
 ):
+    """Serviço para gerenciar operações de documentos.
+
+    Fornece métodos para upload, download, atualização e exclusão de documentos,
+    com validação de tipo de arquivo e armazenamento em disco.
+    """
+
     def __init__(self, repository):
+        """Inicializa o serviço de documentos.
+
+        Args:
+            repository: Repositório de documentos para operações de banco de dados.
+        """
         super().__init__(
             repository=repository,
             response_schema=DocumentResponse,
@@ -29,19 +51,62 @@ class DocumentService(
         self.repository = repository
 
     def _get_file_path(self, doc: Document) -> str:
+        """Obtém o caminho do arquivo no disco.
+
+        Args:
+            doc: Objeto do documento.
+
+        Returns:
+            Caminho completo do arquivo.
+        """
         return f"{UPLOAD_DIR}/{doc.id}.{doc.extension}"
     
     def _get_extension(self, file: UploadFile) -> str:
+        """Extrai a extensão do arquivo.
+
+        Args:
+            file: Arquivo enviado.
+
+        Returns:
+            Extensão do arquivo ou string vazia se não houver.
+        """
         return file.filename.split(".")[-1] if "." in file.filename else ""
     
     async def _get_size(self, file: UploadFile) -> int:
-        await file.seek(0, os.SEEK_END)
-        new_size = file.file.tell()
+        """Obtém o tamanho do arquivo em bytes.
+
+        Args:
+            file: Arquivo enviado.
+
+        Returns:
+            Tamanho do arquivo em bytes.
+        """
+        content = await file.read()
+        size = len(content)
+
         await file.seek(0)
 
-        return new_size
+        return size
 
     async def upload(self, assignment_id: int, file: UploadFile) -> DocumentResponse:
+        """Faz upload de um novo documento.
+
+        Args:
+            assignment_id: ID da tarefa associada.
+            file: Arquivo a ser enviado.
+
+        Returns:
+            Resposta do documento criado.
+
+        Raises:
+            HTTPException: Se o tipo MIME não for permitido.
+        """
+        if file.content_type not in ALLOWED_MIME_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail="Formato inválido. São permitidos apenas ficheiros PDF."
+            )
+
         extension = self._get_extension(file)
 
         size_bytes = await self._get_size(file)

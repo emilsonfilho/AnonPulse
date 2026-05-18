@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi.responses import FileResponse
 from fastapi_pagination import Page, Params
 from app.services.document_service import DocumentService
 from app.schemas.document_schema import (
@@ -24,21 +25,24 @@ async def upload_document(
     return await service.upload(assignment_id, file)
 
 
-@api_router.get("/{document_id}", response_model=UploadFile)
+@api_router.get("/{document_id}", response_class=FileResponse)
 async def get_document(
     document_id: int, service: DocumentService = Depends(get_document_service)
 ):
-    file_path, filename = await service.download(document_id)
-    return File(file_path, media_type="application/octet-stream", filename=filename)
+    file_path, original_name = await service.download(document_id)
+    return FileResponse(
+        path=file_path, 
+        filename=original_name
+    )
 
 
-@api_router.get("/", response_model=Page[DocumentResponse])
-async def list_documents(
-    assignment_id: int,
-    params: Params = Depends(),
-    service: DocumentService = Depends(get_document_service),
-):
-    return await service.list_by_assignment(assignment_id=assignment_id, params=params)
+# @api_router.get("/", response_model=Page[DocumentResponse])
+# async def list_documents(
+#     assignment_id: int,
+#     params: Params = Depends(),
+#     service: DocumentService = Depends(get_document_service),
+# ):
+#     return await service.list_by_assignment(assignment_id=assignment_id, params=params)
 
 
 @api_router.patch("/{document_id}", response_model=DocumentResponse)

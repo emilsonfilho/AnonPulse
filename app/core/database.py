@@ -16,20 +16,19 @@ engine = create_async_engine(
 )
 
 
+
 if engine.url.get_backend_name() == "sqlite":
     @event.listens_for(engine.sync_engine, "connect")
     def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:
-        """Aplicar PRAGMA do SQLite ao conectar.
+        """Aplica PRAGMAs do SQLite ao conectar.
 
-        Habilita o modo WAL, define sincronização para NORMAL e ativa
-        suporte a chaves estrangeiras.
+        Ativa o modo WAL, define a sincronização como NORMAL e habilita
+        chaves estrangeiras.
 
-        Parâmetros
-        ---------
-        dbapi_connection: Any
-            Objeto de conexão DB-API fornecido pelo SQLAlchemy.
-        connection_record: Any
-            Registro da conexão (não utilizado).
+        Args:
+            dbapi_connection: Objeto de conexão DB-API fornecido pelo
+                SQLAlchemy.
+            connection_record: Registro da conexão (não utilizado).
         """
 
         cursor = dbapi_connection.cursor()

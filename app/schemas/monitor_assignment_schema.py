@@ -1,6 +1,8 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+
 class MonitorAssignmentBase(BaseModel):
     weekly_hours: Annotated[
         int,
@@ -12,7 +14,7 @@ class MonitorAssignmentBase(BaseModel):
     ]
 
 class CreateMonitorAssignmentRequest(MonitorAssignmentBase):
-    monitor_registration_number: Annotated[
+    monitor_registration: Annotated[
         str,
         Field(
             min_length= 5,
@@ -25,7 +27,7 @@ class CreateMonitorAssignmentRequest(MonitorAssignmentBase):
         str,
         Field(
             min_length= 3,
-            max_length=3,
+            max_length=15,
             description="Código de turma"
         )
     ]
@@ -39,8 +41,8 @@ class UpdateMonitorAssignmentRequest(BaseModel):
         )
     ]
 
-class MonitorAssignmentResponse(MonitorAssignmentBase):
+class MonitorAssignmentResponse(MonitorAssignmentBase, ORMBaseSchema):
     id: int
-    monitor_registration_number: str
+    monitor_registration: str
     classroom_cod: str
     

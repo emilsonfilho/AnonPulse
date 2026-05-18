@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+
 class DocumentBase(BaseModel):
     original_filename: str
     content_type: str
@@ -18,6 +20,6 @@ class UpdateDocumentRequest(BaseModel):
     size_bytes: int | None = None
     assignment_id: int | None = None
 
-class DocumentResponse(DocumentBase):
+class DocumentResponse(DocumentBase, ORMBaseSchema):
     id: int
     created_at: datetime

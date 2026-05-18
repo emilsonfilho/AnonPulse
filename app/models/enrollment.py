@@ -1,3 +1,4 @@
+from sqlalchemy import UniqueConstraint
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
@@ -10,6 +11,14 @@ if TYPE_CHECKING:
 class Enrollment(SQLModel, table=True):
     __tablename__ = "enrollments"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "student_id",
+            "classroom_cod",
+            name="uq_student_classroom"
+        ),
+    )
+
     id: int | None = Field(default=None, primary_key=True)
     student_id: int = Field(foreign_key="students.id")
     classroom_cod: str = Field(foreign_key="classrooms.cod")
@@ -18,4 +27,3 @@ class Enrollment(SQLModel, table=True):
 
     student: "Student" = Relationship(back_populates="enrollments")
     classroom: "Classroom" = Relationship(back_populates="enrollments")
-    feedbacks: list["Feedback"] = Relationship(back_populates="enrollment")

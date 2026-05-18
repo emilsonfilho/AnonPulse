@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Path
-from fastapi_pagination import Page, Params
+from fastapi_pagination import Params
 
 from app.schemas.professor_schema import (
     CreateProfessorRequest,
@@ -10,6 +10,7 @@ from app.schemas.professor_schema import (
 )
 from app.services.professor_service import ProfessorService
 from app.api.dependencies.services import get_professor_service
+from app.schemas.custom_page import Page
 
 api_router = APIRouter(prefix="/v1/professores", tags=["Professores"])
 

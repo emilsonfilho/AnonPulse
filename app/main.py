@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi_pagination import add_pagination
+from sqlalchemy.exc import IntegrityError
 
 from app.api.routers.classroom import api_router as classroom_router
 from app.api.routers.feedback import api_router as feedback_router
@@ -12,6 +13,7 @@ from app.api.routers.monitor import api_router as monitor_router
 from app.api.routers.enrollment import api_router as enrollment_router
 from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
 from app.api.routers.document import api_router as document_router
+from app.api.routers.feedback_type import api_router as feedback_type_router
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,
     ClassroomHasEnrollmentsException,
@@ -41,6 +43,7 @@ from app.core.exceptions.handlers import (
     resource_not_found_handler,
     custom_not_found_handler,
     custom_conflict_handler,
+    sqlaclgemy_integrity_handler,
 )
 
 tags_metadata = [
@@ -54,6 +57,7 @@ tags_metadata = [
     {"name": "Monitores", "description": "Operações relacionadas a monitores"},
     {"name": "Monitorias", "description": "Operações relacionadas a monitorias"},
     {"name": "Documentos", "description": "Operações relacionadas a documentos"},
+    {"name": "Tipos de Feedback", "description": "Operações relacionadas a tipos de feedback"},
 ]
 
 PREFIX = "/api"
@@ -80,6 +84,7 @@ app.add_exception_handler(DomainValidationException, domain_validation_handler) 
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)  # type: ignore
 app.add_exception_handler(HTTPException, http_handler)  # type: ignore
 app.add_exception_handler(RequestValidationError, request_validation_handler)  # type: ignore
+app.add_exception_handler(IntegrityError, sqlaclgemy_integrity_handler)  # type: ignore
 app.add_exception_handler(Exception, global_exception_handler)
 
 for exc in [
@@ -114,6 +119,7 @@ app.include_router(enrollment_router, prefix=PREFIX)
 app.include_router(student_router, prefix=PREFIX)
 app.include_router(monitor_router, prefix=PREFIX)
 app.include_router(monitor_assignment_router, prefix=PREFIX)
+app.include_router(feedback_type_router, prefix=PREFIX)
 app.include_router(feedback_router, prefix=PREFIX)
 app.include_router(hash_router, prefix=PREFIX)
 app.include_router(document_router, prefix=PREFIX)

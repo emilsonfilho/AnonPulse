@@ -4,10 +4,7 @@ from app.repositories.base_repository import BaseRepository
 from app.models.monitor_assignment import MonitorAssignment
 
 class MonitorAssignmentRepository(BaseRepository):
+    """Repositório para acesso e manipulação de dados de MonitorAssignment."""
     def __init__(self, session: AsyncSession) -> None:
+        """Inicializa o repositório com a sessão de banco de dados."""
         super().__init__(model=MonitorAssignment, session=session)
-
-    async def check_existing(self, monitor_registration: str, classroom_cod: str) -> bool:
-        # To-Do
-        pass
-        

@@ -14,7 +14,14 @@ class ProfessorService(
         Professor, CreateProfessorRequest, UpdateProfessorRequest, ProfessorResponse
     ]
 ):
+    """Serviço responsável pelas operações relacionadas a professores."""
+
     def __init__(self, repository: ProfessorRepository) -> None:
+        """Inicializa o serviço com o repositório de professores.
+
+        Args:
+            repository: Repositório utilizado para persistência e consulta.
+        """
         super().__init__(
             repository=repository,
             response_schema=ProfessorResponse,
@@ -22,4 +29,12 @@ class ProfessorService(
         )
 
     async def create(self, request: CreateProfessorRequest) -> ProfessorResponse:
+        """Cria um novo professor.
+
+        Args:
+            request: Dados necessários para a criação do professor.
+
+        Returns:
+            ProfessorResponse: Dados do professor criado.
+        """
         return await super().create(request)

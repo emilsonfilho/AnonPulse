@@ -2,7 +2,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 from app.core.enums import MessageType
-    
+from app.schemas.orm_base_schema import ORMBaseSchema
 class FeedbackTypeBase(BaseModel):
    type: Annotated[
       MessageType,
@@ -22,5 +22,5 @@ class UpdateFeedbackTypeRequest(BaseModel):
       )
    ]
     
-class FeedbackTypeResponse(FeedbackTypeBase):
+class FeedbackTypeResponse(FeedbackTypeBase, ORMBaseSchema):
    id: int

@@ -12,13 +12,12 @@ class Feedback(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     assignment_id: int = Field(foreign_key="monitor_assignments.id")
-    enrollment_id: int = Field(foreign_key="enrollments.id")
+    registration: str
     type_id: int = Field(foreign_key="feedback_types.id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     text: str
     rating: int
 
     assignment: "MonitorAssignment" =  Relationship(back_populates="feedbacks")
-    enrollment: "Enrollment" = Relationship(back_populates="feedbacks")
     type: "FeedbackType" = Relationship(back_populates="feedbacks")
 

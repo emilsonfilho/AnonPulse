@@ -8,16 +8,23 @@ Iago de Oliveira Lô - 565321
 Membro 1: Iago de Oliveira Lô
 1. Modelagem e implementação do banco de dados com Delta Lake
 2. Leitura incremental em lotes.
+3. Implementação dos repositorios de acesso aos dados
+4. Criação das entidades e schemas para manipulação dos dados
 
 Membro 2: Antônio Willian de Oliveira
 1. Configuração da arquitetura da API com FastAPI
-2. Criação das rotas HTTP
+2. Criação das rotas HTTP, endpoints e controllers para manipulação dos dados
 3. Integração dos retornos via StreamingResponse 
 4. Implementação do endpoint de criptografia/Hash
+5. Ajuste e configuração do Docker Compose para containerização da aplicação
+6. Configuração do Alembic para gerenciamento de migrações do banco de dados
+
 
 Membro 3: Francisco Emilson Santos Souza Filho 
 1. Implementação dos endpoints de streaming de CSV e ZIP
 2. script de carga via Faker
 3. Setup do pyproject.toml e gerenciamento do projeto.
+4. Implementação dos services e regras de negócio para manipulação dos dados
+5. Criação do Esquema Relacional e definição das tabelas no banco de dados
 
 Todos: Integração das Funcionalidades

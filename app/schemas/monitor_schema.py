@@ -1,6 +1,8 @@
 from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+
 class MonitorBase(BaseModel):
     name: Annotated[
         str,
@@ -44,5 +46,5 @@ class UpdateMonitorRequest(BaseModel):
         description="E-mail do monitor."
     )
 
-class MonitorResponse(MonitorBase):
+class MonitorResponse(MonitorBase, ORMBaseSchema):
     pass

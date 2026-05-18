@@ -2,6 +2,8 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+
 class EnrollmentBase(BaseModel):
     isActive: Annotated[
         bool,
@@ -35,8 +37,8 @@ class UpdateEnrollmentRequest(BaseModel):
         )
     ]
 
-class EnrollmentResponse(EnrollmentBase):
+class EnrollmentResponse(EnrollmentBase, ORMBaseSchema):
     id: int
-    enrolledAt: datetime
+    enrolled_at: datetime
     classroom_cod: str
     student_id: int

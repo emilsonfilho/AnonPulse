@@ -1,13 +1,24 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories.base_repository import BaseRepository
 from app.models.enrollment import Enrollment
+from app.repositories.base_repository import BaseRepository
 
-class EnrollmentRepository(BaseRepository):
+
+class EnrollmentRepository(BaseRepository[Enrollment]):
+    """
+    Repositório para gerenciar as operações de banco de dados da entidade Enrollment.
+
+    Esta classe herda de BaseRepository e fornece a abstração necessária para
+    realizar operações assíncronas de persistência e consulta associadas às
+    matrículas de alunos (Enrollment) nas turmas.
+    """
+
     def __init__(self, session: AsyncSession) -> None:
-        super().__init__(model=Enrollment, session=session)
+        """
+        Inicializa o repositório de matrículas.
 
-    async def check_existing(self, student_id: int, classroom_cod: str) -> bool:
-        # To-Do
-        pass
-        
+        Args:
+            session (AsyncSession): Sessão assíncrona do banco de dados
+                gerenciada pelo SQLAlchemy/SQLModel.
+        """
+        super().__init__(model=Enrollment, session=session)

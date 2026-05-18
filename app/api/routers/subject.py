@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Path
-from fastapi_pagination import Page, Params
+from fastapi_pagination import Params
 
 from app.api.dependencies.services import get_subject_service
 from app.schemas.subject_schema import (
@@ -10,6 +10,7 @@ from app.schemas.subject_schema import (
     UpdateSubjectRequest,
 )
 from app.services.subject_service import SubjectService
+from app.schemas.custom_page import Page
 
 api_router = APIRouter(prefix="/v1/disciplinas", tags=["Disciplinas"])
 

@@ -1,6 +1,8 @@
 from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+
 class ProfessorBase(BaseModel):
     name: Annotated[
         str,
@@ -36,5 +38,8 @@ class UpdateProfessorRequest(BaseModel):
         description="Email do professor."
     )
 
-class ProfessorResponse(ProfessorBase):
-    id: int
+class ProfessorResponse(ProfessorBase, ORMBaseSchema):
+    id: int # acredito eu que sim
+
+class ProfessorSelectResponse(ProfessorBase, ORMBaseSchema):
+    pass

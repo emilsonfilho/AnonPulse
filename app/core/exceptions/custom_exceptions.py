@@ -1,3 +1,5 @@
+from fastapi import HTTPException, status
+
 class ResourceNotFoundException(Exception):
     def __init__(self, message: str) -> None:
         super().__init__(message)
@@ -47,12 +49,14 @@ class ProfessorNotFoundException(Exception):
         self.message = message
 
 
-class EnrollmentAlreadyExistsException(Exception):
-    def __init__(self, id: int) -> None:
-        message = f"Já existe uma matrícula com id {id}"
-        super().__init__(message)
-        self.message = message
-
+class EnrollmentAlreadyExistsException(HTTPException):
+    def __init__(self):
+        message = "O aluno já está matriculado nesta turma."
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=message
+        )
+        self.message = message 
 
 class EnrollmentNotFoundException(Exception):
     def __init__(self) -> None:
@@ -118,8 +122,8 @@ class MonitorAssignmentNotFoundException(Exception):
 
 
 class FeedbackNotFoundException(Exception):
-    def __init__(self, id: int) -> None:
-        message = f"Feedback com ID {id} não encontrado."
+    def __init__(self) -> None:
+        message = "Feedback não encontrado."
         super().__init__(message)
         self.message = message
 

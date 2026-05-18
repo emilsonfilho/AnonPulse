@@ -1,4 +1,11 @@
+"""Serviço de inscrição (enrollment).
+
+Este módulo contém a lógica de negócio para gerenciar inscrições,
+incluindo criação, recuperação e exclusão lógica de registros.
+"""
+
 from datetime import datetime, timezone
+from sqlalchemy.exc import IntegrityError
 
 from app.core.exceptions.custom_exceptions import (
     EnrollmentAlreadyExistsException,
@@ -20,7 +27,18 @@ class EnrollmentService(
         Enrollment, CreateEnrollmentRequest, UpdateEnrollmentRequest, EnrollmentResponse
     ]
 ):
+    """Serviço para gerenciar operações de inscrição.
+
+    Fornece funcionalidades para criar, recuperar e deletar inscrições,
+    herdando funcionalidades base de manipulação de dados.
+    """
+
     def __init__(self, repository: EnrollmentRepository) -> None:
+        """Inicializa o serviço de inscrição.
+
+        Args:
+            repository: Repositório para acesso aos dados de inscrição.
+        """
         super().__init__(
             repository=repository,
             response_schema=EnrollmentResponse,
@@ -29,25 +47,41 @@ class EnrollmentService(
         )
 
     async def create(self, request: CreateEnrollmentRequest) -> EnrollmentResponse:
-        already_enrolled = await self.repository.check_existing(
-            request.student_id, request.classroom_cod
-        )
+        """Cria uma nova inscrição.
 
-        if already_enrolled:
-            raise EnrollmentAlreadyExistsException(
-                getattr(already_enrolled, "id"),
-            )
+        Args:
+            request: Dados da inscrição a ser criada.
 
+        Returns:
+            EnrollmentResponse: Dados da inscrição criada.
+
+        Raises:
+            EnrollmentAlreadyExistsException: Se a inscrição já existe.
+        """
         enrollment = Enrollment(
             **request.model_dump(),
             is_active=True,
             enrolled_at=datetime.now(timezone.utc),
         )
-        new_enrollment = await self.repository.create(enrollment)
+        
+        try:
+            new_enrollment = await self.repository.create(enrollment)
+        except IntegrityError:
+            raise EnrollmentAlreadyExistsException()
 
         return Mapper.to_response(new_enrollment, EnrollmentResponse)
 
     async def delete(self, id: int) -> None:
+        """Deleta uma inscrição (exclusão lógica).
+
+        Define o status is_active como False em vez de remover o registro.
+
+        Args:
+            id: Identificador da inscrição a ser deletada.
+
+        Raises:
+            EnrollmentNotFoundException: Se a inscrição não é encontrada.
+        """
         await self.get_or_raise(id)
 
         await self.repository.update(id, {"is_active": False})

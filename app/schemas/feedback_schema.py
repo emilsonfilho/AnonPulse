@@ -1,6 +1,10 @@
+from datetime import datetime
 from typing import Annotated
 from pydantic import BaseModel, Field, field_validator
 
+from app.schemas.orm_base_schema import ORMBaseSchema
+from app.schemas.feedback_type_schema import FeedbackTypeResponse
+from app.schemas.monitor_assignment_schema import MonitorAssignmentResponse
 
 def validate_empty_text(value:str) -> str:
     if value is None:
@@ -46,8 +50,8 @@ class CreateFeedbackRequest(FeedbackBase):
         )
     ]
 
-    enrollment_id: Annotated[
-        int,
+    registration: Annotated[
+        str,
         Field(
             description="ID da matrícula"
         )
@@ -90,9 +94,17 @@ class UpdateFeedbackRequest(BaseModel):
     
 
 
-class FeedbackResponse(FeedbackBase):
+class FeedbackResponse(FeedbackBase, ORMBaseSchema):
     id: int
-    createdAt: str
+    created_at: datetime
     assignment_id: int
-    enrollment_id: int
+    registration: str
     type_id: int
+
+    type: FeedbackTypeResponse | None = None
+    assignment: MonitorAssignmentResponse | None = None
+
+
+class FeedbackSubjectReportResponse(BaseModel):
+    subject_name: str
+    feedback_count: int

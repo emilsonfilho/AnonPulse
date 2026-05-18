@@ -9,7 +9,7 @@ from app.schemas.monitor_assignment_schema import (
     UpdateMonitorAssignmentRequest,
 )
 from app.services.monitor_assignment_service import MonitorAssignmentService
-from app.api.dependencies.services import get_monitor_assignment_repository
+from app.api.dependencies.services import get_monitor_assignment_service
 
 api_router = APIRouter(prefix="/v1/monitorias", tags=["Monitorias"])
 
@@ -25,7 +25,7 @@ api_router = APIRouter(prefix="/v1/monitorias", tags=["Monitorias"])
 async def create_monitor_assignment(
     monitor_assignment_request: CreateMonitorAssignmentRequest,
     monitor_assignment_service: MonitorAssignmentService = Depends(
-        get_monitor_assignment_repository
+        get_monitor_assignment_service
     ),
 ) -> MonitorAssignmentResponse:
     """Cria uma nova monitoria.
@@ -57,7 +57,7 @@ async def create_monitor_assignment(
 )
 async def list_monitor_assignments(
     monitor_assignment_service: MonitorAssignmentService = Depends(
-        get_monitor_assignment_repository
+        get_monitor_assignment_service
     ),
     params: Params = Depends(),
 ) -> Page[MonitorAssignmentResponse]:
@@ -86,7 +86,7 @@ async def list_monitor_assignments(
 )
 async def get_monitor_assignment_by_id(
     monitor_assignment_service: MonitorAssignmentService = Depends(
-        get_monitor_assignment_repository
+        get_monitor_assignment_service
     ),
     monitor_assignment_id: int = Path(
         ..., description="Identificador numérico da monitoria a ser consultada."
@@ -122,7 +122,7 @@ async def get_monitor_assignment_by_id(
 async def update_monitor_assignment(
     monitor_assignment_request: UpdateMonitorAssignmentRequest,
     monitor_assignment_service: MonitorAssignmentService = Depends(
-        get_monitor_assignment_repository
+        get_monitor_assignment_service
     ),
     monitor_assignment_id: int = Path(
         ..., description="Identificador numérico da monitoria a ser atualizada."
@@ -159,7 +159,7 @@ async def update_monitor_assignment(
 )
 async def delete_monitor_assignment(
     monitor_assignment_service: MonitorAssignmentService = Depends(
-        get_monitor_assignment_repository
+        get_monitor_assignment_service
     ),
     monitor_assignment_id: int = Path(
         ..., description="Identificador numérico da monitoria a ser excluída."
