@@ -1,38 +1,32 @@
-from sqlalchemy import event
-from sqlalchemy.ext.asyncio import create_async_engine
+import logging
+from pymongo import AsyncMongoClient
+from beanie import init_beanie
 
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
 
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=True,
-    pool_pre_ping=True,
-    future=True,
-    max_overflow=10,
-    pool_size=20,
-    pool_timeout=30,
-    pool_recycle=1800,
-)
+_client = None
 
 
+async def init_db(document_models: list | None = None):
+    global _client
 
-if engine.url.get_backend_name() == "sqlite":
-    @event.listens_for(engine.sync_engine, "connect")
-    def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:
-        """Aplica PRAGMAs do SQLite ao conectar.
+    _client = AsyncMongoClient(settings.DATABASE_URL)
+    db_name = getattr(settings, "DATABASE_NAME", "anonpulse_db")
+    db = _client[db_name]
 
-        Ativa o modo WAL, define a sincronização como NORMAL e habilita
-        chaves estrangeiras.
+    if document_models is None:
+        document_models = []
 
-        Args:
-            dbapi_connection: Objeto de conexão DB-API fornecido pelo
-                SQLAlchemy.
-            connection_record: Registro da conexão (não utilizado).
-        """
+    await init_beanie(
+        database=db,
+        document_models=document_models,
+    )
 
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")
-        cursor.execute("PRAGMA synchronous=NORMAL")
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
+
+async def close_db():
+    global _client
+    if _client is not None:
+        _client.close()
+        _client = None

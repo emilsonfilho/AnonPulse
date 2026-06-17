@@ -5,17 +5,13 @@ description = "Plataforma desenvolvida para gerenciar feedbacks anônimos de alu
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "aiosqlite>=0.22.1",
-    "alembic>=1.18.4",
+    "beanie>=2.1.0",
     "faker>=40.12.0",
     "fastapi-pagination>=0.15.12",
     "fastapi[standard]>=0.136.1",
-    "psycopg[pool, binary]>=3.3.4",
+    "pymongo>=4.17.0",
     "ruff>=0.15.12",
-    "scalar-fastapi>=1.8.2",
-    "sqlmodel>=0.0.38",
     "uvicorn>=0.46.0",
-    "zipstream>=1.1.4",
 ]
 
 [project.optional-dependencies]

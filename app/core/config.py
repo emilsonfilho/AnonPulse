@@ -14,11 +14,12 @@ class Settings(BaseSettings):
         "DATABASE_URL", "sqlite+aiosqlite:///database/anonpulse.db"
     )
 
+    DATABASE_NAME: str = os.getenv("DATABASE_NAME", "anonpulse")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
-
 
 settings = Settings()
