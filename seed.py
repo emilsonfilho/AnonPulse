@@ -13,7 +13,7 @@ from app.models.monitor_assignment import MonitorAssignment
 from app.models.feedback_type import FeedbackType
 from app.models.enrollment import Enrollment
 from app.models.feedback import Feedback
-from app.models.document import Document
+from app.models.document_metadata import Document
 
 from app.services.hash_service import HashService, HashAlgorithm
 

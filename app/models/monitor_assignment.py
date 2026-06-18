@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from app.models.monitor import Monitor
     from app.models.classroom import Classroom
     from app.models.feedback import Feedback
-    from app.models.document import Document
+    from app.models.document_metadata import DocumentMetadata
 
 class MonitorAssignment(Document):
     weekly_hours: int

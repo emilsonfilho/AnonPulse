@@ -3,7 +3,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.document import Document
+from app.models.document_metadata import Document
 from app.repositories.base_repository import BaseRepository
 
 

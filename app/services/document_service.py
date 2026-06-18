@@ -17,7 +17,7 @@ from app.schemas.document_schema import (
     CreateDocumentRequest,
     UpdateDocumentRequest
 )
-from app.models.document import Document
+from app.models.document_metadata import Document
 from app.core.exceptions.custom_exceptions import DocumentNotFoundException, DocumentNotExistsException
 
 UPLOAD_DIR = "uploads"
