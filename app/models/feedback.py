@@ -19,3 +19,6 @@ class Feedback(Document):
 
     class Settings:
         name = "feedbacks"
+        indexes = [
+            ("text", "text")
+        ]
