@@ -1,13 +1,14 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from beanie import Document, Link, Indexed
+from typing import TYPE_CHECKING, Annotated
+from pydantic import Field
 
 if TYPE_CHECKING:
     from app.models.enrollment import Enrollment
 
-class Student(SQLModel, table=True):
-    __tablename__ = "students"
+class Student(Document):
+    registration: Annotated[str, Indexed(unique=True)]
 
-    id: int | None = Field(default=None, primary_key=True)
-    registration: str = Field(unique=True)
+    enrollments: list[Link["Enrollment"]] = Field(default_factory=list)
 
-    enrollments: list["Enrollment"] = Relationship(back_populates="student")
+    class Settings:
+        name = "students"

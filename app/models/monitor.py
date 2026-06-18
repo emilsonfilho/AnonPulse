@@ -1,14 +1,16 @@
-from typing import TYPE_CHECKING
-from sqlmodel import SQLModel, Field, Relationship
+from beanie import Document, Indexed, Link
+from pydantic import Field
+from typing import TYPE_CHECKING, Annotated
 
 if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
 
-class Monitor(SQLModel, table=True):
-    __tablename__ = "monitors"
-
-    registration: str = Field(primary_key=True)
+class Monitor(Document):
+    registration: Annotated[str, Indexed(unique=True)]
     name: str
     email: str
 
-    assignments: list["MonitorAssignment"] = Relationship(back_populates="monitor")
+    assignments: list[Link["MonitorAssignment"]] = Field(default_factory=list)
+
+    class Settings:
+        name = "monitors"

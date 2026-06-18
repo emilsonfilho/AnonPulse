@@ -1,5 +1,9 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
+from enum import unique
+
+from beanie import Document, Link
 from typing import TYPE_CHECKING
+from pymongo import IndexModel, ASCENDING
+from pydantic import Field
 
 if TYPE_CHECKING:
     from app.models.monitor import Monitor
@@ -7,20 +11,21 @@ if TYPE_CHECKING:
     from app.models.feedback import Feedback
     from app.models.document import Document
 
-class MonitorAssignment(SQLModel, table=True):
-    __tablename__ = "monitor_assignments"
-    __table_args__ = (
-        UniqueConstraint("monitor_registration", "classroom_cod", name="unique_monitor_classroom"),
-    )
-
-    id: int | None = Field(default=None, primary_key=True)
+class MonitorAssignment(Document):
     weekly_hours: int
-    monitor_registration: str = Field(foreign_key="monitors.registration")
-    classroom_cod: str = Field(foreign_key="classrooms.cod")
 
-    monitor: "Monitor" = Relationship(back_populates="assignments")
-    classroom: "Classroom" = Relationship(back_populates="assignments")
-    feedbacks: list["Feedback"] = Relationship(back_populates="assignment")
-    documents: list["Document"] = Relationship(back_populates="assignment")
+    monitor: Link["Monitor"]
+    classroom: Link["Classroom"]
+    feedbacks: list[Link["Feedback"]] = Field(default_factory=list)
+    documents: list[Link["Document"]] = Field(default_factory=list)
 
+    class Settings:
+        name = "monitor_assignments"
 
+        indexes = [
+            IndexModel(
+                [("monitor", ASCENDING), ("classroom", ASCENDING)],
+                unique=True,
+                name="unique_monitor_classroom"
+            ),
+        ]

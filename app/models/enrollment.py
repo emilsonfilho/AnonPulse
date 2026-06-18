@@ -1,29 +1,28 @@
-from sqlalchemy import UniqueConstraint
-from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+from pydantic import Field
+from beanie import Document, Link
+from pymongo import IndexModel, ASCENDING
 
 if TYPE_CHECKING:
     from app.models.student import Student
     from app.models.classroom import Classroom
     from app.models.feedback import Feedback
 
-class Enrollment(SQLModel, table=True):
-    __tablename__ = "enrollments"
-
-    __table_args__ = (
-        UniqueConstraint(
-            "student_id",
-            "classroom_cod",
-            name="uq_student_classroom"
-        ),
-    )
-
-    id: int | None = Field(default=None, primary_key=True)
-    student_id: int = Field(foreign_key="students.id")
-    classroom_cod: str = Field(foreign_key="classrooms.cod")
+class Enrollment(Document):
     is_active: bool = Field(default=True)
     enrolled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    student: "Student" = Relationship(back_populates="enrollments")
-    classroom: "Classroom" = Relationship(back_populates="enrollments")
+    student: Link["Student"]
+    classroom: Link["Classroom"]
+
+    class Settings:
+        name = "enrollments"
+
+        indexes = [
+            IndexModel(
+                [("student", ASCENDING), ("classroom", ASCENDING)],
+                unique=True,
+                name="unique_student_classroom"
+            )
+        ]

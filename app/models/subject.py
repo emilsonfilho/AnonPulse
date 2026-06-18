@@ -1,13 +1,15 @@
-from typing import TYPE_CHECKING
-from sqlmodel import SQLModel, Field, Relationship
+from typing import TYPE_CHECKING, Annotated
+from beanie import Document, Link, Indexed
+from pydantic import Field
 
 if TYPE_CHECKING:
     from app.models.classroom import Classroom
 
-class Subject(SQLModel, table=True):
-    __tablename__ = "subjects"
-
-    cod: str = Field(primary_key=True)
+class Subject(Document):
+    cod: Annotated[str, Indexed(unique=True)]
     name: str
 
-    classrooms: list["Classroom"] = Relationship(back_populates="subject")
+    classrooms: list[Link["Classroom"]]  = Field(default_factory=list)
+
+    class Settings:
+        name = "subjects"

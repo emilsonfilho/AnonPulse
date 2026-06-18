@@ -1,5 +1,6 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
+from beanie import Document, Link, Indexed
+from pydantic import Field
 
 if TYPE_CHECKING:
     from app.models.subject import Subject
@@ -8,14 +9,14 @@ if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
 
 
-class Classroom(SQLModel, table=True):
-    __tablename__ = "classrooms"
+class Classroom(Document):
 
-    cod: str = Field(primary_key=True)
-    subject_cod: str = Field(foreign_key="subjects.cod")
-    professor_id: int = Field(foreign_key="professors.id")
+    cod: Annotated[str, Indexed(unique=True)]
 
-    subject: "Subject" = Relationship(back_populates="classrooms")
-    professor: "Professor" = Relationship(back_populates="classrooms")
-    enrollments: list["Enrollment"] = Relationship(back_populates="classroom")
-    assignments: list["MonitorAssignment"] = Relationship(back_populates="classroom")
+    subject: Link["Subject"]
+    professor: Link["Professor"]
+    enrollments: list[Link["Enrollment"]] = Field(default_factory=list)
+    assignments: list[Link["MonitorAssignment"]] = Field(default_factory=list)
+
+    class Settings:
+        name = "classrooms"
