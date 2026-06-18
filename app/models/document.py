@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 from beanie import Document, Link
+from pydantic import Field
 
 if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
