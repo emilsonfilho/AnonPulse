@@ -49,10 +49,10 @@ class ClassroomRepository(BaseRepository[Classroom]):
         )
 
         return await apaginate(query, params)
-    
+
+    @staticmethod
     async def list_by_subject(
-        self, 
-        subject_cod: str, 
+        subject_cod: str,
         params: Params,
         fetch_links: bool = False
     ) -> Page[Classroom]:
@@ -68,14 +68,13 @@ class ClassroomRepository(BaseRepository[Classroom]):
             Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
                 e os metadados de paginação.
         """
-        subject = await Subject.find_one(Subject.cod == subject_cod)
 
-        if not subject:
-            raise SubjectNotFoundException()
-
-        query = self.model.find(
-            { "subject.$id": subject.id },
+        return await BaseRepository._find_by_linked(
+            model=Subject,
+            lookup_expr=Subject.cod == subject_cod,
+            source_model=Classroom,
+            link_field="subject",
+            exception=SubjectNotFoundException(),
+            params=params,
             fetch_links=fetch_links
         )
-
-        return await apaginate(query, params)
