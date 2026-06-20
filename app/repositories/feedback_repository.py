@@ -43,10 +43,8 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks filtrados.
         """
-        search_term = f"%{term}%"
-
         query = self.model.find(
-            { "text": { "$regex": search_term, "$options": "i" } }
+            { "text": { "$regex": term, "$options": "i" } }
         ).sort("-created_at")
 
         return await apaginate(query, params)
