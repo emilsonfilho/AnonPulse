@@ -49,7 +49,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
             { "text": { "$regex": search_term, "$options": "i" } }
         ).sort("-created_at")
 
-        return await apaginate(self.session, query, params)
+        return await apaginate(query, params)
 
     async def list_by_monitor(
             self,
@@ -162,7 +162,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
             },
             {
                 "$lookup": {
-                    "from": "monitor_assignment",
+                    "from": "monitor_assignments",
                     "localField": "assignment_id",
                     "foreignField": "_id",
                     "as": "assignment"
@@ -176,7 +176,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
             },
             {
                 "$lookup": {
-                    "from": "classroom",
+                    "from": "classrooms",
                     "localField": "classroom_id",
                     "foreignField": "_id",
                     "as": "classroom"
@@ -285,7 +285,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         """
 
         query = self.model.find(
-            Feedback.registration == student_hash,
+            self.model.registration == student_hash,
             fetch_links=fetch_links
         )
 
