@@ -3,7 +3,8 @@
 Este módulo fornece a classe BaseRepository que implementa operações
 CRUD genéricas para qualquer modelo SQLModel.
 """
-
+from beanie.odm.operators.find import BaseFindOperator
+from beanie.odm.queries.find import FindMany
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 
@@ -12,6 +13,8 @@ from beanie import Document, PydanticObjectId
 from pydantic import BaseModel
 
 from typing import TypeVar, Generic, Any
+
+from app.core.pagination.pagination import Pagination
 
 ModelType = TypeVar(
     "ModelType",
@@ -136,3 +139,56 @@ class BaseRepository(Generic[ModelType]):
         """
 
         return await self.model.count()
+
+    async def _paginate_aggregation(self, aggregation: list, params: Params) -> Page[Any]:
+        results = await self.model.aggregate(aggregation).to_list()
+        data = results[0]
+        return Page.create(
+            items=data["items"],
+            total=data["total"][0]["count"] if data["total"] else 0,
+            params=params
+        )
+
+    @staticmethod
+    def _facet_stage(params: Params, sort: dict | None = None) -> dict:
+        p = Pagination.from_params(params)
+
+        items = []
+
+        if sort:
+            items.append({ "$sort": sort })
+
+        items.extend([
+            { "$skip": p.skip },
+            { "$limit": p.limit }
+        ])
+
+        return {
+            "$facet": {
+                "items": items,
+                "total": [ { "$count": "count" } ]
+            }
+        }
+
+    @staticmethod
+    async def _find_by_linked(
+            model: type[Document],
+            lookup_expr: Any,
+            source_model: type[Document],
+            link_field: str,
+            exception: Exception,
+            params: Params,
+            fetch_links: bool = False,
+    ) -> Page[Any]:
+        doc = await model.find_one(lookup_expr)  # type: ignore
+
+        if not doc:
+            raise exception
+
+        assert doc is not None
+        query = source_model.find(
+            {f"{link_field}.$id": doc.id},
+            fetch_links=fetch_links
+        )
+
+        return await apaginate(query, params)
