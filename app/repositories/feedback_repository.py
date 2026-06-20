@@ -2,17 +2,17 @@ from datetime import datetime
 from typing import Any
 
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import func
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from fastapi_pagination.ext.beanie import apaginate
 
-from app.models.classroom import Classroom
+from app.models import (
+    Classroom,
+    Monitor, Student
+)
 from app.models.feedback import Feedback
 from app.models.monitor_assignment import MonitorAssignment
 from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
-
+from app.core.exceptions.custom_exceptions import MonitorNotFoundException, StudentNotFoundException
 
 class FeedbackRepository(BaseRepository[Feedback]):
     """
@@ -23,15 +23,11 @@ class FeedbackRepository(BaseRepository[Feedback]):
     por intervalo de datas, agrupamentos, contagens e joins multi-entidades.
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self) -> None:
         """
         Inicializa o repositório de feedbacks.
-
-        Args:
-            session (AsyncSession): Sessão assíncrona do banco de dados
-                gerenciada pelo SQLAlchemy/SQLModel.
         """
-        super().__init__(model=Feedback, session=session)
+        super().__init__(model=Feedback)
 
     async def search_by_text(self, term: str, params: Params) -> Page[Feedback]:
         """
@@ -49,16 +45,17 @@ class FeedbackRepository(BaseRepository[Feedback]):
         """
         search_term = f"%{term}%"
 
-        query = (
-            select(self.model)
-            .where(self.model.text.ilike(search_term))
-            .order_by(self.model.created_at.desc())
-        )
+        query = self.model.find(
+            { "text": { "$regex": search_term, "$options": "i" } }
+        ).sort("-created_at")
 
-        return await paginate(self.session, query, params)
+        return await apaginate(self.session, query, params)
 
     async def list_by_monitor(
-        self, monitor_registration: str, params: Params
+            self,
+            monitor_registration: str,
+            params: Params,
+            fetch_links: bool = False
     ) -> Page[Feedback]:
         """
         Lista de forma paginada os feedbacks recebidos por um monitor específico.
@@ -69,17 +66,40 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Args:
             monitor_registration (str): A matrícula do monitor alvo do filtro.
             params (Params): Parâmetros de paginação do fastapi-pagination.
+            fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
             Page[Feedback]: Objeto paginado com os feedbacks vinculados ao monitor.
         """
-        query = (
-            select(self.model)
-            .join(MonitorAssignment)
-            .where(MonitorAssignment.monitor_registration == monitor_registration)
-        )
 
-        return await paginate(self.session, query, params)
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "monitor_assignments",
+                    "localField": "assignment.$id",
+                    "foreignField": "_id",
+                    "as": "assignment"
+                }
+            },
+            {"$unwind": "$assignment"},
+            {
+                "$lookup": {
+                    "from": "monitors",
+                    "localField": "assignment.monitor.$id",
+                    "foreignField": "_id",
+                    "as": "monitor"
+                }
+            },
+            {"$unwind": "$monitor"},
+            {
+                "$match": {
+                    "monitor.registration": monitor_registration
+                }
+            },
+            BaseRepository._facet_stage(params)
+        ]
+
+        return await self._paginate_aggregation(pipeline, params)
 
     async def count_by_monitor(self, params: Params) -> Page[Any]:
         """
@@ -95,13 +115,28 @@ class FeedbackRepository(BaseRepository[Feedback]):
             Page[Any]: Objeto paginado contendo tuplas ou dicionários com a
                 matrícula do monitor e a respectiva contagem de feedbacks.
         """
-        query = (
-            select(MonitorAssignment.monitor_registration, func.count(self.model.id))
-            .join(MonitorAssignment)
-            .group_by(MonitorAssignment.monitor_registration)
-        )
 
-        return await paginate(self.session, query, params)
+        pipeline = [
+            {
+                "$group": {
+                    "_id": "$monitor_registration",
+                    "count": { "$sum": 1 }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "monitor_registration": "$_id",
+                    "count": 1
+                }
+            },
+            {
+                "$sort": { "count": -1 }
+            },
+            BaseRepository._facet_stage(params, sort={ "count": -1 })
+        ]
+
+        return await self._paginate_aggregation(pipeline, params)
 
     async def count_by_subject(self, params: Params) -> Page[Any]:
         """
@@ -118,30 +153,67 @@ class FeedbackRepository(BaseRepository[Feedback]):
             Page[Any]: Objeto paginado contendo o nome da disciplina e a
                 quantidade total de feedbacks que ela acumulou.
         """
-        query = (
-            select(
-                Subject.name.label("subject_name"),
-                func.count(self.model.id).label("feedback_count"),
-            )
-            .select_from(self.model)
-            .join(MonitorAssignment)
-            .join(Classroom)
-            .join(Subject)
-            .group_by(Subject.name)
-        )
 
-        return await paginate(
-            self.session,
-            query,
-            params,
-            transformer=lambda items: [
-                {
-                    "subject_name": item.subject_name,
-                    "feedback_count": item.feedback_count,
+        pipeline = [
+            {
+                "$addFields": {
+                    "assignment_id": "$assignment.$id",
                 }
-                for item in items
-            ],
-        )
+            },
+            {
+                "$lookup": {
+                    "from": "monitor_assignment",
+                    "localField": "assignment_id",
+                    "foreignField": "_id",
+                    "as": "assignment"
+                }
+            },
+            { "$unwind": "$assignment" },
+            {
+                "$addFields": {
+                    "classroom_id": "$assignment.classroom.$id",
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "classroom",
+                    "localField": "classroom_id",
+                    "foreignField": "_id",
+                    "as": "classroom"
+                }
+            },
+            { "$unwind": "$classroom" },
+            {
+                "$addFields": {
+                    "subject_id": "$classroom.subject.$id",
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "subjects",
+                    "localField": "subject_id",
+                    "foreignField": "_id",
+                    "as": "subject"
+                }
+            },
+            { "$unwind": "$subject" },
+            {
+                "$group": {
+                    "_id": "$subject.name",
+                    "feedback_count": { "$sum": 1 }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "subject_name": "$_id",
+                    "feedback_count": 1
+                }
+            },
+            BaseRepository._facet_stage(params, sort={ "feedback_count": -1 }),
+        ]
+
+        return await self._paginate_aggregation(pipeline, params)
 
     async def list_by_date_range(
         self,
@@ -167,23 +239,35 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks pertencentes ao período.
         """
-        query = select(self.model)
+        match: dict = {}
 
         if start_date:
-            query = query.where(self.model.created_at >= start_date)
+            match.setdefault("created_at", {})["$gte"] = start_date
 
         if end_date:
-            query = query.where(self.model.created_at <= end_date)
+           match.setdefault("created_at", {})["$lte"] = end_date
 
         if year is not None:
-            query = query.where(func.strftime('%Y', self.model.created_at) == str(year))
+            match["$expr"] = {
+                "$eq": [
+                    { "$year": "$created_at" },
+                    year
+                ]
+            }
 
-        query = query.order_by(self.model.created_at.desc())
+        pipeline = [
+            *([ { "$match": match } ] if match else []),
+            { "$sort": { "created_at": -1 } },
+            BaseRepository._facet_stage(params)
+        ]
 
-        return await paginate(self.session, query, params)
+        return await self._paginate_aggregation(pipeline, params)
 
     async def list_by_student_hash(
-        self, student_hash: str, params: Params, options: list[Any] | None = None
+            self,
+            student_hash: str,
+            params: Params,
+            fetch_links: bool = False
     ) -> Page[Feedback]:
         """
         Busca de forma paginada todos os feedbacks pertencentes a um hash de aluno.
@@ -194,15 +278,15 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Args:
             student_hash (str): O hash gerado a partir da matrícula do aluno.
             params (Params): Parâmetros de paginação do fastapi-pagination.
-            options (list[Any] | None, opcional): Lista de estratégias de eager
-                loading (joinedload/selectinload) do SQLAlchemy.
+            fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks do aluno anônimo.
         """
-        query = select(self.model).where(self.model.registration == student_hash)
 
-        if options:
-            query = query.options(*options)
+        query = self.model.find(
+            Feedback.registration == student_hash,
+            fetch_links=fetch_links
+        )
 
-        return await paginate(self.session, query, params)
+        return await apaginate(query, params)
