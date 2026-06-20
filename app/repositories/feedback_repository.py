@@ -66,9 +66,16 @@ class FeedbackRepository(BaseRepository[Feedback]):
             params (Params): Parâmetros de paginação do fastapi-pagination.
             fetch_links: Se True, carrega os documentos relacionados (links).
 
+        Raises:
+            MonitorNotFoundException se o monitor não for encontrado
+
         Returns:
             Page[Feedback]: Objeto paginado com os feedbacks vinculados ao monitor.
         """
+
+        monitor = await Monitor.find_one(Monitor.registration == monitor_registration)
+        if not monitor:
+            raise MonitorNotFoundException()
 
         pipeline = [
             {
