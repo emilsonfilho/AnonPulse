@@ -1,14 +1,13 @@
 from typing import Any
 
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
-from sqlmodel import select
+from fastapi_pagination.ext.beanie import apaginate
 
 from app.models.classroom import Classroom
+from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
 
+from app.core.exceptions.custom_exceptions import SubjectNotFoundException
 
 class ClassroomRepository(BaseRepository[Classroom]):
     """
@@ -19,21 +18,17 @@ class ClassroomRepository(BaseRepository[Classroom]):
     relacionamentos com suporte a paginação e carregamento ansioso (eager loading).
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self) -> None:
         """
         Inicializa o repositório de turmas.
-
-        Args:
-            session (AsyncSession): Sessão assíncrona do banco de dados 
-                gerenciada pelo SQLAlchemy.
         """
-        super().__init__(model=Classroom, session=session)
+        super().__init__(model=Classroom)
     
     async def list_by_professor(
         self, 
         professor_id: int, 
-        params: Params, 
-        options: list[Any] | None = None
+        params: Params,
+        fetch_links: bool = False
     ) -> Page[Classroom]:
         """
         Lista de forma paginada todas as turmas associadas a um determinado professor.
@@ -42,26 +37,24 @@ class ClassroomRepository(BaseRepository[Classroom]):
             professor_id (int): O identificador único do professor.
             params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination 
                 (página atual e limite de itens).
-            options (list[Any] | None, opcional): Lista de estratégias de eager loading 
-                do SQLAlchemy (como selectinload ou joinedload) para evitar o 
-                problema de consultas N+1. Padrão é None.
+            fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
             Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
                 e os metadados de paginação.
         """
-        query = select(self.model).where(self.model.professor_id == professor_id)
+        query = self.model.find(
+            { "professor.$id": professor_id },
+            fetch_links=fetch_links
+        )
 
-        if options:
-            query = query.options(*options)
-
-        return await paginate(self.session, query, params)
+        return await apaginate(query, params)
     
     async def list_by_subject(
         self, 
         subject_cod: str, 
-        params: Params, 
-        options: list[Any] | None = None
+        params: Params,
+        fetch_links: bool = False
     ) -> Page[Classroom]:
         """
         Lista de forma paginada todas as turmas vinculadas a uma determinada disciplina.
@@ -69,17 +62,20 @@ class ClassroomRepository(BaseRepository[Classroom]):
         Args:
             subject_cod (str): O código de identificação da disciplina (ex: "QXD123").
             params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination.
-            options (list[Any] | None, opcional): Lista de estratégias de eager loading 
-                do SQLAlchemy (como selectinload ou joinedload) para o carregamento 
-                eficiente de relacionamentos. Padrão é None.
+            fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
             Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
                 e os metadados de paginação.
         """
-        query = select(self.model).where(self.model.subject_cod == subject_cod)
-        
-        if options:
-            query = query.options(*options)
+        subject = await Subject.find_one(Subject.cod == subject_cod)
 
-        return await paginate(self.session, query, params)
+        if not subject:
+            raise SubjectNotFoundException()
+
+        query = self.model.find(
+            { "subject.$id": subject.id },
+            fetch_links=fetch_links
+        )
+
+        return await apaginate(query, params)
