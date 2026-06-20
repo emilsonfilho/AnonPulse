@@ -8,6 +8,16 @@ from .student import Student
 from .subject import Subject
 from .document_metadata import DocumentMetadata
 
+Classroom.model_rebuild()
+Enrollment.model_rebuild()
+Feedback.model_rebuild()
+MonitorAssignment.model_rebuild()
+Monitor.model_rebuild()
+Professor.model_rebuild()
+Student.model_rebuild()
+Subject.model_rebuild()
+DocumentMetadata.model_rebuild()
+
 __all__ = [
     "Classroom",
     "Enrollment",

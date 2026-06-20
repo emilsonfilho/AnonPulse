@@ -17,7 +17,7 @@ class MonitorAssignment(Document):
     monitor: Link["Monitor"]
     classroom: Link["Classroom"]
     feedbacks: list[Link["Feedback"]] = Field(default_factory=list)
-    documents: list[Link["Document"]] = Field(default_factory=list)
+    documents: list[Link["DocumentMetadata"]] = Field(default_factory=list)
 
     class Settings:
         name = "monitor_assignments"
