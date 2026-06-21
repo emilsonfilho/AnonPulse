@@ -1,7 +1,7 @@
+from beanie import PydanticObjectId
+from faker.providers.person import is_IS
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from fastapi_pagination.ext.beanie import apaginate
 
 from app.models.document_metadata import Document
 from app.repositories.base_repository import BaseRepository
@@ -16,7 +16,7 @@ class DocumentRepository(BaseRepository[Document]):
     filtrada por vínculos com outras entidades e suporte a paginação assíncrona.
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self) -> None:
         """
         Inicializa o repositório de documentos.
 
@@ -24,12 +24,13 @@ class DocumentRepository(BaseRepository[Document]):
             session (AsyncSession): Sessão assíncrona do banco de dados 
                 gerenciada pelo SQLModel/SQLAlchemy.
         """
-        super().__init__(model=Document, session=session)
+        super().__init__(model=Document)
     
     async def list_by_assignment(
         self, 
         assignment_id: int, 
-        params: Params
+        params: Params,
+        fetch_links: bool = False
     ) -> Page[Document]:
         """
         Lista de forma paginada todos os documentos associados a uma atribuição.
@@ -42,10 +43,18 @@ class DocumentRepository(BaseRepository[Document]):
             assignment_id (int): O identificador único da atribuição de monitoria.
             params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination
                 (como página atual e tamanho da página).
+            fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
             Page[Document]: Objeto paginado contendo a lista de metadados dos documentos
                 encontrados e as informações de controle da paginação.
         """
-        query = select(self.model).where(self.model.assignment_id == assignment_id)
-        return await paginate(self.session, query, params)
+        if isinstance(assignment_id, str):
+            assignment_id = PydanticObjectId(assignment_id)
+
+        query = self.model.find(
+            { "assignment_id": assignment_id },
+            fetch_links=fetch_links
+        )
+
+        return await apaginate(query, params)

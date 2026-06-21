@@ -1,8 +1,5 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.enrollment import Enrollment
 from app.repositories.base_repository import BaseRepository
-
 
 class EnrollmentRepository(BaseRepository[Enrollment]):
     """
@@ -13,12 +10,8 @@ class EnrollmentRepository(BaseRepository[Enrollment]):
     matrículas de alunos (Enrollment) nas turmas.
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self) -> None:
         """
         Inicializa o repositório de matrículas.
-
-        Args:
-            session (AsyncSession): Sessão assíncrona do banco de dados
-                gerenciada pelo SQLAlchemy/SQLModel.
         """
-        super().__init__(model=Enrollment, session=session)
+        super().__init__(model=Enrollment)
