@@ -21,22 +21,19 @@ class DocumentRepository(BaseRepository[Document]):
         Inicializa o repositório de documentos.
 
         Args:
-            session (AsyncSession): Sessão assíncrona do banco de dados 
+            session (AsyncSession): Sessão assíncrona do banco de dados
                 gerenciada pelo SQLModel/SQLAlchemy.
         """
         super().__init__(model=Document)
-    
+
     async def list_by_assignment(
-        self, 
-        assignment_id: int, 
-        params: Params,
-        fetch_links: bool = False
+        self, assignment_id: int, params: Params, fetch_links: bool = False
     ) -> Page[Document]:
         """
         Lista de forma paginada todos os documentos associados a uma atribuição.
 
         Este método atende aos requisitos do TP2 ao permitir buscar os metadados
-        dos arquivos salvos localmente que pertencem a uma determinada relação 
+        dos arquivos salvos localmente que pertencem a uma determinada relação
         de monitoria (MonitorAssignment).
 
         Args:
@@ -53,8 +50,7 @@ class DocumentRepository(BaseRepository[Document]):
             assignment_id = PydanticObjectId(assignment_id)
 
         query = self.model.find(
-            { "assignment_id": assignment_id },
-            fetch_links=fetch_links
+            {"assignment_id": assignment_id}, fetch_links=fetch_links
         )
 
         return await apaginate(query, params)
