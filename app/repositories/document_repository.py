@@ -21,7 +21,7 @@ class DocumentRepository(BaseRepository[DocumentMetadata]):
         Inicializa o repositório de documentos.
 
         Args:
-            session (AsyncSession): Sessão assíncrona do banco de dados 
+            session (AsyncSession): Sessão assíncrona do banco de dados
                 gerenciada pelo SQLModel/SQLAlchemy.
         """
         super().__init__(model=DocumentMetadata)
@@ -36,7 +36,7 @@ class DocumentRepository(BaseRepository[DocumentMetadata]):
         Lista de forma paginada todos os documentos associados a uma atribuição.
 
         Este método atende aos requisitos do TP2 ao permitir buscar os metadados
-        dos arquivos salvos localmente que pertencem a uma determinada relação 
+        dos arquivos salvos localmente que pertencem a uma determinada relação
         de monitoria (MonitorAssignment).
 
         Args:

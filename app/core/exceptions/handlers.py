@@ -4,7 +4,6 @@ from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import IntegrityError
 
 from app.schemas.error_schema import ErrorResponse
 
@@ -117,13 +116,6 @@ async def custom_conflict_handler(
         )
     )
 
-async def sqlaclgemy_integrity_handler(_: Request, exc: IntegrityError) -> JSONResponse:
-    return _json_error_response(
-        ErrorResponse.from_http_status(
-            status_code=HTTPStatus.CONFLICT,
-            message="Conflito de integridade no banco de dados. O registro já está a ser utilizada por outra entidade no sistema"
-        )
-    )
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.error(f"Erro inesperado em {request.url}: {repr(exc)}")

@@ -11,9 +11,8 @@ class Settings(BaseSettings):
     """Configurações carregadas das variáveis de ambiente."""
 
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "sqlite+aiosqlite:///database/anonpulse.db"
+        "DATABASE_URL", "mongodb://root:password@mongo:27017/anonpulse?authSource=admin"
     )
-
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "anonpulse")
 
     MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "anonpulse")
@@ -26,5 +25,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
 
 settings = Settings()

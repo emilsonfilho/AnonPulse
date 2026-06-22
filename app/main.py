@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi_pagination import add_pagination
-from sqlalchemy.exc import IntegrityError
 from scalar_fastapi import get_scalar_api_reference
 
 from app.api.routers.classroom import api_router as classroom_router
@@ -44,7 +43,6 @@ from app.core.exceptions.handlers import (
     http_handler,
     request_validation_handler,
     resource_not_found_handler,
-    sqlaclgemy_integrity_handler,
 )
 
 tags_metadata = [
@@ -88,7 +86,6 @@ app.add_exception_handler(DomainValidationException, domain_validation_handler) 
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)  # type: ignore
 app.add_exception_handler(HTTPException, http_handler)  # type: ignore
 app.add_exception_handler(RequestValidationError, request_validation_handler)  # type: ignore
-app.add_exception_handler(IntegrityError, sqlaclgemy_integrity_handler)  # type: ignore
 app.add_exception_handler(Exception, global_exception_handler)
 
 for exc in [
