@@ -43,7 +43,6 @@ from app.core.exceptions.handlers import (
     http_handler,
     request_validation_handler,
     resource_not_found_handler,
-    sqlaclgemy_integrity_handler,
 )
 
 tags_metadata = [
