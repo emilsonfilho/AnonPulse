@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     """Configurações carregadas das variáveis de ambiente."""
 
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "mongodb://root:example@mongo:27017/anonpulse?authSource=admin"
+        "DATABASE_URL", "mongodb://root:password@mongo:27017/anonpulse?authSource=admin"
     )
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "anonpulse")
 
