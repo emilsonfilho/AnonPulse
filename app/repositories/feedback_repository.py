@@ -43,13 +43,11 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks filtrados.
         """
-        search_term = f"%{term}%"
-
         query = self.model.find(
-            { "text": { "$regex": search_term, "$options": "i" } }
+            { "text": { "$regex": term, "$options": "i" } }
         ).sort("-created_at")
 
-        return await apaginate(self.session, query, params)
+        return await apaginate(query, params)
 
     async def list_by_monitor(
             self,
@@ -68,9 +66,16 @@ class FeedbackRepository(BaseRepository[Feedback]):
             params (Params): Parâmetros de paginação do fastapi-pagination.
             fetch_links: Se True, carrega os documentos relacionados (links).
 
+        Raises:
+            MonitorNotFoundException se o monitor não for encontrado
+
         Returns:
             Page[Feedback]: Objeto paginado com os feedbacks vinculados ao monitor.
         """
+
+        monitor = await Monitor.find_one(Monitor.registration == monitor_registration)
+        if not monitor:
+            raise MonitorNotFoundException()
 
         pipeline = [
             {
@@ -162,7 +167,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
             },
             {
                 "$lookup": {
-                    "from": "monitor_assignment",
+                    "from": "monitor_assignments",
                     "localField": "assignment_id",
                     "foreignField": "_id",
                     "as": "assignment"
@@ -176,7 +181,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
             },
             {
                 "$lookup": {
-                    "from": "classroom",
+                    "from": "classrooms",
                     "localField": "classroom_id",
                     "foreignField": "_id",
                     "as": "classroom"
@@ -285,7 +290,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         """
 
         query = self.model.find(
-            Feedback.registration == student_hash,
+            self.model.registration == student_hash,
             fetch_links=fetch_links
         )
 

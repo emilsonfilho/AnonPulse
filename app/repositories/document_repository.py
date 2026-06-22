@@ -3,11 +3,11 @@ from faker.providers.person import is_IS
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 
-from app.models.document_metadata import Document
+from app.models.document_metadata import DocumentMetadata
 from app.repositories.base_repository import BaseRepository
 
 
-class DocumentRepository(BaseRepository[Document]):
+class DocumentRepository(BaseRepository[DocumentMetadata]):
     """
     Repositório para gerenciar as operações de banco de dados da entidade Document.
 
@@ -24,14 +24,14 @@ class DocumentRepository(BaseRepository[Document]):
             session (AsyncSession): Sessão assíncrona do banco de dados 
                 gerenciada pelo SQLModel/SQLAlchemy.
         """
-        super().__init__(model=Document)
+        super().__init__(model=DocumentMetadata)
     
     async def list_by_assignment(
         self, 
         assignment_id: int, 
         params: Params,
         fetch_links: bool = False
-    ) -> Page[Document]:
+    ) -> Page[DocumentMetadata]:
         """
         Lista de forma paginada todos os documentos associados a uma atribuição.
 
@@ -53,7 +53,7 @@ class DocumentRepository(BaseRepository[Document]):
             assignment_id = PydanticObjectId(assignment_id)
 
         query = self.model.find(
-            { "assignment_id": assignment_id },
+            { "assignment.$id": assignment_id  },
             fetch_links=fetch_links
         )
 
