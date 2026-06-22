@@ -23,8 +23,8 @@ services:
     command: server /data --console-address ":9001"
     # Credenciais vêm do .env (sem segredos fixos aqui)
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"  # API
       - "9001:9001"  # Console Web
@@ -44,7 +44,7 @@ services:
     container_name: anonpulse
     restart: unless-stopped
     env_file:
-      - .env
+      - .env-docker
     ports:
       - "8000:8000"
     depends_on:
