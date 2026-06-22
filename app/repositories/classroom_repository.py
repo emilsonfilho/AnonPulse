@@ -1,5 +1,6 @@
 from typing import Any
 
+from beanie import PydanticObjectId
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 
@@ -8,6 +9,8 @@ from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
 
 from app.core.exceptions.custom_exceptions import SubjectNotFoundException
+from app.schemas.custom_page import Page
+
 
 class ClassroomRepository(BaseRepository[Classroom]):
     """
@@ -23,10 +26,13 @@ class ClassroomRepository(BaseRepository[Classroom]):
         Inicializa o repositório de turmas.
         """
         super().__init__(model=Classroom)
-    
+
+    async def find_by(self, **filters) -> Classroom | None:
+        return await self.model.find_one(filters)
+
     async def list_by_professor(
         self, 
-        professor_id: int, 
+        professor_id: PydanticObjectId,
         params: Params,
         fetch_links: bool = False
     ) -> Page[Classroom]:
@@ -34,7 +40,7 @@ class ClassroomRepository(BaseRepository[Classroom]):
         Lista de forma paginada todas as turmas associadas a um determinado professor.
 
         Args:
-            professor_id (int): O identificador único do professor.
+            professor_id: O identificador único do professor.
             params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination 
                 (página atual e limite de itens).
             fetch_links: Se True, carrega os documentos relacionados (links).
@@ -43,15 +49,24 @@ class ClassroomRepository(BaseRepository[Classroom]):
             Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
                 e os metadados de paginação.
         """
+        if isinstance(professor_id, str):
+            professor_id = PydanticObjectId(professor_id)
+
         query = self.model.find(
-            { "professor.$id": professor_id },
+            self.model.professor.id == professor_id,
             fetch_links=fetch_links
         )
 
-        return await apaginate(query, params)
+        total = await query.count()
 
-    @staticmethod
+        skip = (params.page - 1) * params.size
+
+        items = await query.skip(skip).limit(params.size).to_list()
+
+        return Page.create(items=items, total=total, params=params)
+
     async def list_by_subject(
+        self,
         subject_cod: str,
         params: Params,
         fetch_links: bool = False
@@ -68,13 +83,18 @@ class ClassroomRepository(BaseRepository[Classroom]):
             Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
                 e os metadados de paginação.
         """
+        subject = await Subject.find_one(Subject.cod == subject_cod)
+        if not subject:
+            raise SubjectNotFoundException()
 
-        return await BaseRepository._find_by_linked(
-            model=Subject,
-            lookup_expr=Subject.cod == subject_cod,
-            source_model=Classroom,
-            link_field="subject",
-            exception=SubjectNotFoundException(),
-            params=params,
+        query = self.model.find(
+            self.model.subject.id == subject.id,
             fetch_links=fetch_links
         )
+
+        total = await query.count()
+
+        skip = (params.page - 1) * params.size
+        items = await query.skip(skip).limit(params.size).to_list()
+
+        return Page.create(items=items, total=total, params=params)

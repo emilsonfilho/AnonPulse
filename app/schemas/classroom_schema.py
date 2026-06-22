@@ -1,4 +1,6 @@
 from typing import Annotated
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 
 from app.schemas.orm_base_schema import ORMBaseSchema
@@ -11,21 +13,20 @@ class ClassroomBase(BaseModel):
         str,
         Field(
             min_length=3,
-            max_length=10,
+            max_length=15,
             description="Código de turma",
             examples=["QXD0154", "QXD0155", "QXD0156"],
         ),
     ]
 
     subject_cod: Annotated[
-        str, Field(min_length=7, max_length=9, description="Código de Cadeira")
+        str, Field(min_length=7, max_length=15, description="Código de Cadeira")
     ]
 
-    professor_id: Annotated[int, Field(description="ID do professor")]
+    professor_id: Annotated[PydanticObjectId, Field(description="ID do professor")]
 
 class CreateClassroomRequest(ClassroomBase):
     pass
-
 
 class UpdateClassroomRequest(BaseModel):
     cod: Annotated[
@@ -33,7 +34,9 @@ class UpdateClassroomRequest(BaseModel):
         Field(default=None, min_length=3, max_length=10, description="Código de turma"),
     ]
 
-class ClassroomResponse(ClassroomBase, ORMBaseSchema):
+class ClassroomResponse(ORMBaseSchema):
+    id: PydanticObjectId
+    cod: str
     professor: ProfessorSelectResponse | None = None
     subject: SubjectResponse | None = None
     enrollments: list[EnrollmentResponse] | None = None

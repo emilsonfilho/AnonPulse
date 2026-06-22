@@ -37,13 +37,15 @@ async def test_list_by_professor_retorna_classroom(classroom, professor, params)
 
 @pytest.mark.asyncio
 async def test_list_by_subject_retorna_classroom(classroom, subject, params):
-    page = await ClassroomRepository.list_by_subject(subject.cod, params)
+    repo = ClassroomRepository()
+    page = await repo.list_by_subject(subject.cod, params)
     ids = [item.id for item in page.items]
     assert classroom.id in ids
 
 
 @pytest.mark.asyncio
 async def test_list_by_subject_cod_inexistente_levanta_excecao(params):
+    repo = ClassroomRepository()
     from app.core.exceptions.custom_exceptions import SubjectNotFoundException
     with pytest.raises(SubjectNotFoundException):
-        await ClassroomRepository.list_by_subject("COD-INEXISTENTE", params)
+        await repo.list_by_subject("COD-INEXISTENTE", params)

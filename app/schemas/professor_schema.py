@@ -1,4 +1,6 @@
 from typing import Annotated
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel, Field, EmailStr
 
 from app.schemas.orm_base_schema import ORMBaseSchema
@@ -39,7 +41,7 @@ class UpdateProfessorRequest(BaseModel):
     )
 
 class ProfessorResponse(ProfessorBase, ORMBaseSchema):
-    id: int # acredito eu que sim
+    id: PydanticObjectId
 
 class ProfessorSelectResponse(ProfessorBase, ORMBaseSchema):
-    pass
+    id: PydanticObjectId

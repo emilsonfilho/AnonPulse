@@ -40,7 +40,7 @@ class BaseRepository(Generic[ModelType]):
 
     async def get(
             self,
-            identifier: PydanticObjectId | str,
+            identifier: PydanticObjectId,
             fetch_links: bool = False
     ) -> ModelType | None:
         """
@@ -53,8 +53,6 @@ class BaseRepository(Generic[ModelType]):
             Returns:
                 O documento encontrado ou None se não existir.
         """
-        if isinstance(identifier, str):
-            identifier = PydanticObjectId(identifier)
 
         return await self.model.get(identifier, fetch_links=fetch_links)
 
@@ -81,8 +79,7 @@ class BaseRepository(Generic[ModelType]):
             params
         )
 
-    @staticmethod
-    async def create(obj: ModelType) -> ModelType:
+    async def create(self, obj: ModelType) -> ModelType:
         """Cria um novo registro.
 
         Args:
@@ -91,6 +88,8 @@ class BaseRepository(Generic[ModelType]):
         Returns:
             O objeto criado com os dados persistidos.
         """
+        if isinstance(obj, dict):
+            obj = self.model(**obj)
         return await obj.insert()
 
     async def update(self, identifier: Any, obj_in: dict | BaseModel) -> ModelType:

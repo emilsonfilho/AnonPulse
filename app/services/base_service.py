@@ -7,19 +7,15 @@ genérica para qualquer modelo de dados.
 from beanie import Document, PydanticObjectId
 from fastapi_pagination import Page, Params
 from pydantic import BaseModel
-from sqlalchemy import inspect
 from typing import Any, Generic, Type, TypeVar
-
 
 from app.core.mapper import Mapper
 from app.repositories.base_repository import BaseRepository
-
 
 ModelType = TypeVar("ModelType", bound=Document)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
-
 
 class BaseService(
     Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
@@ -62,7 +58,7 @@ class BaseService(
         self.default_fetch_links = default_fetch_links
 
     async def get_or_raise(
-        self, identifier: PydanticObjectId | str, fetch_links: bool | None = None,
+        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
     ) -> ModelType:
         """Obtém um objeto pelo identificador ou lança exceção.
 
@@ -108,7 +104,7 @@ class BaseService(
         return page
 
     async def get_by_id(
-        self, identifier: PydanticObjectId | str, fetch_links: bool | None = None,
+        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
         """Obtém um objeto pelo identificador e o mapeia.
 
@@ -126,7 +122,7 @@ class BaseService(
         return Mapper.to_response(obj, self.response_schema)
 
     async def create(
-        self, request: CreateSchemaType, identifier_value: PydanticObjectId | str | None = None
+        self, request: CreateSchemaType, identifier_value: PydanticObjectId | None = None
     ) -> ResponseSchemaType:
         """Cria um novo objeto.
 

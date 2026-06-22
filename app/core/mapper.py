@@ -1,12 +1,10 @@
-from typing import Type, TypeVar
+from typing import TypeVar, Type
+from pydantic import BaseModel
 
-T = TypeVar("T")
-R = TypeVar("R")
-
+InT = TypeVar("InT")
+OutT = TypeVar("OutT", bound=BaseModel)
 
 class Mapper:
-    """Mapper para converter objetos de um tipo para outro usando schemas de validação."""
     @staticmethod
-    def to_response(obj: T, schema: Type[R]) -> R:
-        """Converte um objeto de um tipo para outro usando um schema de validação."""
+    def to_response(obj: InT, schema: Type[OutT]) -> OutT:
         return schema.model_validate(obj)

@@ -1,4 +1,6 @@
 from typing import Annotated
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -17,13 +19,13 @@ class CreateEnrollmentRequest(EnrollmentBase):
         str,
         Field(
             min_length=3,
-            max_length=3,
+            max_length=10,
             description="Código da turma"
         )
     ]
 
     student_id: Annotated[
-        int,
+        PydanticObjectId,
         Field(
             description="ID do estudante"
         )
@@ -38,7 +40,7 @@ class UpdateEnrollmentRequest(BaseModel):
     ]
 
 class EnrollmentResponse(EnrollmentBase, ORMBaseSchema):
-    id: int
+    id: PydanticObjectId
     enrolled_at: datetime
     classroom_cod: str
     student_id: int
