@@ -15,9 +15,10 @@ class Settings(BaseSettings):
     )
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "anonpulse")
 
-    MINIO_ROOT_USER: str = os.getenv("MINIO_ROOT_USER", "minioadmin")
-    MINIO_ROOT_PASSWORD: str = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
-    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "anonpulse-documents")
+    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "anonpulse")
+    MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
+    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "anonpulse_admin")
+    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "AnonPulseKeySecure2026!")
 
     model_config = SettingsConfigDict(
         env_file=".env",
