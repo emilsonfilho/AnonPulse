@@ -100,7 +100,6 @@ class FeedbackService(BaseService[
         if assignment is None:
             return data
 
-        # Materializa Link de assignment
         if isinstance(assignment, Link):
             try:
                 assignment = await assignment.fetch()
@@ -115,7 +114,6 @@ class FeedbackService(BaseService[
             "weekly_hours": getattr(assignment, "weekly_hours", None),
         }
 
-        # Materializa monitor
         mon = await self._fetch_or_query(getattr(assignment, "monitor", None), Monitor)
         if mon is not None:
             assign_dict["monitor"] = {
@@ -123,7 +121,6 @@ class FeedbackService(BaseService[
                 "name": getattr(mon, "name", None) or "",
             }
 
-        # Materializa classroom
         clsrm = await self._fetch_or_query(getattr(assignment, "classroom", None), Classroom)
         if clsrm is not None:
             assign_dict["classroom"] = {"cod": getattr(clsrm, "cod", None) or ""}
@@ -144,20 +141,17 @@ class FeedbackService(BaseService[
         if obj is None:
             return None
 
-        # Se for Link, tente fetch
         if isinstance(obj, Link):
             try:
                 return await obj.fetch()
             except Exception:
                 pass
 
-        # Se é documento com campos obrigatórios, retorna
         if hasattr(obj, "id") or hasattr(obj, "_id"):
             if (model_class == Monitor and hasattr(obj, "registration")) or \
                (model_class == Classroom and hasattr(obj, "cod")):
                 return obj
 
-        # Tenta consulta por id
         obj_id = getattr(obj, "id", None) or getattr(obj, "_id", None)
         if obj_id is not None:
             try:
@@ -237,7 +231,6 @@ class FeedbackService(BaseService[
         """
         page = await self.repository.search_by_text(q, params)
 
-        # Materializa cada feedback para garantir validação Pydantic
         items = [await self._materialize_feedback_dict(fb) for fb in page.items]
         page_with_dicts = Page.create(
             items=items, 
