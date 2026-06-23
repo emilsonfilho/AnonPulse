@@ -4,6 +4,7 @@ import pytest
 from beanie import PydanticObjectId
 from fastapi_pagination import Params
 
+from app.repositories.classroom_repository import ClassroomRepository
 from app.services.classroom_service import ClassroomService
 from app.schemas.classroom_schema import CreateClassroomRequest
 from app.core.exceptions.custom_exceptions import (
@@ -15,7 +16,8 @@ from app.core.exceptions.custom_exceptions import (
 @pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_create_classroom_success(subject, professor):
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
 
     # Gera um código aleatório com o prefixo para nunca colidir em execuções repetidas
     random_cod = f"QXD-{str(uuid.uuid4())[:4].upper()}"
@@ -30,10 +32,10 @@ async def test_create_classroom_success(subject, professor):
     assert nova_turma.cod == random_cod
     assert nova_turma.subject.cod == subject.cod
 
-
 @pytest.mark.asyncio
 async def test_create_classroom_already_exists_raises_exception(classroom, subject, professor):
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
 
     req = CreateClassroomRequest(
         cod=classroom.cod,
@@ -47,21 +49,24 @@ async def test_create_classroom_already_exists_raises_exception(classroom, subje
 
 @pytest.mark.asyncio
 async def test_list_by_professor_retorna_pagina_correta(classroom, professor, params):
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
     pagina = await service.list_by_professor(professor.id, params)
     assert pagina.total >= 1
 
 
 @pytest.mark.asyncio
 async def test_list_by_subject_retorna_pagina_correta(classroom, subject, params):
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
     pagina = await service.list_by_subject(subject.cod, params)
     assert pagina.total >= 1
 
 
 @pytest.mark.asyncio
 async def test_get_or_raise_inexistente_raises_not_found():
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
 
     with pytest.raises(ClassroomNotFoundException):
         # Passando um ObjectId válido mas que não existe no banco
@@ -85,14 +90,16 @@ async def test_delete_classroom_with_enrollment_raises_exception(classroom, enro
     turma_db.enrollments.append(enrollment)
     await turma_db.save()
 
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
 
     with pytest.raises(ClassroomHasEnrollmentsException):
         await service.delete(turma_db.cod)
 
 @pytest.mark.asyncio
 async def test_delete_classroom_success(subject, professor):
-    service = ClassroomService()
+    repo = ClassroomRepository()
+    service = ClassroomService(repo)
 
     req = CreateClassroomRequest(
         cod="VAZIA",

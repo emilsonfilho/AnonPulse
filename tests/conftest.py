@@ -129,4 +129,4 @@ async def documento(assignment):
 
 @pytest.fixture
 def params():
-    return Params(page=1, size=10)
+    return Params(page=1, size=100)

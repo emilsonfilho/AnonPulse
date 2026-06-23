@@ -36,11 +36,11 @@ class EnrollmentService(
     herdando funcionalidades-base de manipulação de dados.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, repository: EnrollmentRepository) -> None:
         """Inicializa o serviço de inscrição.
         """
         super().__init__(
-            repository=EnrollmentRepository(),
+            repository=repository,
             response_schema=EnrollmentResponse,
             not_found_exception=EnrollmentNotFoundException,
             already_exists_exception=EnrollmentAlreadyExistsException,

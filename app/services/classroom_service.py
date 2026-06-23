@@ -5,7 +5,7 @@ negócio relacionada a turmas (classrooms).
 """
 from typing import cast
 
-from beanie import Document, PydanticObjectId
+from beanie import Document, PydanticObjectId, Link
 from urllib3.poolmanager import key_fn_by_scheme
 
 from app.core.exceptions.custom_exceptions import (
@@ -40,11 +40,11 @@ class ClassroomService(
     Herdando de BaseService, este serviço adiciona validações e métodos
     específicos como listagens por professor e por disciplina.
     """
-    def __init__(self) -> None:
+    def __init__(self, repository: ClassroomRepository) -> None:
         """Inicializa o serviço com o repositório e opções de carregamento.
         """
         super().__init__(
-            repository=ClassroomRepository(),
+            repository=repository,
             response_schema=ClassroomResponse,
             not_found_exception=ClassroomNotFoundException,
             already_exists_exception=ClassroomAlreadyExistsException,
@@ -66,7 +66,11 @@ class ClassroomService(
         if not subject or not professor:
             raise ClassroomNotFoundException()
 
-        classroom = Classroom(cod=request.cod, subject=subject, professor=professor)
+        classroom = Classroom(
+            cod=request.cod,
+            subject=cast(Link[Subject], cast(object, subject)),
+            professor=cast(Link[Professor], cast(object, professor))
+        )
         new_obj = await classroom.insert()
 
         await new_obj.fetch_all_links()
@@ -78,7 +82,6 @@ class ClassroomService(
         Antes de deletar, valida se existem matrículas associadas e levanta
         ClassroomHasEnrollmentsException quando houver.
         """
-
         classroom = await self.repository.find_by(cod=cod)
 
         if not classroom:

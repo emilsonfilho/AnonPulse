@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import Annotated
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.enums import MessageType
 from app.schemas.orm_base_schema import ORMBaseSchema
-from app.schemas.feedback_type_schema import FeedbackTypeResponse
 from app.schemas.monitor_assignment_schema import MonitorAssignmentResponse
 
 def validate_empty_text(value:str) -> str:
@@ -43,8 +45,8 @@ class FeedbackBase(BaseModel):
 class CreateFeedbackRequest(FeedbackBase):
     # Temos que adicionar a matrícula do aluno para que ele dê hash
 
-    assignment_id: Annotated[
-        int,
+    assignment: Annotated[
+        PydanticObjectId,
         Field(
             description="ID da tarefa"
         )
@@ -57,14 +59,7 @@ class CreateFeedbackRequest(FeedbackBase):
         )
     ]
 
-    type_id: Annotated[
-        int,
-        Field(
-            description="ID do tipo de feedback"
-        )
-    ]
-
-
+    type: Annotated[MessageType, Field(description="Tipo do feedback")]
 
 class UpdateFeedbackRequest(BaseModel):
     rating: Annotated[
@@ -87,23 +82,21 @@ class UpdateFeedbackRequest(BaseModel):
         )   
     ]
 
+    type: Annotated[MessageType | None, Field(description="Tipo do feedback")]
+
     @field_validator("text")
     @classmethod
     def validate_fields(cls, v):
         return validate_empty_text(v)
-    
 
 
 class FeedbackResponse(FeedbackBase, ORMBaseSchema):
-    id: int
+    id: PydanticObjectId
     created_at: datetime
-    assignment_id: int
     registration: str
-    type_id: int
+    type: MessageType
 
-    type: FeedbackTypeResponse | None = None
     assignment: MonitorAssignmentResponse | None = None
-
 
 class FeedbackSubjectReportResponse(BaseModel):
     subject_name: str

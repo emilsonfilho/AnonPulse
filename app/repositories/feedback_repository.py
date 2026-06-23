@@ -226,6 +226,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         start_date: datetime | None = None,
         end_date: datetime | None = None,
         year: int | None = None,
+        fetch_documents: bool = False,
     ) -> Page[Feedback]:
         """
         Filtra os feedbacks registrados dentro de um intervalo de datas específico
@@ -244,6 +245,28 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks pertencentes ao período.
         """
+        # Se o chamador deseja documentos (`fetch_documents=True`), use
+        # find() para retornar `Feedback` Document objects que podem ser
+        # materializados pelo serviço. Caso contrário, preservamos o
+        # comportamento anterior baseado em agregação (retornando dicts).
+        if fetch_documents:
+            query_filters: dict = {}
+
+            if year is not None:
+                # Converte o filtro por ano em um intervalo de datas
+                start_date = datetime(year, 1, 1)
+                end_date = datetime(year, 12, 31, 23, 59, 59, 999999)
+
+            if start_date:
+                query_filters.setdefault("created_at", {})["$gte"] = start_date
+
+            if end_date:
+                query_filters.setdefault("created_at", {})["$lte"] = end_date
+
+            query = self.model.find(query_filters).sort("-created_at")
+            return await apaginate(query, params)
+
+        # comportamento original: agregação com pipeline + facet (retorna dicts)
         match: dict = {}
 
         if start_date:

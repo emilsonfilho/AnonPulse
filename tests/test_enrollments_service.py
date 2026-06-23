@@ -14,8 +14,8 @@ from app.core.exceptions.custom_exceptions import (
 # Criamos uma fixture para injetar o serviço nos testes facilmente
 @pytest.fixture
 def enrollment_service():
-    return EnrollmentService()
-
+    repo = EnrollmentRepository()
+    return EnrollmentService(repo)
 
 @pytest.mark.asyncio
 async def test_create_enrollment_success(enrollment_service, student, classroom):
