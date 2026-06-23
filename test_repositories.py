@@ -91,7 +91,7 @@ async def criar_fixtures() -> dict:
 
     # Classroom: cod (unique), subject (Link), professor (Link)
     classroom = Classroom(
-        cod="T01-2025-TEST",
+        cod="T01-2025",
         subject=subject,
         professor=professor,
     )

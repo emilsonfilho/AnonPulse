@@ -8,7 +8,7 @@ from app.repositories.classroom_repository import ClassroomRepository
 async def test_insert_persiste_no_banco(classroom):
     no_banco = await Classroom.get(classroom.id)
     assert no_banco is not None
-    assert no_banco.cod == "T01-2025-TEST"
+    assert no_banco.cod == "T01-2025"
 
 
 @pytest.mark.asyncio

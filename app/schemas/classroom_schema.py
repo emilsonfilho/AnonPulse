@@ -31,7 +31,7 @@ class CreateClassroomRequest(ClassroomBase):
 class UpdateClassroomRequest(BaseModel):
     cod: Annotated[
         str | None,
-        Field(default=None, min_length=3, max_length=10, description="Código de turma"),
+        Field(default=None, min_length=3, max_length=15, description="Código de turma"),
     ]
 
 class ClassroomResponse(ORMBaseSchema):

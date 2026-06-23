@@ -14,7 +14,7 @@ class EnrollmentBase(BaseModel):
         )
     ]
 
-class CreateEnrollmentRequest(EnrollmentBase):
+class CreateEnrollmentRequest(BaseModel):
     classroom_cod: Annotated[
         str,
         Field(
@@ -43,4 +43,4 @@ class EnrollmentResponse(EnrollmentBase, ORMBaseSchema):
     id: PydanticObjectId
     enrolled_at: datetime
     classroom_cod: str
-    student_id: int
+    student_id: PydanticObjectId

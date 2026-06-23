@@ -45,7 +45,7 @@ async def professor():
 
 @pytest_asyncio.fixture
 async def classroom(subject, professor):
-    doc = Classroom(cod="T01-2025-TEST", subject=subject, professor=professor)
+    doc = Classroom(cod="T01-2025", subject=subject, professor=professor)
     await doc.insert()
     yield doc
     await Classroom.find_one(Classroom.id == doc.id).delete()
@@ -53,7 +53,7 @@ async def classroom(subject, professor):
 
 @pytest_asyncio.fixture
 async def student():
-    doc = Student(registration="2023001-TEST")
+    doc = Student(registration="2951f0fd418439158dabce8120838f1e")
     await doc.insert()
     yield doc
     await Student.find_one(Student.id == doc.id).delete()
@@ -61,7 +61,7 @@ async def student():
 
 @pytest_asyncio.fixture
 async def monitor():
-    doc = Monitor(registration="2022001-TEST", name="Monitor João", email="joao@ufc.br")
+    doc = Monitor(registration="565685", name="Monitor João", email="joao@ufc.br")
     await doc.insert()
     yield doc
     await Monitor.find_one(Monitor.id == doc.id).delete()
