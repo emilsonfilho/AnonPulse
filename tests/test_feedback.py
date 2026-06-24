@@ -114,6 +114,7 @@ async def test_list_by_monitor_retorna_feedback(feedback, monitor, params):
 @pytest.mark.asyncio
 async def test_list_by_monitor_inexistente_levanta_excecao(params):
     from app.core.exceptions.custom_exceptions import MonitorNotFoundException
+
     repo = FeedbackRepository()
     with pytest.raises(MonitorNotFoundException):
         await repo.list_by_monitor("matricula_nao_existe", params)
@@ -145,6 +146,7 @@ async def test_count_by_subject_retorna_agregacao(feedback, params):
 @pytest.mark.asyncio
 async def test_delete_remove_do_banco(assignment):
     from app.core.enums import MessageType
+
     doc = Feedback(
         registration="hash_del",
         text="Será deletado.",

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.feedback import Feedback
     from app.models.document_metadata import DocumentMetadata
 
+
 class MonitorAssignment(Document):
     weekly_hours: int
 
@@ -26,6 +27,6 @@ class MonitorAssignment(Document):
             IndexModel(
                 [("monitor", ASCENDING), ("classroom", ASCENDING)],
                 unique=True,
-                name="unique_monitor_classroom"
+                name="unique_monitor_classroom",
             ),
         ]

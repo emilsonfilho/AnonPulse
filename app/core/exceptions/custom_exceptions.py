@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+
 class ResourceNotFoundException(Exception):
     def __init__(self, message: str) -> None:
         super().__init__(message)
@@ -52,11 +53,9 @@ class ProfessorNotFoundException(Exception):
 class EnrollmentAlreadyExistsException(HTTPException):
     def __init__(self):
         message = "O aluno já está matriculado nesta turma."
-        super().__init__(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=message
-        )
-        self.message = message 
+        super().__init__(status_code=status.HTTP_409_CONFLICT, detail=message)
+        self.message = message
+
 
 class EnrollmentNotFoundException(Exception):
     def __init__(self) -> None:

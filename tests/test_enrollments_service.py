@@ -17,6 +17,7 @@ def enrollment_service():
     repo = EnrollmentRepository()
     return EnrollmentService(repo)
 
+
 @pytest.mark.asyncio
 async def test_create_enrollment_success(enrollment_service, student, classroom):
     """Testa se uma inscrição é criada com sucesso e salva no banco de dados."""
@@ -25,8 +26,7 @@ async def test_create_enrollment_success(enrollment_service, student, classroom)
     # o seu schema foi construído. Se ele esperar IDs em vez do objeto inteiro,
     # troque para student_id=student.id, classroom_id=classroom.id
     request = CreateEnrollmentRequest(
-        student_id=student.id,
-        classroom_cod=classroom.cod
+        student_id=student.id, classroom_cod=classroom.cod
     )
 
     response = await enrollment_service.create(request)
@@ -42,7 +42,9 @@ async def test_create_enrollment_success(enrollment_service, student, classroom)
 
 
 @pytest.mark.asyncio
-async def test_create_enrollment_already_exists(enrollment_service, enrollment, student, classroom):
+async def test_create_enrollment_already_exists(
+    enrollment_service, enrollment, student, classroom
+):
     """Testa se o serviço impede a criação de uma inscrição duplicada."""
 
     # A fixture 'enrollment' (injetada nos parâmetros) já criou uma inscrição

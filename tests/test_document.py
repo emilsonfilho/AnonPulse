@@ -40,6 +40,7 @@ async def test_list_by_assignment_retorna_documento(documento, assignment, param
 @pytest.mark.asyncio
 async def test_list_by_assignment_id_errado_retorna_vazio(params):
     from beanie import PydanticObjectId
+
     repo = DocumentRepository()
     id_falso = PydanticObjectId()
     page = await repo.list_by_assignment(id_falso, params)

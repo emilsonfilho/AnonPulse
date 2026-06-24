@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 _client: AsyncMongoClient | None = None
 
+
 async def init_db(document_models: list | None = None):
     global _client
 
@@ -21,6 +22,7 @@ async def init_db(document_models: list | None = None):
         database=db,
         document_models=document_models or [],
     )
+
 
 async def close_db():
     global _client

@@ -16,13 +16,22 @@ from app.models.enrollment import Enrollment
 from app.models.feedback import Feedback
 from app.models.document_metadata import DocumentMetadata
 
+
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def database():
-    await init_db([
-        Subject, Professor, Classroom, Student,
-        Monitor, MonitorAssignment, Enrollment,
-        Feedback, DocumentMetadata,
-    ])
+    await init_db(
+        [
+            Subject,
+            Professor,
+            Classroom,
+            Student,
+            Monitor,
+            MonitorAssignment,
+            Enrollment,
+            Feedback,
+            DocumentMetadata,
+        ]
+    )
     yield
     await close_db()
 

@@ -8,6 +8,7 @@ from app.schemas.professor_schema import ProfessorSelectResponse
 from app.schemas.subject_schema import SubjectResponse
 from app.schemas.enrollment_schema import EnrollmentResponse
 
+
 class ClassroomBase(BaseModel):
     cod: Annotated[
         str,
@@ -25,14 +26,17 @@ class ClassroomBase(BaseModel):
 
     professor_id: Annotated[PydanticObjectId, Field(description="ID do professor")]
 
+
 class CreateClassroomRequest(ClassroomBase):
     pass
+
 
 class UpdateClassroomRequest(BaseModel):
     cod: Annotated[
         str | None,
         Field(default=None, min_length=3, max_length=15, description="Código de turma"),
     ]
+
 
 class ClassroomResponse(ORMBaseSchema):
     id: PydanticObjectId

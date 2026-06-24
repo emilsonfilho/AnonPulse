@@ -3,15 +3,18 @@ from datetime import datetime
 
 from app.schemas.orm_base_schema import ORMBaseSchema
 
+
 class DocumentBase(BaseModel):
     original_filename: str
     content_type: str
     extension: str
     size_bytes: int
     assignment_id: int
-    
+
+
 class CreateDocumentRequest(DocumentBase):
     pass
+
 
 class UpdateDocumentRequest(BaseModel):
     original_filename: str | None = None
@@ -19,6 +22,7 @@ class UpdateDocumentRequest(BaseModel):
     extension: str | None = None
     size_bytes: int | None = None
     assignment_id: int | None = None
+
 
 class DocumentResponse(DocumentBase, ORMBaseSchema):
     id: int

@@ -3,48 +3,34 @@ from pydantic import BaseModel, Field, EmailStr
 
 from app.schemas.orm_base_schema import ORMBaseSchema
 
+
 class MonitorBase(BaseModel):
     name: Annotated[
-        str,
-        Field(
-            min_length=15,
-            max_length=50,
-            description="Nome do monitor."
-        )
+        str, Field(min_length=15, max_length=50, description="Nome do monitor.")
     ]
     registration: Annotated[
-        str,
-        Field(
-            min_length=5,
-            max_length=8,
-            description="Matrícula do aluno."
-        )
+        str, Field(min_length=5, max_length=8, description="Matrícula do aluno.")
     ]
     email: EmailStr = Field(
-        min_length=5,
-        max_length=100,
-        description="E-mail do monitor."
+        min_length=5, max_length=100, description="E-mail do monitor."
     )
+
 
 class CreateMonitorRequest(MonitorBase):
     pass
+
 
 class UpdateMonitorRequest(BaseModel):
     name: Annotated[
         str | None,
         Field(
-            default=None,
-            min_length=15,
-            max_length=50,
-            description="Nome do monitor."
-        )
+            default=None, min_length=15, max_length=50, description="Nome do monitor."
+        ),
     ]
     email: EmailStr | None = Field(
-        default=None,
-        min_length=5,
-        max_length=100,
-        description="E-mail do monitor."
+        default=None, min_length=5, max_length=100, description="E-mail do monitor."
     )
+
 
 class MonitorResponse(MonitorBase, ORMBaseSchema):
     pass

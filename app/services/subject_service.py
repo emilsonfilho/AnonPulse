@@ -22,7 +22,7 @@ class SubjectService(
     BaseService[Subject, CreateSubjectRequest, UpdateSubjectRequest, SubjectResponse]
 ):
     """Serviço para gerenciar operações de disciplinas.
-    
+
     Herda de BaseService e fornece funcionalidades específicas para
     manipulação de dados de disciplinas, incluindo criação, leitura,
     atualização e exclusão.
@@ -30,7 +30,7 @@ class SubjectService(
 
     def __init__(self, repository: SubjectRepository) -> None:
         """Inicializa o serviço de disciplina.
-        
+
         Args:
             repository: Instância do repositório de disciplinas.
         """
@@ -43,10 +43,10 @@ class SubjectService(
 
     async def create(self, request: CreateSubjectRequest) -> SubjectResponse:
         """Cria uma nova disciplina.
-        
+
         Args:
             request: Requisição com os dados da disciplina a ser criada.
-            
+
         Returns:
             SubjectResponse: Resposta contendo os dados da disciplina criada.
         """

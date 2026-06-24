@@ -4,6 +4,7 @@ Este módulo fornece a classe BaseService que implementa operações
 básicas de criação, leitura, atualização e exclusão (CRUD) de forma
 genérica para qualquer modelo de dados.
 """
+
 from beanie import Document, PydanticObjectId
 from fastapi_pagination import Page, Params
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ ModelType = TypeVar("ModelType", bound=Document)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
+
 
 class BaseService(
     Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
@@ -58,7 +60,9 @@ class BaseService(
         self.default_fetch_links = default_fetch_links
 
     async def get_or_raise(
-        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
+        self,
+        identifier: PydanticObjectId,
+        fetch_links: bool | None = None,
     ) -> ModelType:
         """Obtém um objeto pelo identificador ou lança exceção.
 
@@ -82,7 +86,9 @@ class BaseService(
         return obj
 
     async def list_all(
-        self, params: Params, fetch_links: bool | None = None,
+        self,
+        params: Params,
+        fetch_links: bool | None = None,
     ) -> Page[ResponseSchemaType]:
         """Lista todos os objetos com paginação.
 
@@ -104,7 +110,9 @@ class BaseService(
         return page
 
     async def get_by_id(
-        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
+        self,
+        identifier: PydanticObjectId,
+        fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
         """Obtém um objeto pelo identificador e o mapeia.
 
@@ -122,7 +130,9 @@ class BaseService(
         return Mapper.to_response(obj, self.response_schema)
 
     async def create(
-        self, request: CreateSchemaType, identifier_value: PydanticObjectId | None = None
+        self,
+        request: CreateSchemaType,
+        identifier_value: PydanticObjectId | None = None,
     ) -> ResponseSchemaType:
         """Cria um novo objeto.
 
@@ -157,8 +167,10 @@ class BaseService(
         return Mapper.to_response(new_obj, self.response_schema)
 
     async def update(
-        self, identifier: PydanticObjectId | str, request: UpdateSchemaType,
-        fetch_links: bool | None = None
+        self,
+        identifier: PydanticObjectId | str,
+        request: UpdateSchemaType,
+        fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
         """Atualiza um objeto existente.
 
@@ -174,7 +186,8 @@ class BaseService(
             not_found_exception: Se o objeto não é encontrado.
         """
         updated_obj = await self.repository.update(
-            identifier, request.model_dump(exclude_unset=True),
+            identifier,
+            request.model_dump(exclude_unset=True),
         )
 
         if not updated_obj:

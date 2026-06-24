@@ -25,12 +25,9 @@ class DocumentRepository(BaseRepository[DocumentMetadata]):
                 gerenciada pelo SQLModel/SQLAlchemy.
         """
         super().__init__(model=DocumentMetadata)
-    
+
     async def list_by_assignment(
-        self, 
-        assignment_id: int, 
-        params: Params,
-        fetch_links: bool = False
+        self, assignment_id: int, params: Params, fetch_links: bool = False
     ) -> Page[DocumentMetadata]:
         """
         Lista de forma paginada todos os documentos associados a uma atribuição.
@@ -53,8 +50,7 @@ class DocumentRepository(BaseRepository[DocumentMetadata]):
             assignment_id = PydanticObjectId(assignment_id)
 
         query = self.model.find(
-            { "assignment.$id": assignment_id  },
-            fetch_links=fetch_links
+            {"assignment.$id": assignment_id}, fetch_links=fetch_links
         )
 
         return await apaginate(query, params)

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Annotated
 if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
 
+
 class Monitor(Document):
     registration: Annotated[str, Indexed(unique=True)]
     name: str

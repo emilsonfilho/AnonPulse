@@ -3,24 +3,19 @@ from pydantic import BaseModel, Field
 
 from app.core.enums import MessageType
 from app.schemas.orm_base_schema import ORMBaseSchema
+
+
 class FeedbackTypeBase(BaseModel):
-   type: Annotated[
-      MessageType,
-      Field(
-         description="Tipo de feedback"
-      )
-   ]
+    type: Annotated[MessageType, Field(description="Tipo de feedback")]
+
 
 class CreateFeedbackTypeRequest(FeedbackTypeBase):
-   pass
+    pass
+
 
 class UpdateFeedbackTypeRequest(BaseModel):
-   type: Annotated[
-     MessageType | None, 
-     Field(
-        default=None
-      )
-   ]
-    
+    type: Annotated[MessageType | None, Field(default=None)]
+
+
 class FeedbackTypeResponse(FeedbackTypeBase, ORMBaseSchema):
-   id: int
+    id: int

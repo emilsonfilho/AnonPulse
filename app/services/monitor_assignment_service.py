@@ -46,7 +46,7 @@ class MonitorAssignmentService(
         super().__init__(
             repository=repository,
             response_schema=MonitorAssignmentResponse,
-            not_found_exception=MonitorAssignmentNotFoundException
+            not_found_exception=MonitorAssignmentNotFoundException,
         )
 
     async def create(
@@ -80,7 +80,8 @@ class MonitorAssignmentService(
         """
         # Carrega explicitamente os feedbacks para evitar lazy-load assíncrono
         assignment = await self.get_or_raise(
-            id, options=[joinedload(MonitorAssignment.feedbacks)] # <--- Mude aqui
+            id,
+            options=[joinedload(MonitorAssignment.feedbacks)],  # <--- Mude aqui
         )
 
         if assignment.feedbacks:

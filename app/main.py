@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.concurrency import asynccontextmanager
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi_pagination import add_pagination
 from scalar_fastapi import get_scalar_api_reference
@@ -44,6 +45,7 @@ from app.core.exceptions.handlers import (
     request_validation_handler,
     resource_not_found_handler,
 )
+from app.core.database import init_db
 
 tags_metadata = [
     {"name": "Feedbacks", "description": "Operações relacionadas a feedbacks"},
@@ -64,6 +66,13 @@ tags_metadata = [
 
 PREFIX = "/api"
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+
 app = FastAPI(
     title="AnonPulse",
     summary="O AnonPulse é uma plataforma desenvolvida para gerenciar feedbacks anônimos de alunos para monitores da UFC Quixadá",
@@ -80,6 +89,7 @@ app = FastAPI(
         "email": "email@faltacolocar.com",
     },
     tags=tags_metadata,
+    lifespan=lifespan,
 )
 
 app.add_exception_handler(DomainValidationException, domain_validation_handler)  # type: ignore

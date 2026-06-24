@@ -20,17 +20,14 @@ async def assignment(monitor, classroom):
     """
     # Cria a alocação instanciando o modelo do Beanie
     nova_alocacao = MonitorAssignment(
-        weekly_hours=6, 
-        monitor=monitor,
-        classroom=classroom,
-        feedbacks=[],
-        documents=[]
+        weekly_hours=6, monitor=monitor, classroom=classroom, feedbacks=[], documents=[]
     )
 
     # Salva na base de dados (MongoDB) antes de entregar ao teste
     await nova_alocacao.insert()
 
     return nova_alocacao
+
 
 # ==========================================
 # FIXTURE DO SERVIÇO
@@ -46,7 +43,9 @@ def feedback_service():
 # TESTES DE CRIAÇÃO & ANONIMATO
 # ==========================================
 @pytest.mark.asyncio
-async def test_create_feedback_aplica_hash_na_matricula(feedback_service, monitor, assignment):
+async def test_create_feedback_aplica_hash_na_matricula(
+    feedback_service, monitor, assignment
+):
     matricula_real = "555666"
     hash_esperado = HashService.generate_hash(matricula_real, HashAlgorithm.SHA256)
 
@@ -56,7 +55,7 @@ async def test_create_feedback_aplica_hash_na_matricula(feedback_service, monito
         text="O monitor explicou as árvores AVL perfeitamente!",
         rating=5,
         assignment=assignment.id,
-        type=MessageType.ELOGIO
+        type=MessageType.ELOGIO,
     )
 
     novo_feedback = await feedback_service.create(req)
@@ -113,9 +112,7 @@ async def test_list_by_date_com_parametros_corretos(feedback_service, params):
 
     # Testa a listagem num intervalo de datas
     pagina = await feedback_service.list_by_date(
-        params=params,
-        start_date=ontem,
-        end_date=hoje
+        params=params, start_date=ontem, end_date=hoje
     )
 
     assert pagina is not None

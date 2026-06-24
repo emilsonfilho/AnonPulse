@@ -5,6 +5,7 @@ from pydantic import Field
 if TYPE_CHECKING:
     from app.models.classroom import Classroom
 
+
 class Professor(Document):
     name: str
     email: str

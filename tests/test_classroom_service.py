@@ -10,8 +10,9 @@ from app.schemas.classroom_schema import CreateClassroomRequest
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,
     ClassroomHasEnrollmentsException,
-    ClassroomNotFoundException
+    ClassroomNotFoundException,
 )
+
 
 @pytest.mark.asyncio
 @pytest.mark.asyncio
@@ -23,24 +24,23 @@ async def test_create_classroom_success(subject, professor):
     random_cod = f"QXD-{str(uuid.uuid4())[:4].upper()}"
 
     req = CreateClassroomRequest(
-        cod=random_cod,
-        subject_cod=subject.cod,
-        professor_id=professor.id
+        cod=random_cod, subject_cod=subject.cod, professor_id=professor.id
     )
 
     nova_turma = await service.create(req)
     assert nova_turma.cod == random_cod
     assert nova_turma.subject.cod == subject.cod
 
+
 @pytest.mark.asyncio
-async def test_create_classroom_already_exists_raises_exception(classroom, subject, professor):
+async def test_create_classroom_already_exists_raises_exception(
+    classroom, subject, professor
+):
     repo = ClassroomRepository()
     service = ClassroomService(repo)
 
     req = CreateClassroomRequest(
-        cod=classroom.cod,
-        subject_cod=subject.cod,
-        professor_id=professor.id
+        cod=classroom.cod, subject_cod=subject.cod, professor_id=professor.id
     )
 
     with pytest.raises(ClassroomAlreadyExistsException):
@@ -96,15 +96,14 @@ async def test_delete_classroom_with_enrollment_raises_exception(classroom, enro
     with pytest.raises(ClassroomHasEnrollmentsException):
         await service.delete(turma_db.cod)
 
+
 @pytest.mark.asyncio
 async def test_delete_classroom_success(subject, professor):
     repo = ClassroomRepository()
     service = ClassroomService(repo)
 
     req = CreateClassroomRequest(
-        cod="VAZIA",
-        subject_cod=subject.cod,
-        professor_id=professor.id
+        cod="VAZIA", subject_cod=subject.cod, professor_id=professor.id
     )
     turma_vazia = await service.create(req)
 

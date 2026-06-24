@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.classroom import Classroom
     from app.models.feedback import Feedback
 
+
 class Enrollment(Document):
     is_active: bool = Field(default=True)
     enrolled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -23,6 +24,6 @@ class Enrollment(Document):
             IndexModel(
                 [("student", ASCENDING), ("classroom", ASCENDING)],
                 unique=True,
-                name="unique_student_classroom"
+                name="unique_student_classroom",
             )
         ]

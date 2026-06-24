@@ -12,7 +12,7 @@ from app.api.dependencies.repositories import (
     get_professor_repository,
     get_student_repository,
     get_subject_repository,
-    get_feedback_type_repository
+    get_feedback_type_repository,
 )
 
 from app.repositories.classroom_repository import ClassroomRepository
@@ -34,6 +34,7 @@ from app.services.professor_service import ProfessorService
 from app.services.student_service import StudentService
 from app.services.subject_service import SubjectService
 from app.services.feedback_type_service import FeedbackTypeService
+
 
 def get_classroom_service(
     repository: ClassroomRepository = Depends(get_classroom_repository),
@@ -98,6 +99,7 @@ def get_document_service(
 ) -> DocumentService:
     """Retorna uma instância do serviço de documentos."""
     return DocumentService(repository)
+
 
 def get_feedback_type_service(
     repository: FeedbackTypeRepository = Depends(get_feedback_type_repository),

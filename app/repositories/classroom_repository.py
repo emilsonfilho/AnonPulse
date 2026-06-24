@@ -31,30 +31,26 @@ class ClassroomRepository(BaseRepository[Classroom]):
         return await self.model.find_one(filters)
 
     async def list_by_professor(
-        self, 
-        professor_id: PydanticObjectId,
-        params: Params,
-        fetch_links: bool = False
+        self, professor_id: PydanticObjectId, params: Params, fetch_links: bool = False
     ) -> Page[Classroom]:
         """
         Lista de forma paginada todas as turmas associadas a um determinado professor.
 
         Args:
             professor_id: O identificador único do professor.
-            params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination 
+            params (Params): Parâmetros de paginação fornecidos pelo fastapi-pagination
                 (página atual e limite de itens).
             fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
-            Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
+            Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas
                 e os metadados de paginação.
         """
         if isinstance(professor_id, str):
             professor_id = PydanticObjectId(professor_id)
 
         query = self.model.find(
-            self.model.professor.id == professor_id,
-            fetch_links=fetch_links
+            self.model.professor.id == professor_id, fetch_links=fetch_links
         )
 
         total = await query.count()
@@ -66,10 +62,7 @@ class ClassroomRepository(BaseRepository[Classroom]):
         return Page.create(items=items, total=total, params=params)
 
     async def list_by_subject(
-        self,
-        subject_cod: str,
-        params: Params,
-        fetch_links: bool = False
+        self, subject_cod: str, params: Params, fetch_links: bool = False
     ) -> Page[Classroom]:
         """
         Lista de forma paginada todas as turmas vinculadas a uma determinada disciplina.
@@ -80,7 +73,7 @@ class ClassroomRepository(BaseRepository[Classroom]):
             fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
-            Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas 
+            Page[Classroom]: Objeto paginado contendo a lista de turmas encontradas
                 e os metadados de paginação.
         """
         subject = await Subject.find_one(Subject.cod == subject_cod)
@@ -88,8 +81,7 @@ class ClassroomRepository(BaseRepository[Classroom]):
             raise SubjectNotFoundException()
 
         query = self.model.find(
-            self.model.subject.id == subject.id,
-            fetch_links=fetch_links
+            self.model.subject.id == subject.id, fetch_links=fetch_links
         )
 
         total = await query.count()

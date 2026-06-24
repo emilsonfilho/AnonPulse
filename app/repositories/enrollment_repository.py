@@ -1,6 +1,7 @@
 from app.models.enrollment import Enrollment
 from app.repositories.base_repository import BaseRepository
 
+
 class EnrollmentRepository(BaseRepository[Enrollment]):
     """
     Repositório para gerenciar as operações de banco de dados da entidade Enrollment.

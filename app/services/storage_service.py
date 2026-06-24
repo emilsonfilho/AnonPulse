@@ -7,8 +7,10 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class StorageService:
     """Serviço assíncrono para armazenamento de arquivos."""
+
     def __init__(self):
         self.session = aioboto3.Session()
         self.bucket_name = settings.MINIO_BUCKET_NAME
@@ -36,7 +38,12 @@ class StorageService:
         async with self.session.client(**self.bucket_config) as s3_client:
             await self._ensure_bucket_exists(s3_client)
 
-            await s3_client.upload_fileobj(file.file, self.bucket_name, filename, ExtraArgs={"ContentType": file.content_type})
+            await s3_client.upload_fileobj(
+                file.file,
+                self.bucket_name,
+                filename,
+                ExtraArgs={"ContentType": file.content_type},
+            )
 
         logger.info(f"Arquivo {filename} enviado com sucesso!")
 
@@ -54,4 +61,6 @@ class StorageService:
     async def delete_file(self, filename: str) -> None:
         async with self.session.client(**self.bucket_config) as s3:
             await s3.delete_object(Bucket=self.bucket_name, Key=filename)
-            logger.info(f"Ficheiro {filename} removido com sucesso do bucket {self.bucket_name}.")
+            logger.info(
+                f"Ficheiro {filename} removido com sucesso do bucket {self.bucket_name}."
+            )

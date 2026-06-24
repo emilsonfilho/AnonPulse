@@ -47,5 +47,6 @@ async def test_list_by_subject_retorna_classroom(classroom, subject, params):
 async def test_list_by_subject_cod_inexistente_levanta_excecao(params):
     repo = ClassroomRepository()
     from app.core.exceptions.custom_exceptions import SubjectNotFoundException
+
     with pytest.raises(SubjectNotFoundException):
         await repo.list_by_subject("COD-INEXISTENTE", params)

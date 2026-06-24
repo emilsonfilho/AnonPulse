@@ -6,6 +6,7 @@ from pydantic import Field
 if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
 
+
 class DocumentMetadata(Document):
     original_filename: str
     content_type: str

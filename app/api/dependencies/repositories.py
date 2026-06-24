@@ -92,9 +92,7 @@ def get_monitor_repository(session: AsyncSession = Depends(get_session)):
     return MonitorRepository(session)
 
 
-def get_monitor_assignment_repository(
-    session: AsyncSession = Depends(get_session)
-):
+def get_monitor_assignment_repository(session: AsyncSession = Depends(get_session)):
     """Obtém uma instância do repositório de atribuições de monitores.
 
     Args:

@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
     from app.models.enrollment import Enrollment
 
+
 class Feedback(Document):
     registration: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -19,6 +20,4 @@ class Feedback(Document):
 
     class Settings:
         name = "feedbacks"
-        indexes = [
-            ("text", "text")
-        ]
+        indexes = [("text", "text")]

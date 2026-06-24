@@ -12,7 +12,9 @@ from pymongo.errors import DuplicateKeyError
 
 from app.core.exceptions.custom_exceptions import (
     EnrollmentAlreadyExistsException,
-    EnrollmentNotFoundException, ClassroomNotFoundException, StudentNotFoundException,
+    EnrollmentNotFoundException,
+    ClassroomNotFoundException,
+    StudentNotFoundException,
 )
 from app.models import Student, Classroom
 from app.models.enrollment import Enrollment
@@ -37,8 +39,7 @@ class EnrollmentService(
     """
 
     def __init__(self, repository: EnrollmentRepository) -> None:
-        """Inicializa o serviço de inscrição.
-        """
+        """Inicializa o serviço de inscrição."""
         super().__init__(
             repository=repository,
             response_schema=EnrollmentResponse,
@@ -87,7 +88,7 @@ class EnrollmentService(
             isActive=new_enrollment.is_active,
             enrolled_at=new_enrollment.enrolled_at,
             classroom_cod=classroom.cod,
-            student_id=student.id
+            student_id=student.id,
         )
 
     async def delete(self, identifier: PydanticObjectId) -> None:

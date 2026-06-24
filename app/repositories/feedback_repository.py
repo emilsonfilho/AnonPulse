@@ -4,15 +4,16 @@ from typing import Any
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 
-from app.models import (
-    Classroom,
-    Monitor, Student
-)
+from app.models import Classroom, Monitor, Student
 from app.models.feedback import Feedback
 from app.models.monitor_assignment import MonitorAssignment
 from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
-from app.core.exceptions.custom_exceptions import MonitorNotFoundException, StudentNotFoundException
+from app.core.exceptions.custom_exceptions import (
+    MonitorNotFoundException,
+    StudentNotFoundException,
+)
+
 
 class FeedbackRepository(BaseRepository[Feedback]):
     """
@@ -43,17 +44,14 @@ class FeedbackRepository(BaseRepository[Feedback]):
         Returns:
             Page[Feedback]: Objeto paginado contendo os feedbacks filtrados.
         """
-        query = self.model.find(
-            { "text": { "$regex": term, "$options": "i" } }
-        ).sort("-created_at")
+        query = self.model.find({"text": {"$regex": term, "$options": "i"}}).sort(
+            "-created_at"
+        )
 
         return await apaginate(query, params)
 
     async def list_by_monitor(
-            self,
-            monitor_registration: str,
-            params: Params,
-            fetch_links: bool = False
+        self, monitor_registration: str, params: Params, fetch_links: bool = False
     ) -> Page[Feedback]:
         """
         Lista de forma paginada os feedbacks recebidos por um monitor específico.
@@ -83,7 +81,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
                     "from": "monitor_assignments",
                     "localField": "assignment.$id",
                     "foreignField": "_id",
-                    "as": "assignment"
+                    "as": "assignment",
                 }
             },
             {"$unwind": "$assignment"},
@@ -92,16 +90,12 @@ class FeedbackRepository(BaseRepository[Feedback]):
                     "from": "monitors",
                     "localField": "assignment.monitor.$id",
                     "foreignField": "_id",
-                    "as": "monitor"
+                    "as": "monitor",
                 }
             },
             {"$unwind": "$monitor"},
-            {
-                "$match": {
-                    "monitor.registration": monitor_registration
-                }
-            },
-            BaseRepository._facet_stage(params)
+            {"$match": {"monitor.registration": monitor_registration}},
+            BaseRepository._facet_stage(params),
         ]
 
         return await self._paginate_aggregation(pipeline, params)
@@ -122,23 +116,10 @@ class FeedbackRepository(BaseRepository[Feedback]):
         """
 
         pipeline = [
-            {
-                "$group": {
-                    "_id": "$monitor_registration",
-                    "count": { "$sum": 1 }
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "monitor_registration": "$_id",
-                    "count": 1
-                }
-            },
-            {
-                "$sort": { "count": -1 }
-            },
-            BaseRepository._facet_stage(params, sort={ "count": -1 })
+            {"$group": {"_id": "$monitor_registration", "count": {"$sum": 1}}},
+            {"$project": {"_id": 0, "monitor_registration": "$_id", "count": 1}},
+            {"$sort": {"count": -1}},
+            BaseRepository._facet_stage(params, sort={"count": -1}),
         ]
 
         return await self._paginate_aggregation(pipeline, params)
@@ -170,10 +151,10 @@ class FeedbackRepository(BaseRepository[Feedback]):
                     "from": "monitor_assignments",
                     "localField": "assignment_id",
                     "foreignField": "_id",
-                    "as": "assignment"
+                    "as": "assignment",
                 }
             },
-            { "$unwind": "$assignment" },
+            {"$unwind": "$assignment"},
             {
                 "$addFields": {
                     "classroom_id": "$assignment.classroom.$id",
@@ -184,10 +165,10 @@ class FeedbackRepository(BaseRepository[Feedback]):
                     "from": "classrooms",
                     "localField": "classroom_id",
                     "foreignField": "_id",
-                    "as": "classroom"
+                    "as": "classroom",
                 }
             },
-            { "$unwind": "$classroom" },
+            {"$unwind": "$classroom"},
             {
                 "$addFields": {
                     "subject_id": "$classroom.subject.$id",
@@ -198,24 +179,13 @@ class FeedbackRepository(BaseRepository[Feedback]):
                     "from": "subjects",
                     "localField": "subject_id",
                     "foreignField": "_id",
-                    "as": "subject"
+                    "as": "subject",
                 }
             },
-            { "$unwind": "$subject" },
-            {
-                "$group": {
-                    "_id": "$subject.name",
-                    "feedback_count": { "$sum": 1 }
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "subject_name": "$_id",
-                    "feedback_count": 1
-                }
-            },
-            BaseRepository._facet_stage(params, sort={ "feedback_count": -1 }),
+            {"$unwind": "$subject"},
+            {"$group": {"_id": "$subject.name", "feedback_count": {"$sum": 1}}},
+            {"$project": {"_id": 0, "subject_name": "$_id", "feedback_count": 1}},
+            BaseRepository._facet_stage(params, sort={"feedback_count": -1}),
         ]
 
         return await self._paginate_aggregation(pipeline, params)
@@ -267,29 +237,21 @@ class FeedbackRepository(BaseRepository[Feedback]):
             match.setdefault("created_at", {})["$gte"] = start_date
 
         if end_date:
-           match.setdefault("created_at", {})["$lte"] = end_date
+            match.setdefault("created_at", {})["$lte"] = end_date
 
         if year is not None:
-            match["$expr"] = {
-                "$eq": [
-                    { "$year": "$created_at" },
-                    year
-                ]
-            }
+            match["$expr"] = {"$eq": [{"$year": "$created_at"}, year]}
 
         pipeline = [
-            *([ { "$match": match } ] if match else []),
-            { "$sort": { "created_at": -1 } },
-            BaseRepository._facet_stage(params)
+            *([{"$match": match}] if match else []),
+            {"$sort": {"created_at": -1}},
+            BaseRepository._facet_stage(params),
         ]
 
         return await self._paginate_aggregation(pipeline, params)
 
     async def list_by_student_hash(
-            self,
-            student_hash: str,
-            params: Params,
-            fetch_links: bool = False
+        self, student_hash: str, params: Params, fetch_links: bool = False
     ) -> Page[Feedback]:
         """
         Busca de forma paginada todos os feedbacks pertencentes a um hash de aluno.
@@ -307,8 +269,7 @@ class FeedbackRepository(BaseRepository[Feedback]):
         """
 
         query = self.model.find(
-            self.model.registration == student_hash,
-            fetch_links=fetch_links
+            self.model.registration == student_hash, fetch_links=fetch_links
         )
 
         return await apaginate(query, params)

@@ -42,9 +42,9 @@ from app.repositories.document_repository import DocumentRepository
 # ── helpers ────────────────────────────────────────────────────────────────────
 
 PARAMS = Params(page=1, size=10)
-PASS   = "✅"
-FAIL   = "❌"
-SEP    = "─" * 60
+PASS = "✅"
+FAIL = "❌"
+SEP = "─" * 60
 
 results: list[tuple[str, bool, str]] = []
 
@@ -74,6 +74,7 @@ def section(title: str) -> None:
 
 
 # ── fixtures ───────────────────────────────────────────────────────────────────
+
 
 async def criar_fixtures() -> dict:
     """Cria e persiste dados mínimos interligados para os testes."""
@@ -166,20 +167,21 @@ async def criar_fixtures() -> dict:
     ok("DocumentMetadata inserido")
 
     return {
-        "subject":    subject,
-        "professor":  professor,
-        "classroom":  classroom,
-        "student":    student,
-        "monitor":    monitor,
+        "subject": subject,
+        "professor": professor,
+        "classroom": classroom,
+        "student": student,
+        "monitor": monitor,
         "assignment": assignment,
         "enrollment": enrollment,
-        "feedback":   feedback,
-        "feedback2":  feedback2,
-        "doc":        doc,
+        "feedback": feedback,
+        "feedback2": feedback2,
+        "doc": doc,
     }
 
 
 # ── limpeza ────────────────────────────────────────────────────────────────────
+
 
 async def limpar_fixtures(fx: dict) -> None:
     section("🧹 Limpando fixtures")
@@ -194,13 +196,14 @@ async def limpar_fixtures(fx: dict) -> None:
 
 # ── testes por repositório ─────────────────────────────────────────────────────
 
+
 async def testar_subject(fx: dict) -> None:
     section("📚 SubjectRepository")
     repo = SubjectRepository()
 
-    await run("list_all",    repo.list_all(PARAMS))
-    await run("get por id",  repo.get(fx["subject"].id))
-    await run("count",       repo.count())
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["subject"].id))
+    await run("count", repo.count())
     await run("update name", repo.update(fx["subject"].id, {"name": "CG Atualizado"}))
 
 
@@ -208,68 +211,81 @@ async def testar_professor(fx: dict) -> None:
     section("🧑‍🏫 ProfessorRepository")
     repo = ProfessorRepository()
 
-    await run("list_all",    repo.list_all(PARAMS))
-    await run("get por id",  repo.get(fx["professor"].id))
-    await run("count",       repo.count())
-    await run("update name", repo.update(fx["professor"].id, {"name": "Prof. Silva Atualizado"}))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["professor"].id))
+    await run("count", repo.count())
+    await run(
+        "update name",
+        repo.update(fx["professor"].id, {"name": "Prof. Silva Atualizado"}),
+    )
 
 
 async def testar_classroom(fx: dict) -> None:
     section("🏫 ClassroomRepository")
     repo = ClassroomRepository()
 
-    await run("list_all",          repo.list_all(PARAMS))
-    await run("get por id",        repo.get(fx["classroom"].id))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["classroom"].id))
     await run("list_by_professor", repo.list_by_professor(fx["professor"].id, PARAMS))
-    await run("list_by_subject",   ClassroomRepository.list_by_subject(fx["subject"].cod, PARAMS))
+    await run(
+        "list_by_subject",
+        ClassroomRepository.list_by_subject(fx["subject"].cod, PARAMS),
+    )
 
 
 async def testar_student(fx: dict) -> None:
     section("🎓 StudentRepository")
     repo = StudentRepository()
 
-    await run("list_all",   repo.list_all(PARAMS))
+    await run("list_all", repo.list_all(PARAMS))
     await run("get por id", repo.get(fx["student"].id))
-    await run("count",      repo.count())
+    await run("count", repo.count())
 
 
 async def testar_monitor(fx: dict) -> None:
     section("🧑‍💻 MonitorRepository")
     repo = MonitorRepository()
 
-    await run("list_all",    repo.list_all(PARAMS))
-    await run("get por id",  repo.get(fx["monitor"].id))
-    await run("count",       repo.count())
-    await run("update name", repo.update(fx["monitor"].id, {"name": "Monitor João Atualizado"}))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["monitor"].id))
+    await run("count", repo.count())
+    await run(
+        "update name",
+        repo.update(fx["monitor"].id, {"name": "Monitor João Atualizado"}),
+    )
 
 
 async def testar_assignment(fx: dict) -> None:
     section("📋 MonitorAssignmentRepository")
     repo = MonitorAssignmentRepository()
 
-    await run("list_all",        repo.list_all(PARAMS))
-    await run("get por id",      repo.get(fx["assignment"].id))
-    await run("count",           repo.count())
-    await run("update hours",    repo.update(fx["assignment"].id, {"weekly_hours": 6}))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["assignment"].id))
+    await run("count", repo.count())
+    await run("update hours", repo.update(fx["assignment"].id, {"weekly_hours": 6}))
 
 
 async def testar_enrollment(fx: dict) -> None:
     section("📝 EnrollmentRepository")
     repo = EnrollmentRepository()
 
-    await run("list_all",        repo.list_all(PARAMS))
-    await run("get por id",      repo.get(fx["enrollment"].id))
-    await run("count",           repo.count())
-    await run("update is_active",repo.update(fx["enrollment"].id, {"is_active": False}))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["enrollment"].id))
+    await run("count", repo.count())
+    await run(
+        "update is_active", repo.update(fx["enrollment"].id, {"is_active": False})
+    )
 
 
 async def testar_document(fx: dict) -> None:
     section("📄 DocumentRepository")
     repo = DocumentRepository()
 
-    await run("list_all",          repo.list_all(PARAMS))
-    await run("get por id",        repo.get(fx["doc"].id))
-    await run("list_by_assignment",repo.list_by_assignment(fx["assignment"].id, PARAMS))
+    await run("list_all", repo.list_all(PARAMS))
+    await run("get por id", repo.get(fx["doc"].id))
+    await run(
+        "list_by_assignment", repo.list_by_assignment(fx["assignment"].id, PARAMS)
+    )
 
 
 async def testar_feedback(fx: dict) -> None:
@@ -277,9 +293,9 @@ async def testar_feedback(fx: dict) -> None:
     repo = FeedbackRepository()
 
     # CRUD básico
-    await run("list_all",   repo.list_all(PARAMS))
+    await run("list_all", repo.list_all(PARAMS))
     await run("get por id", repo.get(fx["feedback"].id))
-    await run("count",      repo.count())
+    await run("count", repo.count())
 
     # Busca textual (regex)
     await run("search_by_text ('monitor')", repo.search_by_text("monitor", PARAMS))
@@ -289,39 +305,34 @@ async def testar_feedback(fx: dict) -> None:
     now = datetime.now(timezone.utc)
     await run(
         "list_by_date_range (start_date)",
-        repo.list_by_date_range(PARAMS, start_date=now - timedelta(days=30))
+        repo.list_by_date_range(PARAMS, start_date=now - timedelta(days=30)),
     )
     await run(
-        "list_by_date_range (end_date)",
-        repo.list_by_date_range(PARAMS, end_date=now)
+        "list_by_date_range (end_date)", repo.list_by_date_range(PARAMS, end_date=now)
     )
     await run(
         "list_by_date_range (intervalo completo)",
         repo.list_by_date_range(
-            PARAMS,
-            start_date=now - timedelta(days=30),
-            end_date=now
-        )
+            PARAMS, start_date=now - timedelta(days=30), end_date=now
+        ),
     )
     await run(
-        "list_by_date_range (por ano)",
-        repo.list_by_date_range(PARAMS, year=now.year)
+        "list_by_date_range (por ano)", repo.list_by_date_range(PARAMS, year=now.year)
     )
 
     # Por hash do aluno (anonimato)
     await run(
         "list_by_student_hash (hash_001)",
-        repo.list_by_student_hash("hash_anonimo_001", PARAMS)
+        repo.list_by_student_hash("hash_anonimo_001", PARAMS),
     )
     await run(
         "list_by_student_hash (hash inexistente)",
-        repo.list_by_student_hash("hash_nao_existe", PARAMS)
+        repo.list_by_student_hash("hash_nao_existe", PARAMS),
     )
 
     # Por monitor (pipeline com $lookup duplo)
     await run(
-        "list_by_monitor",
-        repo.list_by_monitor(fx["monitor"].registration, PARAMS)
+        "list_by_monitor", repo.list_by_monitor(fx["monitor"].registration, PARAMS)
     )
 
     # Agregações
@@ -330,6 +341,7 @@ async def testar_feedback(fx: dict) -> None:
 
 
 # ── sumário final ──────────────────────────────────────────────────────────────
+
 
 def imprimir_sumario() -> None:
     section("📊 Sumário")
@@ -350,20 +362,23 @@ def imprimir_sumario() -> None:
 
 # ── entry point ────────────────────────────────────────────────────────────────
 
+
 async def main() -> None:
     print("\n🚀 Iniciando testes dos repositórios AnonPulse\n")
 
-    await init_db([
-        Subject,
-        Professor,
-        Classroom,
-        Student,
-        Monitor,
-        MonitorAssignment,
-        Enrollment,
-        Feedback,
-        DocumentMetadata,
-    ])
+    await init_db(
+        [
+            Subject,
+            Professor,
+            Classroom,
+            Student,
+            Monitor,
+            MonitorAssignment,
+            Enrollment,
+            Feedback,
+            DocumentMetadata,
+        ]
+    )
 
     fx = await criar_fixtures()
 

@@ -5,6 +5,7 @@ from pydantic import Field
 if TYPE_CHECKING:
     from app.models.enrollment import Enrollment
 
+
 class Student(Document):
     registration: Annotated[str, Indexed(unique=True)]
 
