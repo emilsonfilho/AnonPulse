@@ -1,12 +1,19 @@
-from typing import Type, TypeVar
+from typing import TypeVar, Type
+from pydantic import BaseModel, ValidationError
 
-T = TypeVar("T")
-R = TypeVar("R")
+InT = TypeVar("InT")
+OutT = TypeVar("OutT", bound=BaseModel)
 
 
 class Mapper:
-    """Mapper para converter objetos de um tipo para outro usando schemas de validação."""
     @staticmethod
-    def to_response(obj: T, schema: Type[R]) -> R:
-        """Converte um objeto de um tipo para outro usando um schema de validação."""
-        return schema.model_validate(obj)
+    def to_response(obj: InT, schema: Type[OutT]) -> OutT:
+        try:
+            return schema.model_validate(obj)
+        except ValidationError:
+            # Fallback: se for um documento/beanie model, tenta validar a partir do dump
+            if hasattr(obj, "model_dump"):
+                return schema.model_validate(obj.model_dump())
+            if hasattr(obj, "__dict__"):
+                return schema.model_validate(obj.__dict__)
+            raise

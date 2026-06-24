@@ -1,4 +1,6 @@
 from typing import Annotated
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 
 from app.schemas.orm_base_schema import ORMBaseSchema
@@ -41,8 +43,14 @@ class UpdateMonitorAssignmentRequest(BaseModel):
         )
     ]
 
+class AssignmentMonitorNested(ORMBaseSchema):
+    registration: str
+    name: str
+
+class AssignmentClassroomNested(ORMBaseSchema):
+    cod: str
+
 class MonitorAssignmentResponse(MonitorAssignmentBase, ORMBaseSchema):
-    id: int
-    monitor_registration: str
-    classroom_cod: str
-    
+    id: PydanticObjectId
+    monitor: AssignmentMonitorNested
+    classroom: AssignmentClassroomNested

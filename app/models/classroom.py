@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 
 class Classroom(Document):
-
     cod: Annotated[str, Indexed(unique=True)]
 
     subject: Link["Subject"]

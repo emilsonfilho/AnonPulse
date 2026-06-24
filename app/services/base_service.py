@@ -4,21 +4,18 @@ Este módulo fornece a classe BaseService que implementa operações
 básicas de criação, leitura, atualização e exclusão (CRUD) de forma
 genérica para qualquer modelo de dados.
 """
-
+from beanie import Document, PydanticObjectId
 from fastapi_pagination import Page, Params
-from sqlalchemy import inspect
+from pydantic import BaseModel
 from typing import Any, Generic, Type, TypeVar
-
 
 from app.core.mapper import Mapper
 from app.repositories.base_repository import BaseRepository
 
-
-ModelType = TypeVar("ModelType")
-CreateSchemaType = TypeVar("CreateSchemaType")
-UpdateSchemaType = TypeVar("UpdateSchemaType")
-ResponseSchemaType = TypeVar("ResponseSchemaType")
-
+ModelType = TypeVar("ModelType", bound=Document)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 
 class BaseService(
     Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
@@ -38,11 +35,11 @@ class BaseService(
 
     def __init__(
         self,
-        repository: BaseRepository,
+        repository: BaseRepository[ModelType],
         response_schema: Type[ResponseSchemaType],
         not_found_exception: Type[Exception],
         already_exists_exception: Type[Exception] | None = None,
-        default_load_options: list[Any] | None = None,
+        default_fetch_links: bool = False,
     ) -> None:
         """Inicializa o serviço base.
 
@@ -52,23 +49,22 @@ class BaseService(
             not_found_exception: Exceção a lançar quando objeto não é encontrado.
             already_exists_exception: Exceção a lançar quando objeto já existe.
                 Padrão é None.
-            default_load_options: Opções de carregamento padrão do SQLAlchemy.
-                Padrão é None.
+            default_fetch_links: Se True, os relacionamentos são carregados.
         """
         self.repository = repository
         self.response_schema = response_schema
         self.not_found_exception = not_found_exception
         self.already_exists_exception = already_exists_exception
-        self.default_load_options = default_load_options
+        self.default_fetch_links = default_fetch_links
 
     async def get_or_raise(
-        self, identifier: Any, options: list[Any] | None = None
+        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
     ) -> ModelType:
         """Obtém um objeto pelo identificador ou lança exceção.
 
         Args:
             identifier: Identificador único do objeto.
-            options: Opções de carregamento do SQLAlchemy. Padrão é None.
+            fetch_links: Se True, os relacionamentos são carregados.
 
         Returns:
             O objeto encontrado.
@@ -76,9 +72,9 @@ class BaseService(
         Raises:
             not_found_exception: Se o objeto não é encontrado.
         """
-        _options = options or self.default_load_options
+        _fetch_links = fetch_links or self.default_fetch_links
 
-        obj = await self.repository.get(identifier, options=_options)
+        obj = await self.repository.get(identifier, fetch_links=_fetch_links)
 
         if not obj:
             raise self.not_found_exception()
@@ -86,20 +82,20 @@ class BaseService(
         return obj
 
     async def list_all(
-        self, params: Params, options: list[Any] | None = None
+        self, params: Params, fetch_links: bool | None = None,
     ) -> Page[ResponseSchemaType]:
         """Lista todos os objetos com paginação.
 
         Args:
             params: Parâmetros de paginação.
-            options: Opções de carregamento do SQLAlchemy. Padrão é None.
+            fetch_links: Se True, os relacionamentos são carregados.
 
         Returns:
             Página contendo objetos mapeados para o esquema de resposta.
         """
-        _options = options or self.default_load_options
+        _fetch_links = fetch_links or self.default_fetch_links
 
-        page = await self.repository.list_all(params, options=_options)
+        page = await self.repository.list_all(params, fetch_links=_fetch_links)
 
         page.items = [
             Mapper.to_response(obj, self.response_schema) for obj in page.items
@@ -108,13 +104,13 @@ class BaseService(
         return page
 
     async def get_by_id(
-        self, identifier: Any, options: list[Any] | None = None
+        self, identifier: PydanticObjectId, fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
         """Obtém um objeto pelo identificador e o mapeia.
 
         Args:
             identifier: Identificador único do objeto.
-            options: Opções de carregamento do SQLAlchemy. Padrão é None.
+            fetch_links: Se True, os relacionamentos são carregados.
 
         Returns:
             Objeto mapeado para o esquema de resposta.
@@ -122,11 +118,11 @@ class BaseService(
         Raises:
             not_found_exception: Se o objeto não é encontrado.
         """
-        obj = await self.get_or_raise(identifier, options=options)
+        obj = await self.get_or_raise(identifier, fetch_links=fetch_links)
         return Mapper.to_response(obj, self.response_schema)
 
     async def create(
-        self, request: CreateSchemaType, identifier_value: Any | None = None
+        self, request: CreateSchemaType, identifier_value: PydanticObjectId | None = None
     ) -> ResponseSchemaType:
         """Cria um novo objeto.
 
@@ -141,34 +137,35 @@ class BaseService(
         Raises:
             already_exists_exception: Se o objeto com o identificador já existe.
         """
-        if identifier_value is not None:
+        if identifier_value is not None and self.already_exists_exception:
             obj_exists = await self.repository.get(identifier_value)
 
             if obj_exists:
                 raise self.already_exists_exception(identifier_value)
 
-        obj = self.repository.model(**request.model_dump())
-        new_obj = await self.repository.create(obj)
+        obj_dict = request.model_dump(exclude_unset=True)
+        new_obj = await self.repository.create(obj_dict)
 
-        identifier = inspect(new_obj).identity[0]
+        if new_obj.id is None:
+            raise RuntimeError("Objeto criado sem ID")
 
         new_obj = await self.get_or_raise(
-            identifier,
-            options=self.default_load_options
+            new_obj.id,
+            fetch_links=self.default_fetch_links,
         )
 
         return Mapper.to_response(new_obj, self.response_schema)
 
     async def update(
-        self, identifier: Any, request: UpdateSchemaType,
-        options: list[Any] | None = None
+        self, identifier: PydanticObjectId | str, request: UpdateSchemaType,
+        fetch_links: bool | None = None
     ) -> ResponseSchemaType:
         """Atualiza um objeto existente.
 
         Args:
             identifier: Identificador único do objeto a atualizar.
             request: Dados a atualizar, validados pelo esquema.
-            options: Opções de carregamento do SQLAlchemy. Padrão é None.
+            fetch_links: Se True, os relacionamentos são carregados.
 
         Returns:
             Objeto atualizado mapeado para o esquema de resposta.
@@ -180,12 +177,16 @@ class BaseService(
             identifier, request.model_dump(exclude_unset=True),
         )
 
-        _new_identifier = inspect(updated_obj).identity[0]
+        if not updated_obj:
+            raise self.not_found_exception()
 
-        _options = options or self.default_load_options
+        if updated_obj.id is None:
+            raise RuntimeError("Objeto atualizado sem ID")
+
+        _fetch_links = fetch_links or self.default_fetch_links
 
         updated_obj_with_rels = await self.get_or_raise(
-            _new_identifier, options=_options
+            updated_obj.id, fetch_links=_fetch_links
         )
 
         return Mapper.to_response(updated_obj_with_rels, self.response_schema)
