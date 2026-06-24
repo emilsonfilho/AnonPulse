@@ -1,8 +1,6 @@
-from typing import Any
 
 from beanie import PydanticObjectId
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.beanie import apaginate
 
 from app.models.classroom import Classroom
 from app.models.subject import Subject

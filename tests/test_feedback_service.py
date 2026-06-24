@@ -1,6 +1,5 @@
 import pytest
 from datetime import date, timedelta
-from fastapi_pagination import Params
 
 from app.models import MonitorAssignment
 from app.services.feedback_service import FeedbackService
@@ -8,7 +7,6 @@ from app.repositories.feedback_repository import FeedbackRepository
 from app.schemas.feedback_schema import CreateFeedbackRequest
 from app.services.hash_service import HashService
 from app.core.enums import HashAlgorithm, MessageType
-from app.core.exceptions.custom_exceptions import FeedbackNotFoundException
 from tests.conftest import assignment
 
 

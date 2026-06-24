@@ -19,13 +19,10 @@ from app.models import (
 )
 
 # Importação de todos os Repositórios
-from app.repositories.subject_repository import SubjectRepository
-from app.repositories.professor_repository import ProfessorRepository
 from app.repositories.classroom_repository import ClassroomRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.enrollment_repository import EnrollmentRepository
 from app.repositories.monitor_repository import MonitorRepository
-from app.repositories.monitor_assignment_repository import MonitorAssignmentRepository
 from app.repositories.feedback_repository import FeedbackRepository
 from app.repositories.document_repository import DocumentRepository
 
@@ -207,7 +204,7 @@ async def run_massive_tests():
 
     # 4. Agrupamento por Monitor (Pipeline)
     count_mon = await repo_fb.count_by_monitor(params)
-    print(f"   -> Contagem de Feedbacks por Monitor (Agregação):")
+    print("   -> Contagem de Feedbacks por Monitor (Agregação):")
     for item in count_mon.items:
         print(
             f"      - Monitor: {item.get('monitor_registration')}, Total: {item.get('count')}"
@@ -215,7 +212,7 @@ async def run_massive_tests():
 
     # 5. Agrupamento por Disciplina (Super Pipeline Múltiplo)
     count_sub = await repo_fb.count_by_subject(params)
-    print(f"   -> Contagem de Feedbacks por Disciplina (Agregação 4 Níveis):")
+    print("   -> Contagem de Feedbacks por Disciplina (Agregação 4 Níveis):")
     for item in count_sub.items:
         print(
             f"      - Disciplina: {item.get('subject_name')}, Total: {item.get('feedback_count')}"

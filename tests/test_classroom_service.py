@@ -2,7 +2,6 @@ import uuid
 
 import pytest
 from beanie import PydanticObjectId
-from fastapi_pagination import Params
 
 from app.repositories.classroom_repository import ClassroomRepository
 from app.services.classroom_service import ClassroomService

@@ -1,4 +1,3 @@
-from enum import unique
 
 from beanie import Document, Link
 from typing import TYPE_CHECKING

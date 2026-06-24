@@ -1,12 +1,11 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING
 from pydantic import Field
 from beanie import Document, Link
 from app.core.enums import MessageType
 
 if TYPE_CHECKING:
     from app.models.monitor_assignment import MonitorAssignment
-    from app.models.enrollment import Enrollment
 
 
 class Feedback(Document):

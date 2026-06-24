@@ -1,6 +1,6 @@
 import asyncio
 from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.core.database import engine
 from app.core.enums import MessageType
 

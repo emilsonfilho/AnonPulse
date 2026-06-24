@@ -7,7 +7,6 @@ from pymongo import IndexModel, ASCENDING
 if TYPE_CHECKING:
     from app.models.student import Student
     from app.models.classroom import Classroom
-    from app.models.feedback import Feedback
 
 
 class Enrollment(Document):

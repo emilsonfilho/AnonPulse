@@ -1,5 +1,4 @@
 from beanie import PydanticObjectId
-from faker.providers.person import is_IS
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 

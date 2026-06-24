@@ -1,6 +1,5 @@
 import pytest
 from app.models.classroom import Classroom
-from app.models.subject import Subject
 from app.repositories.classroom_repository import ClassroomRepository
 
 

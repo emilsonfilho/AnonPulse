@@ -4,8 +4,6 @@ Este módulo fornece a classe BaseRepository que implementa operações
 CRUD genéricas para qualquer modelo SQLModel.
 """
 
-from beanie.odm.operators.find import BaseFindOperator
-from beanie.odm.queries.find import FindMany
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 

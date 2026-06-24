@@ -4,14 +4,11 @@ from typing import Any
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.beanie import apaginate
 
-from app.models import Classroom, Monitor, Student
+from app.models import Monitor
 from app.models.feedback import Feedback
-from app.models.monitor_assignment import MonitorAssignment
-from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
 from app.core.exceptions.custom_exceptions import (
     MonitorNotFoundException,
-    StudentNotFoundException,
 )
 
 
