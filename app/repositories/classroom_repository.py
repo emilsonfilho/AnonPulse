@@ -1,4 +1,3 @@
-
 from beanie import PydanticObjectId
 from fastapi_pagination import Page, Params
 
@@ -7,7 +6,6 @@ from app.models.subject import Subject
 from app.repositories.base_repository import BaseRepository
 
 from app.core.exceptions.custom_exceptions import SubjectNotFoundException
-from app.schemas.custom_page import Page
 
 
 class ClassroomRepository(BaseRepository[Classroom]):

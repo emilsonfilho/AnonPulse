@@ -4,10 +4,6 @@ Este módulo fornece funções de dependência FastAPI para injetar
 instâncias de repositórios nas rotas da API.
 """
 
-from fastapi import Depends
-from sqlmodel.ext.asyncio.session import AsyncSession
-
-from app.api.dependencies.session import get_session
 from app.repositories.classroom_repository import ClassroomRepository
 from app.repositories.enrollment_repository import EnrollmentRepository
 from app.repositories.feedback_repository import FeedbackRepository
@@ -17,124 +13,84 @@ from app.repositories.student_repository import StudentRepository
 from app.repositories.monitor_repository import MonitorRepository
 from app.repositories.monitor_assignment_repository import MonitorAssignmentRepository
 from app.repositories.document_repository import DocumentRepository
-from app.repositories.feedback_type_repository import FeedbackTypeRepository
 
 
-def get_subject_repository(session: AsyncSession = Depends(get_session)):
+def get_subject_repository():
     """Obtém uma instância do repositório de disciplinas.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de disciplinas.
     """
-    return SubjectRepository(session)
+    return SubjectRepository()
 
 
-def get_student_repository(session: AsyncSession = Depends(get_session)):
+def get_student_repository():
     """Obtém uma instância do repositório de estudantes.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de estudantes.
     """
-    return StudentRepository(session)
+    return StudentRepository()
 
 
-def get_professor_repository(session: AsyncSession = Depends(get_session)):
+def get_professor_repository():
     """Obtém uma instância do repositório de professores.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de professores.
     """
-    return ProfessorRepository(session)
+    return ProfessorRepository()
 
 
-def get_classroom_repository(session: AsyncSession = Depends(get_session)):
+def get_classroom_repository():
     """Obtém uma instância do repositório de salas de aula.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de salas de aula.
     """
-    return ClassroomRepository(session)
+    return ClassroomRepository()
 
 
-def get_feedback_repository(session: AsyncSession = Depends(get_session)):
+def get_feedback_repository():
     """Obtém uma instância do repositório de feedback.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de feedback.
     """
-    return FeedbackRepository(session)
+    return FeedbackRepository()
 
 
-def get_monitor_repository(session: AsyncSession = Depends(get_session)):
+def get_monitor_repository():
     """Obtém uma instância do repositório de monitores.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de monitores.
     """
-    return MonitorRepository(session)
+    return MonitorRepository()
 
 
-def get_monitor_assignment_repository(session: AsyncSession = Depends(get_session)):
+def get_monitor_assignment_repository():
     """Obtém uma instância do repositório de atribuições de monitores.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de atribuições de monitores.
     """
-    return MonitorAssignmentRepository(session)
+    return MonitorAssignmentRepository()
 
 
-def get_enrollment_repository(session: AsyncSession = Depends(get_session)):
+def get_enrollment_repository():
     """Obtém uma instância do repositório de matrículas.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de matrículas.
     """
-    return EnrollmentRepository(session)
+    return EnrollmentRepository()
 
 
-def get_document_repository(session: AsyncSession = Depends(get_session)):
+def get_document_repository():
     """Obtém uma instância do repositório de documentos.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
 
     Returns:
         Instância do repositório de documentos.
     """
-    return DocumentRepository(session)
-
-
-def get_feedback_type_repository(session: AsyncSession = Depends(get_session)):
-    """Obtém uma instância do repositório de tipos de feedback.
-
-    Args:
-        session: Sessão assíncrona do banco de dados.
-
-    Returns:
-        Instância do repositório de tipos de feedback.
-    """
-    return FeedbackTypeRepository(session)
+    return DocumentRepository()

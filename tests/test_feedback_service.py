@@ -7,7 +7,6 @@ from app.repositories.feedback_repository import FeedbackRepository
 from app.schemas.feedback_schema import CreateFeedbackRequest
 from app.services.hash_service import HashService
 from app.core.enums import HashAlgorithm, MessageType
-from tests.conftest import assignment
 
 
 @pytest.fixture

@@ -8,7 +8,6 @@ from app.api.routers.classroom import api_router as classroom_router
 from app.api.routers.document import api_router as document_router
 from app.api.routers.enrollment import api_router as enrollment_router
 from app.api.routers.feedback import api_router as feedback_router
-from app.api.routers.feedback_type import api_router as feedback_type_router
 from app.api.routers.hash import api_router as hash_router
 from app.api.routers.monitor import api_router as monitor_router
 from app.api.routers.monitor_assignment import api_router as monitor_assignment_router
@@ -130,7 +129,6 @@ app.include_router(enrollment_router, prefix=PREFIX)
 app.include_router(student_router, prefix=PREFIX)
 app.include_router(monitor_router, prefix=PREFIX)
 app.include_router(monitor_assignment_router, prefix=PREFIX)
-app.include_router(feedback_type_router, prefix=PREFIX)
 app.include_router(feedback_router, prefix=PREFIX)
 app.include_router(hash_router, prefix=PREFIX)
 app.include_router(document_router, prefix=PREFIX)

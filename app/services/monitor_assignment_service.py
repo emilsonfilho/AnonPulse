@@ -10,7 +10,6 @@ from app.core.exceptions.custom_exceptions import (
     MonitorAssignmentNotFoundException,
 )
 from app.core.mapper import Mapper
-from sqlalchemy.orm import joinedload
 from app.models.monitor_assignment import MonitorAssignment
 from app.repositories.monitor_assignment_repository import MonitorAssignmentRepository
 from app.schemas.monitor_assignment_schema import (
@@ -80,8 +79,7 @@ class MonitorAssignmentService(
         """
         # Carrega explicitamente os feedbacks para evitar lazy-load assíncrono
         assignment = await self.get_or_raise(
-            id,
-            options=[joinedload(MonitorAssignment.feedbacks)],  # <--- Mude aqui
+            id,  # <--- Mude aqui
         )
 
         if assignment.feedbacks:
