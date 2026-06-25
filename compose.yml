@@ -43,22 +43,6 @@ services:
     networks:
       - anonpulse-net
 
-  backend:
-    build: .
-    container_name: anonpulse
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - "8000:8000"
-    depends_on:
-      mongo:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - anonpulse-net
-
 networks:
   anonpulse-net:
     driver: bridge
