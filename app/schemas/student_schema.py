@@ -1,6 +1,8 @@
 from typing import Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from beanie import PydanticObjectId
 
+from app.schemas.enrollment_schema import EnrollmentResponse
 from app.schemas.orm_base_schema import ORMBaseSchema
 
 
@@ -26,4 +28,8 @@ class UpdateStudentRequest(StudentBase):
 
 
 class StudentResponse(StudentBase, ORMBaseSchema):
-    id: int
+    id: PydanticObjectId | None
+
+    enrollments: list[EnrollmentResponse]
+
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
