@@ -184,7 +184,7 @@ uv run seed_mongo.py
 ## OU rodando o script por dentro do contêiner da API
 
 ```Bash
-docker exec -it anonpulse_api uv run seed_mongo.py
+docker exec -it anonpulse python seed_mongo.py
 ```
 
 ## 📄 Organização da Equipe
