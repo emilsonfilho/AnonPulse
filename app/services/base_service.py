@@ -103,9 +103,11 @@ class BaseService(
 
         page = await self.repository.list_all(params, fetch_links=_fetch_links)
 
-        page.items = [
-            Mapper.to_response(obj, self.response_schema) for obj in page.items
-        ]
+        if _fetch_links:
+            # Se fetch_links for True, mapeia os objetos com relacionamentos carregados
+            page.items = [
+                Mapper.to_response(obj, self.response_schema) for obj in page.items
+            ]
 
         return page
 
