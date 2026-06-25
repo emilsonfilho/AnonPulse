@@ -1,13 +1,13 @@
 services:
   mongo:
-    image: mongo:8.3.2
+    image: mongo:8.2
     container_name: mongodb
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password'}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
       MONGO_INITDB_DATABASE: ${DATABASE_NAME:-anonpulse}
     volumes:
       - mongo_data:/data/db
@@ -48,7 +48,7 @@ services:
     container_name: anonpulse
     restart: unless-stopped
     env_file:
-      - .env-docker
+      - .env
     ports:
       - "8000:8000"
     depends_on:
