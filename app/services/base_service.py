@@ -7,6 +7,7 @@ genérica para qualquer modelo de dados.
 
 from beanie import Document, PydanticObjectId
 from fastapi_pagination import Page, Params
+from fastapi_pagination.api import create_page
 from pydantic import BaseModel
 from typing import Any, Generic, Type, TypeVar
 
@@ -22,18 +23,7 @@ ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 class BaseService(
     Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
 ):
-    """Serviço base genérico para operações CRUD.
-
-    Fornece operações padrão de leitura, criação, atualização e exclusão
-    de objetos através de um repositório, com mapeamento automático para
-    esquemas de resposta.
-
-    Atributos genéricos:
-        ModelType: Tipo do modelo de dados.
-        CreateSchemaType: Esquema de validação para criação.
-        UpdateSchemaType: Esquema de validação para atualização.
-        ResponseSchemaType: Esquema para resposta da API.
-    """
+    """Serviço base genérico para operações CRUD."""
 
     def __init__(
         self,
@@ -41,18 +31,8 @@ class BaseService(
         response_schema: Type[ResponseSchemaType],
         not_found_exception: Type[Exception],
         already_exists_exception: Type[Exception] | None = None,
-        default_fetch_links: bool = False,
+        default_fetch_links: bool = True,
     ) -> None:
-        """Inicializa o serviço base.
-
-        Args:
-            repository: Repositório para acesso aos dados.
-            response_schema: Esquema para serialização de respostas.
-            not_found_exception: Exceção a lançar quando objeto não é encontrado.
-            already_exists_exception: Exceção a lançar quando objeto já existe.
-                Padrão é None.
-            default_fetch_links: Se True, os relacionamentos são carregados.
-        """
         self.repository = repository
         self.response_schema = response_schema
         self.not_found_exception = not_found_exception
@@ -64,19 +44,9 @@ class BaseService(
         identifier: PydanticObjectId,
         fetch_links: bool | None = None,
     ) -> ModelType:
-        """Obtém um objeto pelo identificador ou lança exceção.
-
-        Args:
-            identifier: Identificador único do objeto.
-            fetch_links: Se True, os relacionamentos são carregados.
-
-        Returns:
-            O objeto encontrado.
-
-        Raises:
-            not_found_exception: Se o objeto não é encontrado.
-        """
-        _fetch_links = fetch_links or self.default_fetch_links
+        _fetch_links = (
+            fetch_links if fetch_links is not None else self.default_fetch_links
+        )
 
         obj = await self.repository.get(identifier, fetch_links=_fetch_links)
 
@@ -90,44 +60,41 @@ class BaseService(
         params: Params,
         fetch_links: bool | None = None,
     ) -> Page[ResponseSchemaType]:
-        """Lista todos os objetos com paginação.
+        _fetch_links = (
+            fetch_links if fetch_links is not None else self.default_fetch_links
+        )
 
-        Args:
-            params: Parâmetros de paginação.
-            fetch_links: Se True, os relacionamentos são carregados.
+        # 1. Recuperar a query base sem paginar automaticamente
+        query = self.repository.model.find_all(fetch_links=_fetch_links)
 
-        Returns:
-            Página contendo objetos mapeados para o esquema de resposta.
-        """
-        _fetch_links = fetch_links or self.default_fetch_links
+        # 2. Obter o total de registos para os metadados da página
+        total = await query.count()
 
-        page = await self.repository.list_all(params, fetch_links=_fetch_links)
+        # 3. Calcular a paginação manual
+        limit = params.size
+        skip = (params.page - 1) * params.size if hasattr(params, "page") else 0
 
+        # 4. Obter a lista crua de registos do MongoDB
+        raw_items = await query.skip(skip).limit(limit).to_list()
+
+        # 5. Forçar a extração dos links na memória, caso o Beanie não o faça automaticamente
         if _fetch_links:
-            # Se fetch_links for True, mapeia os objetos com relacionamentos carregados
-            page.items = [
-                Mapper.to_response(obj, self.response_schema) for obj in page.items
-            ]
+            for item in raw_items:
+                await item.fetch_all_links()
 
-        return page
+        # 6. Mapear de forma limpa, já com os documentos internos resolvidos
+        mapped_items = [
+            Mapper.to_response(obj, self.response_schema) for obj in raw_items
+        ]
+
+        # 7. Retornar o construtor manual da página sem gerar erros no Pydantic
+        return create_page(mapped_items, total, params)
 
     async def get_by_id(
         self,
         identifier: PydanticObjectId,
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
-        """Obtém um objeto pelo identificador e o mapeia.
-
-        Args:
-            identifier: Identificador único do objeto.
-            fetch_links: Se True, os relacionamentos são carregados.
-
-        Returns:
-            Objeto mapeado para o esquema de resposta.
-
-        Raises:
-            not_found_exception: Se o objeto não é encontrado.
-        """
         obj = await self.get_or_raise(identifier, fetch_links=fetch_links)
         return Mapper.to_response(obj, self.response_schema)
 
@@ -136,22 +103,8 @@ class BaseService(
         request: CreateSchemaType,
         identifier_value: PydanticObjectId | None = None,
     ) -> ResponseSchemaType:
-        """Cria um novo objeto.
-
-        Args:
-            request: Dados do objeto a criar, validados pelo esquema.
-            identifier_value: Valor do identificador para verificar duplicatas.
-                Padrão é None.
-
-        Returns:
-            Objeto criado mapeado para o esquema de resposta.
-
-        Raises:
-            already_exists_exception: Se o objeto com o identificador já existe.
-        """
         if identifier_value is not None and self.already_exists_exception:
             obj_exists = await self.repository.get(identifier_value)
-
             if obj_exists:
                 raise self.already_exists_exception(identifier_value)
 
@@ -174,19 +127,6 @@ class BaseService(
         request: UpdateSchemaType,
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
-        """Atualiza um objeto existente.
-
-        Args:
-            identifier: Identificador único do objeto a atualizar.
-            request: Dados a atualizar, validados pelo esquema.
-            fetch_links: Se True, os relacionamentos são carregados.
-
-        Returns:
-            Objeto atualizado mapeado para o esquema de resposta.
-
-        Raises:
-            not_found_exception: Se o objeto não é encontrado.
-        """
         updated_obj = await self.repository.update(
             identifier,
             request.model_dump(exclude_unset=True),
@@ -198,7 +138,9 @@ class BaseService(
         if updated_obj.id is None:
             raise RuntimeError("Objeto atualizado sem ID")
 
-        _fetch_links = fetch_links or self.default_fetch_links
+        _fetch_links = (
+            fetch_links if fetch_links is not None else self.default_fetch_links
+        )
 
         updated_obj_with_rels = await self.get_or_raise(
             updated_obj.id, fetch_links=_fetch_links
@@ -207,21 +149,8 @@ class BaseService(
         return Mapper.to_response(updated_obj_with_rels, self.response_schema)
 
     async def delete(self, identifier: Any) -> None:
-        """Deleta um objeto.
-
-        Args:
-            identifier: Identificador único do objeto a deletar.
-
-        Raises:
-            not_found_exception: Se o objeto não é encontrado.
-        """
         await self.get_or_raise(identifier)
         await self.repository.delete(identifier)
 
     async def count(self) -> int:
-        """Conta o número total de objetos.
-
-        Returns:
-            Quantidade total de objetos.
-        """
         return await self.repository.count()
