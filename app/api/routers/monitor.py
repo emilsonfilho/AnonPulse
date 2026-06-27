@@ -127,7 +127,7 @@ async def get_monitor_by_id(
 
 
 @api_router.delete(
-    path="/{registration}",
+    path="/{monitor_id}",
     status_code=HTTPStatus.NO_CONTENT,
     name="Excluir Monitor",
     description="Exclui um monitor existente.",
@@ -135,7 +135,7 @@ async def get_monitor_by_id(
 )
 async def delete_monitor(
     monitor_service: MonitorService = Depends(get_monitor_service),
-    registration: str = Path(..., description="Matrícula do monitor a ser excluído"),
+    monitor_id: str = Path(..., description="ID do monitor a ser excluído"),
 ) -> None:
     """Exclui um monitor existente.
 
@@ -143,10 +143,10 @@ async def delete_monitor(
     camada de serviço, que é responsável por remover o monitor do sistema.
 
     Args:
-        registration: Matrícula do monitor a ser excluído.
+        monitor_id: ID do monitor a ser excluído.
         monitor_service: Dependência injetada com as regras de negócio de
             monitores.
     Returns:
         None
     """
-    await monitor_service.delete(registration)
+    await monitor_service.delete(monitor_id)

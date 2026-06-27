@@ -315,30 +315,17 @@ class FeedbackService(
         )
 
         # Materializa cada feedback
-        items = []
-        for fb in page.items:
-            try:
-                items.append(await self._materialize_feedback_dict(fb))
-            except Exception:
-                # Fallback: feedback sem relacionamentos
-                items.append(
-                    {
-                        "id": getattr(fb, "id", None),
-                        "created_at": getattr(fb, "created_at", None),
-                        "registration": getattr(fb, "registration", None),
-                        "text": getattr(fb, "text", None),
-                        "rating": getattr(fb, "rating", None),
-                        "type": getattr(fb, "type", None),
-                        "assignment": None,
-                    }
-                )
+        for obj in page.items:
+            await obj.fetch_all_links()
 
-        page_with_dicts = Page.create(
-            items=items, total=page.total, params=Params(page=page.page, size=page.size)
-        )
+            if obj.assignment:
+                if hasattr(obj.assignment.monitor, "fetch"):
+                    obj.assignment.monitor = await obj.assignment.monitor.fetch()
+                if hasattr(obj.assignment.classroom, "fetch"):
+                    obj.assignment.classroom = await obj.assignment.classroom.fetch()
 
         return map_page(
-            page_with_dicts,
+            page,
             lambda obj: Mapper.to_response(obj, self.response_schema),
         )
 

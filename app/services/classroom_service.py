@@ -21,7 +21,7 @@ from app.schemas.classroom_schema import (
     CreateClassroomRequest,
     UpdateClassroomRequest,
 )
-from app.services.base_service import BaseService
+from app.services.base_service import BaseService, UpdateSchemaType, ResponseSchemaType
 from fastapi_pagination import Params
 
 
@@ -48,32 +48,42 @@ class ClassroomService(
             default_fetch_links=True,
         )
 
+    async def get_by_cod(self, cod: str) -> ClassroomResponse:
+        return await self.get_by(cod=cod)
+
     async def create(self, request: CreateClassroomRequest) -> ClassroomResponse:
         """Cria uma nova classroom.
 
         O identificador usado para checagem de existência é o atributo
         `cod` do request.
         """
-        if await self.repository.find_by(cod=request.cod):
-            raise ClassroomAlreadyExistsException(request.cod)
-
         subject = await Subject.find_one(Subject.cod == request.subject_cod)
         professor = await Professor.find_one(Professor.id == request.professor_id)
 
         if not subject or not professor:
             raise ClassroomNotFoundException()
 
-        classroom = Classroom(
+        return await self._execute_creation(
+            unique_filter={"cod": request.cod},
             cod=request.cod,
-            subject=cast(Link[Subject], cast(object, subject)),
-            professor=cast(Link[Professor], cast(object, professor)),
+            subject=subject,
+            professor=professor,
         )
-        new_obj = await classroom.insert()
 
-        await new_obj.fetch_all_links()
-        return cast(
-            ClassroomResponse, Mapper.to_response(new_obj, self.response_schema)
-        )
+    async def update(
+        self,
+        identifier: PydanticObjectId | str,
+        request: UpdateSchemaType,
+        fetch_links: bool | None = None,
+    ) -> ResponseSchemaType:
+        classroom = await self.repository.find_by(cod=identifier)
+
+        if not classroom:
+            raise ClassroomNotFoundException()
+
+        await classroom.update({ "$set": { "cod": request.cod } })
+        await classroom.fetch_all_links()
+        return cast(ResponseSchemaType, Mapper.to_response(classroom, self.response_schema))
 
     async def delete(self, cod: str) -> None:
         """Remove uma classroom pelo código.

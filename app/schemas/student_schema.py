@@ -23,7 +23,7 @@ class CreateStudentRequest(BaseModel):
     ]
 
 
-class UpdateStudentRequest(StudentBase):
+class UpdateStudentRequest(CreateStudentRequest):
     pass
 
 

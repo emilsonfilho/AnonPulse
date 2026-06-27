@@ -69,7 +69,7 @@ async def get_classroom_by_code(
     Returns:
         ClassroomResponse: Dados da turma encontrada.
     """
-    classroom = await classroom_service.get_by_id(classroom_code)
+    classroom = await classroom_service.get_by_cod(classroom_code)
     return classroom
 
 

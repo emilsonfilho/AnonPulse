@@ -35,6 +35,9 @@ class BaseRepository(Generic[ModelType]):
         """
         self.model = model
 
+    async def find_by(self, **filters) -> ModelType | None:
+        return await self.model.find_one(filters, fetch_links=True)
+
     async def get(
         self, identifier: PydanticObjectId, fetch_links: bool = False
     ) -> ModelType | None:

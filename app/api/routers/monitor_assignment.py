@@ -88,8 +88,8 @@ async def get_monitor_assignment_by_id(
     monitor_assignment_service: MonitorAssignmentService = Depends(
         get_monitor_assignment_service
     ),
-    monitor_assignment_id: int = Path(
-        ..., description="Identificador numérico da monitoria a ser consultada."
+    monitor_assignment_id: str = Path(
+        ..., description="ID da monitoria a ser consultada."
     ),
 ) -> MonitorAssignmentResponse:
     """Busca uma monitoria específica a partir do identificador.
@@ -124,8 +124,8 @@ async def update_monitor_assignment(
     monitor_assignment_service: MonitorAssignmentService = Depends(
         get_monitor_assignment_service
     ),
-    monitor_assignment_id: int = Path(
-        ..., description="Identificador numérico da monitoria a ser atualizada."
+    monitor_assignment_id: str = Path(
+        ..., description="ID da monitoria a ser atualizada."
     ),
 ) -> MonitorAssignmentResponse:
     """Atualiza os dados de uma monitoria existente.
@@ -161,8 +161,8 @@ async def delete_monitor_assignment(
     monitor_assignment_service: MonitorAssignmentService = Depends(
         get_monitor_assignment_service
     ),
-    monitor_assignment_id: int = Path(
-        ..., description="Identificador numérico da monitoria a ser excluída."
+    monitor_assignment_id: str = Path(
+        ..., description="ID da monitoria a ser excluída."
     ),
 ) -> None:
     """Exclui uma monitoria existente.

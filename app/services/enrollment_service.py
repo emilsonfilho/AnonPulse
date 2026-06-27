@@ -24,8 +24,9 @@ from app.schemas.enrollment_schema import (
     EnrollmentResponse,
     UpdateEnrollmentRequest,
 )
-from app.services.base_service import BaseService
+from app.services.base_service import BaseService, ResponseSchemaType
 
+from fastapi_pagination import Page, Params
 
 class EnrollmentService(
     BaseService[
@@ -83,9 +84,12 @@ class EnrollmentService(
         assert student.id is not None
         assert new_enrollment.id is not None
 
+        student.enrollments.append(cast(Link["Enrollment"], cast(object, new_enrollment)))
+        await student.save()
+
         return EnrollmentResponse(
             id=new_enrollment.id,
-            isActive=new_enrollment.is_active,
+            is_active=new_enrollment.is_active,
             enrolled_at=new_enrollment.enrolled_at,
             classroom_cod=classroom.cod,
             student_id=student.id,

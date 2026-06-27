@@ -148,13 +148,13 @@ async def report_feedbacks_by_subject(
     description="Retorna um feedback específico pelo seu ID.",
 )
 async def get_feedback_by_id(
-    feedback_id: int = Path(..., description="ID numérico do feedback"),
+    feedback_id: str = Path(..., description="ID do feedback"),
     feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> FeedbackResponse:
     """Busca um feedback específico a partir do identificador.
 
     Args:
-        feedback_id: Identificador numérico do feedback a ser consultado.
+        feedback_id: Identificador do feedback a ser consultado.
         feedback_service: Dependência injetada com as regras de negócio de
             feedback.
 
@@ -208,7 +208,7 @@ async def list_feedbacks(
 )
 async def update_feedback(
     feedback_request: UpdateFeedbackRequest,
-    feedback_id: int = Path(..., description="ID do feedback a ser atualizado"),
+    feedback_id: str = Path(..., description="ID do feedback a ser atualizado"),
     feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> FeedbackResponse:
     """Atualiza um feedback existente.
@@ -239,7 +239,7 @@ async def update_feedback(
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def delete_feedback(
-    feedback_id: int = Path(..., description="ID do feedback a ser deletado"),
+    feedback_id: str = Path(..., description="ID do feedback a ser deletado"),
     feedback_service: FeedbackService = Depends(get_feedback_service),
 ) -> None:
     """Remove um feedback existente.

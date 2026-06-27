@@ -76,7 +76,7 @@ async def list_students(
 async def update_student(
     student_request: UpdateStudentRequest,
     student_service: StudentService = Depends(get_student_service),
-    student_id: int = Path(..., description="ID do estudante a ser atualizado"),
+    student_id: str = Path(..., description="ID do estudante a ser atualizado"),
 ) -> StudentResponse:
     """Atualiza os dados de um estudante existente.
 
@@ -107,7 +107,7 @@ async def update_student(
 )
 async def get_student_by_id(
     student_service: StudentService = Depends(get_student_service),
-    student_id: int = Path(..., description="ID do estudante a ser consultado"),
+    student_id: str = Path(..., description="ID do estudante a ser consultado"),
 ) -> StudentResponse:
     """Busca os dados de um estudante específico pelo seu ID.
 
@@ -135,7 +135,7 @@ async def get_student_by_id(
 )
 async def delete_student(
     student_service: StudentService = Depends(get_student_service),
-    student_id: int = Path(..., description="ID do estudante a ser excluído"),
+    student_id: str = Path(..., description="ID do estudante a ser excluído"),
 ) -> None:
     """Exclui um estudante existente.
 

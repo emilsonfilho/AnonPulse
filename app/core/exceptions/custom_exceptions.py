@@ -107,7 +107,7 @@ class MonitorAssignmentAlreadyExistsException(Exception):
 
 
 class MonitorAssignmentHasFeedbackException(Exception):
-    def __init__(self, assignment_id: int) -> None:
+    def __init__(self, assignment_id: str) -> None:
         message = f"Não é possível remover a alocação de ID {assignment_id} pois ela já possui feedbacks registrados."
         super().__init__(message)
         self.message = message
@@ -135,8 +135,8 @@ class FeedbackAlreadyExistsException(Exception):
 
 
 class DocumentNotFoundException(Exception):
-    def __init__(self, id: int) -> None:
-        message = f"Documento com ID {id} não encontrado."
+    def __init__(self) -> None:
+        message = f"Documento não encontrado."
         super().__init__(message)
         self.message = message
 

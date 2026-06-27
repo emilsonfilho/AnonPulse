@@ -23,9 +23,6 @@ class ClassroomRepository(BaseRepository[Classroom]):
         """
         super().__init__(model=Classroom)
 
-    async def find_by(self, **filters) -> Classroom | None:
-        return await self.model.find_one(filters)
-
     async def list_by_professor(
         self, professor_id: PydanticObjectId, params: Params, fetch_links: bool = False
     ) -> Page[Classroom]:

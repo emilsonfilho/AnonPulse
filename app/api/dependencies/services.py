@@ -15,6 +15,7 @@ from app.api.dependencies.repositories import (
 )
 
 from app.repositories.classroom_repository import ClassroomRepository
+from app.repositories.document_repository import DocumentRepository
 from app.repositories.enrollment_repository import EnrollmentRepository
 from app.repositories.feedback_repository import FeedbackRepository
 from app.repositories.monitor_assignment_repository import MonitorAssignmentRepository
@@ -98,7 +99,7 @@ def get_storage_service() -> StorageService:
 
 
 def get_document_service(
-    repository=Depends(get_document_repository),
+    repository: DocumentRepository = Depends(get_document_repository),
 ) -> DocumentService:
     """Retorna uma instância do serviço de documentos."""
-    return DocumentService(get_storage_service(), repository)
+    return DocumentService(repository=repository, storage_service=get_storage_service())

@@ -6,10 +6,13 @@ de documentos, com validação de tipo MIME e armazenamento em nuvem (MinIO).
 
 from fastapi import HTTPException, UploadFile
 from fastapi_pagination import Page, Params
+from beanie import PydanticObjectId
 
 from app.core.exceptions.custom_exceptions import DocumentNotFoundException
 from app.core.mapper import Mapper
-from app.models.document_metadata import Document
+from app.models import MonitorAssignment
+from app.models.document_metadata import DocumentMetadata
+from app.repositories.document_repository import DocumentRepository
 from app.schemas.document_schema import (
     CreateDocumentRequest,
     DocumentResponse,
@@ -29,7 +32,7 @@ ALLOWED_MIME_TYPES = [
 
 class DocumentService(
     BaseService[
-        Document, CreateDocumentRequest, UpdateDocumentRequest, DocumentResponse
+        DocumentMetadata, CreateDocumentRequest, UpdateDocumentRequest, DocumentResponse
     ]
 ):
     """Serviço para gerenciar operações de documentos.
@@ -38,7 +41,7 @@ class DocumentService(
     com validação de tipo de arquivo e armazenamento no MinIO.
     """
 
-    def __init__(self, repository, storage_service: StorageService):
+    def __init__(self, repository: DocumentRepository, storage_service: StorageService):
         """Inicializa o serviço de documentos.
 
         Args:
@@ -53,7 +56,7 @@ class DocumentService(
         self.repository = repository
         self.storage_service = storage_service
 
-    def _get_filename(self, doc: Document) -> str:
+    def _get_filename(self, doc: DocumentMetadata) -> str:
         """Obtém o nome físico do arquivo que será salvo no bucket.
 
         Args:
@@ -114,17 +117,21 @@ class DocumentService(
         extension = self._get_extension(file)
         size_bytes = await self._get_size(file)
 
+        assignment = await MonitorAssignment.get(PydanticObjectId(assignment_id))
+        if not assignment:
+            raise HTTPException(status_code=404, detail="Monitoria não encontrada.")
+
         document_data = {
             "original_filename": file.filename,
             "content_type": file.content_type,
             "extension": extension,
             "size_bytes": size_bytes,
-            "assignment_id": assignment_id,
+            "assignment": assignment,
         }
 
         # 1. Salva os metadados no MongoDB
-        document = Document(**document_data)
-        new_document = await self.repository.create(document)
+        document = DocumentMetadata(**document_data)
+        new_document = await document.insert()
 
         # 2. Faz o upload físico no MinIO
         filename = self._get_filename(new_document)
@@ -141,7 +148,7 @@ class DocumentService(
         Returns:
             Uma tupla contendo (bytes_do_arquivo, nome_original, content_type).
         """
-        document = await self.get_or_raise(id)
+        document = await self.get_or_raise(PydanticObjectId(id))
         filename = self._get_filename(document)
 
         file_data, content_type = await self.storage_service.download_file(filename)
@@ -155,8 +162,9 @@ class DocumentService(
             id: ID do documento a ser atualizado.
             file: Novo arquivo.
         """
-        prev_doc = await self.get_or_raise(id)
-        old_filename = self._get_filename(prev_doc)
+        obj_id = PydanticObjectId(id)
+        document = await self.get_or_raise(obj_id)
+        old_filename = self._get_filename(document)
 
         # 1. Deleta o arquivo antigo do MinIO
         try:
@@ -164,40 +172,31 @@ class DocumentService(
         except Exception:
             pass  # Ignora se o arquivo antigo já não existir fisicamente no bucket
 
-        # 2. Prepara novos dados
-        new_extension = self._get_extension(file)
-        new_size = await self._get_size(file)
+        document.original_filename = file.filename
+        document.content_type = file.content_type
+        document.extension = self._get_extension(file)
+        document.size_bytes = await self._get_size(file)
 
-        updated_data = {
-            "original_filename": file.filename,
-            "content_type": file.content_type,
-            "extension": new_extension,
-            "size_bytes": new_size,
-        }
+        await document.save()
 
-        # 3. Atualiza os metadados no MongoDB
-        updated = await self.repository.update(id, updated_data)
-
-        # 4. Envia o novo arquivo para o MinIO
-        new_filename = self._get_filename(updated)
+        new_filename = self._get_filename(document)
         await self.storage_service.upload_file(file, new_filename)
 
-        return Mapper.to_response(updated, DocumentResponse)
+        return Mapper.to_response(document, DocumentResponse)
 
     async def delete(self, id: str) -> None:
         """Remove o documento da base de dados e exclui o arquivo do MinIO."""
-        document = await self.get_or_raise(id)
+        obj_id = PydanticObjectId(id)
+        document = await self.get_or_raise(obj_id)
         filename = self._get_filename(document)
 
-        # Remove do MongoDB
-        await super().delete(id)
+        await document.delete()
 
-        # Remove do MinIO
         await self.storage_service.delete_file(filename)
 
     async def list_by_assignment(
         self, assignment_id: str, params: Params
-    ) -> Page[Document]:
+    ) -> Page[DocumentMetadata]:
         page_result = await self.repository.list_by_assignment(assignment_id, params)
 
         page_result.items = [

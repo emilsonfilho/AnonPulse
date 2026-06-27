@@ -80,7 +80,7 @@ async def list_enrollments(
 )
 async def get_enrollment_by_id(
     enrollment_service: EnrollmentService = Depends(get_enrollment_service),
-    enrollment_id: int = Path(
+    enrollment_id: str = Path(
         ..., description="Identificador numérico da matrícula a ser consultada."
     ),
 ) -> EnrollmentResponse:
@@ -112,7 +112,7 @@ async def get_enrollment_by_id(
 async def update_enrollment(
     enrollment_request: UpdateEnrollmentRequest,
     enrollment_service: EnrollmentService = Depends(get_enrollment_service),
-    enrollment_id: int = Path(
+    enrollment_id: str = Path(
         ..., description="Identificador numérico da matrícula a ser atualizada."
     ),
 ) -> EnrollmentResponse:
@@ -147,7 +147,7 @@ async def update_enrollment(
 )
 async def delete_enrollment(
     enrollment_service: EnrollmentService = Depends(get_enrollment_service),
-    enrollment_id: int = Path(
+    enrollment_id: str = Path(
         ..., description="Identificador numérico da matrícula a ser excluída."
     ),
 ) -> None:

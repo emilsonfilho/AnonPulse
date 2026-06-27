@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from beanie import PydanticObjectId
 
 from app.schemas.orm_base_schema import ORMBaseSchema
 
@@ -9,7 +10,6 @@ class DocumentBase(BaseModel):
     content_type: str
     extension: str
     size_bytes: int
-    assignment_id: int
 
 
 class CreateDocumentRequest(DocumentBase):
@@ -25,5 +25,5 @@ class UpdateDocumentRequest(BaseModel):
 
 
 class DocumentResponse(DocumentBase, ORMBaseSchema):
-    id: int
+    id: PydanticObjectId
     created_at: datetime

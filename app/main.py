@@ -34,6 +34,7 @@ from app.core.exceptions.custom_exceptions import (
     StudentNotFoundException,
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
+    DocumentNotFoundException
 )
 from app.core.exceptions.handlers import (
     custom_conflict_handler,
@@ -106,6 +107,7 @@ for exc in [
     StudentNotFoundException,
     MonitorAssignmentNotFoundException,
     FeedbackNotFoundException,
+    DocumentNotFoundException,
 ]:
     app.add_exception_handler(exc, custom_not_found_handler)  # type: ignore
 

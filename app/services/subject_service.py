@@ -3,11 +3,13 @@
 Este módulo fornece a implementação do serviço de disciplina,
 responsável pela lógica de negócio relacionada às disciplinas.
 """
+from typing import cast
 
 from app.core.exceptions.custom_exceptions import (
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
 )
+from app.core.mapper import Mapper
 from app.models import Subject
 from app.repositories.subject_repository import SubjectRepository
 from app.schemas.subject_schema import (
@@ -50,4 +52,43 @@ class SubjectService(
         Returns:
             SubjectResponse: Resposta contendo os dados da disciplina criada.
         """
-        return await super().create(request, identifier_value=request.cod)
+        if await self.repository.find_by(cod=request.cod):
+            raise SubjectAlreadyExistsException(request.cod)
+
+        subject = Subject(
+            cod=request.cod,
+            name=request.name,
+        )
+
+        new_obj = await subject.insert()
+
+        await new_obj.fetch_all_links()
+
+        return cast(
+            SubjectResponse, Mapper.to_response(new_obj, self.response_schema)
+        )
+
+    async def update(
+            self,
+            identifier: str,
+            request: UpdateSubjectRequest,
+            fetch_links: bool | None = None,
+    ) -> SubjectResponse:
+        subject = await self.repository.find_by(cod=identifier)
+
+        if not subject:
+            raise SubjectNotFoundException()
+
+        await subject.update({ "$set": { "name": request.name } })
+        await subject.fetch_all_links()
+        return cast(SubjectResponse, Mapper.to_response(subject, self.response_schema))
+
+    async def get_by_cod(self, cod: str) -> SubjectResponse:
+       return await self.get_by(cod=cod)
+
+    async def delete(self, cod: str) -> None:
+        subject = await self.repository.find_by(cod=cod)
+        if not subject:
+            raise SubjectNotFoundException()
+
+        await subject.delete()

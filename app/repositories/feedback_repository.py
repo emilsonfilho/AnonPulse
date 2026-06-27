@@ -45,7 +45,11 @@ class FeedbackRepository(BaseRepository[Feedback]):
             "-created_at"
         )
 
-        return await apaginate(query, params)
+        total = await query.count()
+        skip = (params.page - 1) * params.size if hasattr(params, "page") else 0
+        items = await query.skip(skip).limit(params.size).to_list()
+
+        return Page.create(items=items, total=total, params=params)
 
     async def list_by_monitor(
         self, monitor_registration: str, params: Params, fetch_links: bool = False
@@ -92,6 +96,36 @@ class FeedbackRepository(BaseRepository[Feedback]):
             },
             {"$unwind": "$monitor"},
             {"$match": {"monitor.registration": monitor_registration}},
+            {
+                "$lookup": {
+                    "from": "classrooms",
+                    "localField": "assignment.classroom.$id",
+                    "foreignField": "_id",
+                    "as": "classroom",
+                }
+            },
+            {"$unwind": "$classroom"},
+            {
+                "$project": {
+                    "id": "$_id",
+                    "created_at": 1,
+                    "registration": 1,
+                    "text": 1,
+                    "rating": 1,
+                    "type": 1,
+                    "assignment": {
+                        "id": "$assignment._id",
+                        "weekly_hours": "$assignment.weekly_hours",
+                        "monitor": {
+                            "registration": "$monitor.registration",
+                            "name": "$monitor.name"
+                        },
+                        "classroom": {
+                            "cod": "$classroom.cod"
+                        }
+                    }
+                }
+            },
             BaseRepository._facet_stage(params),
         ]
 
@@ -226,7 +260,12 @@ class FeedbackRepository(BaseRepository[Feedback]):
                 query_filters.setdefault("created_at", {})["$lte"] = end_date
 
             query = self.model.find(query_filters).sort("-created_at")
-            return await apaginate(query, params)
+
+            total = await query.count()
+            skip = (params.page - 1) * params.size if hasattr(params, "page") else 0
+            items = await query.skip(skip).limit(params.size).to_list()
+
+            return Page.create(items=items, total=total, params=params)
 
         match: dict = {}
 
@@ -269,4 +308,8 @@ class FeedbackRepository(BaseRepository[Feedback]):
             self.model.registration == student_hash, fetch_links=fetch_links
         )
 
-        return await apaginate(query, params)
+        total = await query.count()
+        skip = (params.page - 1) * params.size if hasattr(params, "page") else 0
+        items = await query.skip(skip).limit(params.size).to_list()
+
+        return Page.create(items=items, total=total, params=params)

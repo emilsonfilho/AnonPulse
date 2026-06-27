@@ -123,7 +123,7 @@ async def get_subject_by_code(
     Returns:
         SubjectResponse: Dados da disciplina encontrada.
     """
-    subject = await subject_service.get_by_id(subject_code)
+    subject = await subject_service.get_by_cod(subject_code)
     return subject
 
 

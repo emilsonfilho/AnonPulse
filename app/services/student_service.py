@@ -3,11 +3,13 @@
 Este módulo fornece a implementação de StudentService, responsável
 por operações relacionadas ao modelo Student.
 """
+from typing import cast, Any
 
 from app.core.exceptions.custom_exceptions import (
     StudentAlreadyExistsException,
     StudentNotFoundException,
 )
+from app.core.mapper import Mapper
 from app.models.student import Student
 from app.repositories.student_repository import StudentRepository
 from app.schemas.student_schema import (
@@ -64,4 +66,39 @@ class StudentService(
             request.registration, HashAlgorithm.SHA256
         )
 
-        return await super().create(request, identifier_value=request.registration)
+        return await self._execute_creation(
+            unique_filter={"registration": request.registration},
+            registration=request.registration,
+        )
+
+    async def update(
+            self,
+            identifier: str,
+            request: UpdateStudentRequest,
+            fetch_links: bool | None = None,
+    ) -> StudentResponse:
+        request.registration = HashService.generate_hash(
+            request.registration, HashAlgorithm.SHA256
+        )
+
+        student = await self.repository.get(identifier)
+
+        if not student:
+            raise StudentNotFoundException()
+
+        await student.update({ "$set": { "registration": request.registration } })
+
+        await student.fetch_all_links()
+
+        return cast(
+            StudentResponse,
+            Mapper.to_response(student, self.response_schema)
+        )
+
+    async def delete(self, identifier: Any) -> None:
+        from app.models.enrollment import Enrollment
+
+        student = await self.get_or_raise(identifier)
+
+        await Enrollment.find({ "student.$id": student.id }).delete()
+        await self.repository.delete(student.id)

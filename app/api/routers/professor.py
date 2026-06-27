@@ -81,18 +81,18 @@ async def list_professores(
 )
 async def get_professor_by_id(
     professor_service: ProfessorService = Depends(get_professor_service),
-    professor_id: int = Path(
-        ..., description="Identificador numérico do professor a ser consultado."
+    professor_id: str = Path(
+        ..., description="Identificador do professor a ser consultado."
     ),
 ) -> ProfessorResponse:
     """Busca um professor específico a partir do identificador.
 
-    A rota recebe o identificador numérico do professor a ser consultado e
+    A rota recebe o identificador do professor a ser consultado e
     delega a busca para a camada de serviço, que é responsável por retornar os
     dados do professor encontrado.
 
     Args:
-        professor_id: Identificador numérico do professor a ser consultado.
+        professor_id: Identificador do professor a ser consultado.
         professor_service: Dependência injetada com as regras de negócio de
             cursos.
 
@@ -113,7 +113,7 @@ async def get_professor_by_id(
 async def update_professor(
     professor_request: UpdateProfessorRequest,
     professor_service: ProfessorService = Depends(get_professor_service),
-    professor_id: int = Path(
+    professor_id: str = Path(
         ..., description="Identificador numérico do professor a ser atualizado."
     ),
 ) -> ProfessorResponse:
@@ -146,7 +146,7 @@ async def update_professor(
 )
 async def delete_professor(
     professor_service: ProfessorService = Depends(get_professor_service),
-    professor_id: int = Path(
+    professor_id: str = Path(
         ..., description="Identificador numérico do professor a ser excluído."
     ),
 ) -> None:

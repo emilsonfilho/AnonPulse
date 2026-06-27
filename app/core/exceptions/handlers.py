@@ -26,6 +26,7 @@ from .custom_exceptions import (
     StudentNotFoundException,
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
+    DocumentNotFoundException
 )
 
 
@@ -90,7 +91,8 @@ async def custom_not_found_handler(
     | ClassroomNotFoundException
     | StudentNotFoundException
     | MonitorAssignmentNotFoundException
-    | FeedbackNotFoundException,
+    | FeedbackNotFoundException
+    | DocumentNotFoundException,
 ) -> JSONResponse:
     return _json_error_response(
         ErrorResponse.from_http_status(

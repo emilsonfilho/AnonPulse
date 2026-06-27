@@ -2,6 +2,7 @@ import aioboto3
 from fastapi import UploadFile
 import logging
 from botocore.exceptions import ClientError
+from botocore.config import Config
 
 from app.core.config import settings
 
@@ -21,6 +22,7 @@ class StorageService:
             "aws_access_key_id": settings.MINIO_ACCESS_KEY,
             "aws_secret_access_key": settings.MINIO_SECRET_KEY,
             "region_name": "us-east-1",
+            "config": Config(signature_version="s3v4", s3={"addressing_style": "path"}),
         }
 
     async def _ensure_bucket_exists(self, s3_client):

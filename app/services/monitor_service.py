@@ -3,11 +3,14 @@
 Este módulo fornece a classe MonitorService que implementa operações
 CRUD para monitores, estendendo a funcionalidade do BaseService.
 """
+from typing import cast
+from urllib import request
 
 from app.core.exceptions.custom_exceptions import (
     MonitorAlreadyExistsException,
     MonitorNotFoundException,
 )
+from app.core.mapper import Mapper
 from app.models.monitor import Monitor
 from app.repositories.monitor_repository import MonitorRepository
 from app.schemas.monitor_schema import (
@@ -49,4 +52,8 @@ class MonitorService(
         Returns:
             MonitorResponse: Dados do monitor criado.
         """
-        return await super().create(request, identifier_value=request.registration)
+
+        return await self._execute_creation(
+            unique_filter={"registration": request.registration},
+            **request.model_dump(),
+        )

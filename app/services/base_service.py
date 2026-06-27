@@ -64,30 +64,23 @@ class BaseService(
             fetch_links if fetch_links is not None else self.default_fetch_links
         )
 
-        # 1. Recuperar a query base sem paginar automaticamente
         query = self.repository.model.find_all(fetch_links=_fetch_links)
 
-        # 2. Obter o total de registos para os metadados da página
         total = await query.count()
 
-        # 3. Calcular a paginação manual
         limit = params.size
         skip = (params.page - 1) * params.size if hasattr(params, "page") else 0
 
-        # 4. Obter a lista crua de registos do MongoDB
         raw_items = await query.skip(skip).limit(limit).to_list()
 
-        # 5. Forçar a extração dos links na memória, caso o Beanie não o faça automaticamente
         if _fetch_links:
             for item in raw_items:
                 await item.fetch_all_links()
 
-        # 6. Mapear de forma limpa, já com os documentos internos resolvidos
         mapped_items = [
             Mapper.to_response(obj, self.response_schema) for obj in raw_items
         ]
 
-        # 7. Retornar o construtor manual da página sem gerar erros no Pydantic
         return create_page(mapped_items, total, params)
 
     async def get_by_id(
@@ -96,6 +89,14 @@ class BaseService(
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
         obj = await self.get_or_raise(identifier, fetch_links=fetch_links)
+        return Mapper.to_response(obj, self.response_schema)
+
+    async def get_by(self, **filters) -> ResponseSchemaType:
+        obj = await self.repository.find_by(**filters)
+
+        if not obj:
+            raise self.not_found_exception()
+
         return Mapper.to_response(obj, self.response_schema)
 
     async def create(
@@ -118,6 +119,23 @@ class BaseService(
             new_obj.id,
             fetch_links=self.default_fetch_links,
         )
+
+        return Mapper.to_response(new_obj, self.response_schema)
+
+    async def _execute_creation(
+            self,
+            unique_filter: dict,
+            **model_data
+    ) -> ResponseSchemaType:
+        if await self.repository.find_by(**unique_filter):
+            raise self.already_exists_exception(**unique_filter)
+
+        entity = self.repository.model(**model_data)
+
+        new_obj = await entity.insert()
+
+        if hasattr(new_obj, "fetch_all_links"):
+            await new_obj.fetch_all_links()
 
         return Mapper.to_response(new_obj, self.response_schema)
 
