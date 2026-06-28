@@ -27,8 +27,8 @@ services:
     command: server /data --console-address ":9001"
     # Credenciais vêm do .env (sem segredos fixos aqui)
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
       - "9000:9000"  # API
       - "9001:9001"  # Console Web
@@ -43,21 +43,21 @@ services:
     networks:
       - anonpulse-net
 
-#  backend:
-#    build: .
-#    container_name: anonpulse
-#    restart: unless-stopped
-#    env_file:
-#      - .env
-#    ports:
-#      - "8000:8000"
-#    depends_on:
-#      mongo:
-#        condition: service_healthy
-#      minio:
-#        condition: service_healthy
-#    networks:
-#      - anonpulse-net
+  backend:
+    build: .
+    container_name: anonpulse
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - anonpulse-net
 
 networks:
   anonpulse-net:
