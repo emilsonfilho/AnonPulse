@@ -33,102 +33,71 @@ Abaixo está o checklist de cumprimento das exigências do professor:
 
 ## 🏗️ Diagrama de Classes (Modelo de Documentos - Beanie)
 
-O diagrama abaixo ilustra a modelagem NoSQL adotada. Diferente de bancos relacionais, tabelas associativas foram transformadas em **Documentos Embutidos** (`<<Embedded>>`), enquanto relações fortes utilizam **Referências Assíncronas** (`Link`).
-
 ```mermaid
 classDiagram
-    %% Entidades Principais (Coleções do MongoDB)
-    class Subject {
-        <<Document>>
-        +PydanticObjectId id
-        +String cod
-        +String name
-    }
-
-    class Professor {
-        <<Document>>
-        +PydanticObjectId id
-        +String name
-        +String email
-    }
-
-    class Classroom {
-        <<Document>>
-        +PydanticObjectId id
-        +String cod
-        +Link~Subject~ subject
-        +Link~Professor~ professor
-    }
-
-    %% Metadados do MinIO
-    class DocumentMetadata {
-        <<Document>>
-        +PydanticObjectId id
-        +String original_filename
-        +String content_type
-        +String extension
-        +Int size_bytes
-        +DateTime created_at
-        +Link~Subject~ subject
-    }
-
-    %% Documentos Embutidos (Sub-documentos)
-    class Enrollment {
-        <<Embedded>>
-        +Link~Classroom~ classroom
-        +Boolean is_active
-        +DateTime enrolled_at
-    }
-
-    class MonitorAssignment {
-        <<Embedded>>
-        +Link~Classroom~ classroom
-        +Int weekly_hours
-    }
-
-    %% Coleções com Arrays Embutidos
     class Student {
-        <<Document>>
         +PydanticObjectId id
-        +String registration_hash
-        +List~Enrollment~ enrollments
+        +str registration
+        +List[BackLink] enrollments
     }
-
+    class Enrollment {
+        +PydanticObjectId id
+        +datetime enrolled_at
+        +Link[Student] student
+        +Link[Classroom] classroom
+    }
+    class Classroom {
+        +PydanticObjectId id
+        +str cod
+        +Link[Subject] subject
+        +Link[Professor] professor
+    }
+    class Subject {
+        +PydanticObjectId id
+        +str cod
+        +str name
+    }
+    class Professor {
+        +PydanticObjectId id
+        +str name
+        +str email
+    }
     class Monitor {
-        <<Document>>
         +PydanticObjectId id
-        +String registration
-        +String name
-        +String email
-        +List~MonitorAssignment~ assignments
+        +str registration
+        +str name
+        +str email
     }
-
+    class MonitorAssignment {
+        +PydanticObjectId id
+        +int weekly_hours
+        +Link[Monitor] monitor
+        +Link[Classroom] classroom
+    }
     class Feedback {
-        <<Document>>
         +PydanticObjectId id
-        +String text
-        +Int rating
-        +DateTime created_at
-        +String student_hash
-        +String message_type
-        +Link~Monitor~ monitor
-        +Link~Classroom~ classroom
+        +str text
+        +int rating
+        +MessageType type
+        +Link[MonitorAssignment] assignment
+    }
+    class DocumentMetadata {
+        +PydanticObjectId id
+        +str original_filename
+        +str content_type
+        +Link[MonitorAssignment] assignment
     }
 
-    %% Relacionamentos
-    Subject "1" <-- "0..*" Classroom : referenciado por
-    Professor "1" <-- "0..*" Classroom : referenciado por
-    Subject "1" <-- "0..*" DocumentMetadata : referenciado por (MinIO)
-    
-    Student "1" *-- "0..*" Enrollment : contém (Embutido)
-    Enrollment "0..*" --> "1" Classroom : referência
-    
-    Monitor "1" *-- "0..*" MonitorAssignment : contém (Embutido)
-    MonitorAssignment "0..*" --> "1" Classroom : referência
-    
-    Feedback "0..*" --> "1" Monitor : avalia
-    Feedback "0..*" --> "1" Classroom : ocorreu na
-```
+    Student "1" -- "*" Enrollment : possui
+    Classroom "1" -- "*" Enrollment : matricula
+    Classroom "1" -- "*" MonitorAssignment : aloca
+    Monitor "1" -- "*" MonitorAssignment : executa
+    MonitorAssignment "1" -- "*" Feedback : recebe
+    MonitorAssignment "1" -- "*" DocumentMetadata : possui
+    Classroom "*" -- "1" Subject : pertence
+    Classroom "*" -- "1" Professor : ministrada_por
+
+``` 
 
 ## ⚙️ Como Executar o Projeto via Docker (Recomendado)
 

@@ -646,6 +646,22 @@ async def seed_data():
         ]
         await Enrollment.insert_many(enrollments)
 
+        enrollments_salvos = await Enrollment.find_all().to_list()
+
+        for matricula in enrollments_salvos:
+            student_id = matricula.student.id if hasattr(matricula.student, "id") else matricula.student.ref.id
+            
+            for aluno in alunos_ordenados:
+                if aluno and aluno.id == student_id:
+                    if getattr(aluno, "enrollments", None) is None:
+                        aluno.enrollments = []
+                    aluno.enrollments.append(matricula)
+                    break
+
+        for aluno in alunos_ordenados:
+            if aluno and getattr(aluno, "enrollments", None):
+                await aluno.save()
+
         print("A inserir Monitores (Nível 5)...")
         monitores = [
             Monitor(
