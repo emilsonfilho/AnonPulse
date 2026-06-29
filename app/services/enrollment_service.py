@@ -85,7 +85,10 @@ class EnrollmentService(
         assert new_enrollment.id is not None
 
         student.enrollments.append(cast(Link["Enrollment"], cast(object, new_enrollment)))
+        classroom.enrollments.append(cast(Link["Enrollment"], cast(object, new_enrollment)))
+
         await student.save()
+        await classroom.save()
 
         return EnrollmentResponse(
             id=new_enrollment.id,
