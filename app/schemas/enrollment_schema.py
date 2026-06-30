@@ -32,22 +32,43 @@ class EnrollmentResponse(EnrollmentBase, ORMBaseSchema):
     @model_validator(mode="before")
     @classmethod
     def extract_links(cls, data: Any) -> Any:
-        if not isinstance(data, dict) and hasattr(data, "student") and hasattr(data.student, "classroom"):
-            return {
-                "id": data.id,
-                "is_active": data.is_active,
-                "enrolled_at": data.enrolled_at,
-                "classroom_cod": data.student.classroom.cod if data.classroom else None,
-                "student_id": data.student.id if data.student else None,
-            }
+        if isinstance(data, dict):
+            res = data.copy()
+            student = res.get("student")
+            classroom = res.get("classroom")
 
-        if hasattr(data, "student") and hasattr(data, "classroom"):
-            return {
-                "id": data.id,
-                "is_active": data.is_active,
-                "enrolled_at": data.enrolled_at,
-                "classroom_cod": data.classroom.cod if data.classroom else None,
-                "student_id": data.student.id if data.student else None,
-            }
-        return data
+            if student:
+                if isinstance(student, dict):
+                    res["student_id"] = student.get("id") or student.get("_id") or student.get("$id")
+                else:
+                    ref = getattr(student, "ref", None)
+                    res["student_id"] = getattr(student, "id", getattr(ref, "id", None))
+
+            if classroom:
+                if isinstance(classroom, dict):
+                    res["classroom_cod"] = classroom.get("cod")
+                else:
+                    res["classroom_cod"] = getattr(classroom, "cod", None)
+
+            return res
+
+        if hasattr(data, "model_dump"):
+            res = data.model_dump()
+        elif hasattr(data, "__dict__"):
+            res = data.__dict__.copy()
+        else:
+            res = dict(data)
+
+        if hasattr(data, "id") and data.id:
+            res["id"] = data.id
+
+        student = getattr(data, "student", None)
+        if student:
+            ref = getattr(student, "ref", None)
+            res["student_id"] = getattr(student, "id", getattr(ref, "id", None))
+
+        classroom = getattr(data, "classroom", None)
+        if classroom:
+            res["classroom_cod"] = getattr(classroom, "cod", None)
+
         return data

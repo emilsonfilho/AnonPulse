@@ -646,6 +646,36 @@ async def seed_data():
         ]
         await Enrollment.insert_many(enrollments)
 
+        print("A atualizar as listas de links (Turmas e Alunos)...")
+        enrollments_salvos = await Enrollment.find_all().to_list()
+
+        aluno_por_id = {a.id: a for a in alunos_ordenados if a}
+        turma_por_id = {t.id: t for t in turmas_salvas if t}
+
+        for matricula in enrollments_salvos:
+            student_id = matricula.student.id if hasattr(matricula.student, "id") else matricula.student.ref.id
+            classroom_id = matricula.classroom.id if hasattr(matricula.classroom, "id") else matricula.classroom.ref.id
+
+            aluno = aluno_por_id.get(student_id)
+            if aluno:
+                if getattr(aluno, "enrollments", None) is None:
+                    aluno.enrollments = []
+                aluno.enrollments.append(matricula)
+
+            turma = turma_por_id.get(classroom_id)
+            if turma:
+                if getattr(turma, "enrollments", None) is None:
+                    turma.enrollments = []
+                turma.enrollments.append(matricula)
+
+        for aluno in alunos_ordenados:
+            if aluno and getattr(aluno, "enrollments", None):
+                await aluno.save()
+
+        for turma in turmas_salvas:
+            if turma and getattr(turma, "enrollments", None):
+                await turma.save()
+
         enrollments_salvos = await Enrollment.find_all().to_list()
 
         for matricula in enrollments_salvos:
