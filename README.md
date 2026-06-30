@@ -97,7 +97,7 @@ classDiagram
     Classroom "*" -- "1" Subject : pertence
     Classroom "*" -- "1" Professor : ministrada_por
 
-``` 
+```
 
 ## ⚙️ Como Executar o Projeto via Docker (Recomendado)
 
@@ -115,7 +115,7 @@ cp .env-example .env
 1. Subir os Contêineres
 
 ```Bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 Serviços disponíveis:
