@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Any
 
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.beanie import apaginate
 
 from app.models import Monitor
 from app.models.feedback import Feedback

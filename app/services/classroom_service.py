@@ -6,7 +6,7 @@ negócio relacionada a turmas (classrooms).
 
 from typing import cast
 
-from beanie import PydanticObjectId, Link
+from beanie import PydanticObjectId
 
 from app.core.exceptions.custom_exceptions import (
     ClassroomAlreadyExistsException,

@@ -136,7 +136,7 @@ class FeedbackAlreadyExistsException(Exception):
 
 class DocumentNotFoundException(Exception):
     def __init__(self) -> None:
-        message = f"Documento não encontrado."
+        message = "Documento não encontrado."
         super().__init__(message)
         self.message = message
 

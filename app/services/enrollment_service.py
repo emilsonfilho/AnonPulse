@@ -24,9 +24,8 @@ from app.schemas.enrollment_schema import (
     EnrollmentResponse,
     UpdateEnrollmentRequest,
 )
-from app.services.base_service import BaseService, ResponseSchemaType
+from app.services.base_service import BaseService
 
-from fastapi_pagination import Page, Params
 
 class EnrollmentService(
     BaseService[
