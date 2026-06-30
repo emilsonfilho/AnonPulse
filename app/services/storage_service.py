@@ -26,6 +26,21 @@ class StorageService:
         }
 
     async def _ensure_bucket_exists(self, s3_client):
+        """
+        Verifica a existência de um bucket no S3 e o cria caso não seja encontrado.
+
+        Args:
+            s3_client (Any): A instância do cliente aioboto3
+                utilizada para comunicar-se com o serviço de armazenamento.
+
+        Returns:
+            None
+
+        Raises:
+            ClientError: A exceção original do cliente (ex: boto3/botocore) caso a
+                tentativa de acessar o bucket resulte em um erro diferente de
+                "não encontrado" (como erros de permissão ou credenciais inválidas).
+        """
         try:
             await s3_client.head_bucket(Bucket=self.bucket_name)
         except ClientError as e:
@@ -37,6 +52,19 @@ class StorageService:
                 raise
 
     async def upload_file(self, file: UploadFile, filename: str) -> str:
+        """
+        Realiza o upload de um arquivo para o armazenamento (S3/MinIO) e retorna sua URL.
+
+        Args:
+            file (UploadFile): O objeto do arquivo recebido (geralmente de uma
+                requisição HTTP), contendo o stream de leitura e o content_type.
+            filename (str): O nome ou caminho de destino sob o qual o arquivo
+                será salvo dentro do bucket.
+
+        Returns:
+            str: A URL formatada (baseada no endpoint do MinIO e no nome do bucket)
+                para acessar o arquivo recém-enviado.
+        """
         async with self.session.client(**self.bucket_config) as s3_client:
             await self._ensure_bucket_exists(s3_client)
 
@@ -52,6 +80,18 @@ class StorageService:
         return f"{settings.MINIO_ENDPOINT}/{self.bucket_name}/{filename}"
 
     async def download_file(self, filename: str) -> tuple[bytes, str]:
+        """
+        Baixa um arquivo do armazenamento (S3/MinIO) e retorna seu conteúdo e tipo MIME.
+
+        Args:
+            filename (str): O nome ou caminho exato do arquivo (chave) a ser
+                baixado do bucket.
+
+        Returns:
+            tuple[bytes, str]: Uma tupla contendo o conteúdo binário do arquivo
+                (`bytes`) na primeira posição, e o seu tipo de conteúdo MIME
+                (`str`) na segunda.
+        """
         async with self.session.client(**self.bucket_config) as s3:
             response = await s3.get_object(Bucket=self.bucket_name, Key=filename)
 
@@ -61,6 +101,16 @@ class StorageService:
             return file_data, content_type
 
     async def delete_file(self, filename: str) -> None:
+        """
+        Exclui um arquivo do armazenamento (S3/MinIO) com base no seu nome.
+
+        Args:
+            filename (str): O nome ou caminho exato do arquivo (chave) a ser
+                removido do bucket.
+
+        Returns:
+            None
+        """
         async with self.session.client(**self.bucket_config) as s3:
             await s3.delete_object(Bucket=self.bucket_name, Key=filename)
             logger.info(

@@ -21,6 +21,18 @@ _client: AsyncMongoClient | None = None
 
 
 async def init_db():
+    """
+    Inicializa a conexão assíncrona com o banco de dados e configura o Beanie ODM.
+
+    Esta função cria um cliente MongoDB assíncrono usando as configurações de
+    URL do sistema.
+
+    Globals:
+        _client (AsyncMongoClient): Instância global do cliente conectado ao MongoDB.
+
+    Returns:
+        None
+    """
     global _client
 
     client = AsyncMongoClient(settings.DATABASE_URL)

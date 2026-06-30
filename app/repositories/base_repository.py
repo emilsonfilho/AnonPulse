@@ -36,6 +36,21 @@ class BaseRepository(Generic[ModelType]):
         self.model = model
 
     async def find_by(self, **filters) -> ModelType | None:
+        """
+        Busca um único documento no banco de dados com base nos filtros fornecidos.
+
+        Realiza uma consulta assíncrona utilizando os critérios de busca passados
+        como argumentos nomeados (`**filters`). A busca é configurada para resolver
+        e recuperar automaticamente os documentos relacionados (via `fetch_links=True`).
+
+        Args:
+            **filters: Critérios de filtragem flexíveis para a consulta.
+
+        Returns:
+            ModelType | None: A instância do documento encontrado com os seus
+                relacionamentos resolvidos, ou `None` caso nenhum registro
+                corresponda aos critérios.
+        """
         return await self.model.find_one(filters, fetch_links=True)
 
     async def get(
@@ -45,7 +60,7 @@ class BaseRepository(Generic[ModelType]):
         Obtém um documento pelo seu ID.
 
         Args:
-            identifier: ID do documento (ObjectId ou string).
+            identifier: ID do documento (ObjectId ).
             fetch_links: Se True, carrega os documentos relacionados (links).
 
         Returns:
@@ -71,7 +86,7 @@ class BaseRepository(Generic[ModelType]):
         return await apaginate(self.model.find_all(fetch_links=fetch_links), params)
 
     async def create(self, obj: ModelType) -> ModelType:
-        """Cria um novo registro.
+        """Cria um registro.
 
         Args:
             obj: O objeto do modelo a ser criado.
@@ -137,6 +152,19 @@ class BaseRepository(Generic[ModelType]):
     async def _paginate_aggregation(
         self, aggregation: list, params: Params
     ) -> Page[Any]:
+        """
+        Executa um pipeline de agregação e formata os resultados com paginação.
+
+        Args:
+            - aggregation (list): O pipeline de agregação do MongoDB a ser executado.
+            - params (Params): Os parâmetros de paginação (como número e tamanho da
+                página) que serão utilizados para formatar a resposta final.
+
+        Returns:
+            Page[Any]: um objeto de resposta paginada contendo os itens retornados
+                pela agregação, a contagem total de registros e os parâmetros
+                de paginação aplicados.
+        """
         results = await self.model.aggregate(aggregation).to_list()
         data = results[0]
         return Page.create(
@@ -147,6 +175,19 @@ class BaseRepository(Generic[ModelType]):
 
     @staticmethod
     def _facet_stage(params: Params, sort: dict | None = None) -> dict:
+        """
+        Cria o estágio de agregação `$facet` para paginação e ordenação no MongoDB.
+
+        Args:
+            - params (Params): Os parâmetros de paginação contendo informações como
+                a página atual e o limite de itens por página.
+            - sort (dict | None, opcional): Um dicionário de ordenação no formato do
+                MongoDB (ex: {"campo": 1}). Padrão é None.
+
+        Returns:
+            dict: O dicionário formatado representando o estágio `$facet` pronto
+                para ser anexado a um pipeline de agregação.
+        """
         p = Pagination.from_params(params)
 
         items = []
@@ -168,6 +209,31 @@ class BaseRepository(Generic[ModelType]):
         params: Params,
         fetch_links: bool = False,
     ) -> Page[Any]:
+        """
+        Busca documentos vinculados a um registro específico com paginação.
+
+        Args:
+            model (type[Document]): O modelo do documento base a ser localizado.
+            lookup_expr (Any): A expressão de filtro (critérios de busca) para
+                encontrar o documento base.
+            source_model (type[Document]): O modelo que contém os registros
+                vinculados a serem retornados.
+            link_field (str): O nome do campo no `source_model` que armazena a
+                referência (link) para o documento base.
+            exception (Exception): A instância da exceção a ser lançada caso o
+                documento base não seja encontrado.
+            params (Params): Os parâmetros de paginação.
+            fetch_links (bool, opcional): Indica se os relacionamentos dos
+                documentos finais devem ser resolvidos. Padrão é False.
+
+        Returns:
+            Page[Any]: Um objeto de resposta paginada contendo os documentos
+                do `source_model` que estão vinculados ao registro base.
+
+        Raises:
+            Exception: A exceção fornecida no argumento `exception` se a
+                consulta inicial no `model` não retornar nenhum documento.
+        """
         doc = await model.find_one(lookup_expr)  # type: ignore
 
         if not doc:

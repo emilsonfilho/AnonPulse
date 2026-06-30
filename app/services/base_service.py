@@ -44,6 +44,23 @@ class BaseService(
         identifier: PydanticObjectId,
         fetch_links: bool | None = None,
     ) -> ModelType:
+        """
+        Busca um documento pelo seu identificador ou lança uma exceção se não for encontrado.
+
+        Args:
+            identifier (PydanticObjectId): O identificador único (Object ID) do
+                documento a ser recuperado.
+            fetch_links (bool | None, opcional): Flag para determinar se os documentos
+                vinculados devem ser trazidos na consulta. Se `None`, assume o
+                comportamento padrão da classe. Padrão é None.
+
+        Returns:
+            ModelType: A instância do documento correspondente ao identificador.
+
+        Raises:
+            Exception: A exceção gerada por `self.not_found_exception()` caso o
+                documento não seja localizado no repositório.
+        """
         _fetch_links = (
             fetch_links if fetch_links is not None else self.default_fetch_links
         )
@@ -60,6 +77,21 @@ class BaseService(
         params: Params,
         fetch_links: bool | None = None,
     ) -> Page[ResponseSchemaType]:
+        """
+        Lista todos os documentos do repositório com paginação e mapeamento.
+
+        Args:
+            params (Params): Os parâmetros de paginação (como página e tamanho)
+                utilizados para limitar e deslocar os resultados da consulta.
+            fetch_links (bool | None, opcional): Flag para determinar se os
+                documentos vinculados devem ser resolvidos. Se `None`, utiliza o
+                comportamento padrão da classe. Padrão é None.
+
+        Returns:
+            Page[ResponseSchemaType]: Um objeto de resposta paginada contendo
+                os documentos convertidos para o esquema de saída, além do
+                total de registros e detalhes da paginação.
+        """
         _fetch_links = (
             fetch_links if fetch_links is not None else self.default_fetch_links
         )
@@ -88,10 +120,43 @@ class BaseService(
         identifier: PydanticObjectId,
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
+        """
+        Busca um documento pelo seu identificador e o mapeia para o esquema de resposta.
+
+        Args:
+            identifier (PydanticObjectId): O identificador único (Object ID) do
+                documento a ser buscado.
+            fetch_links (bool | None, opcional): Flag para determinar se os
+                documentos vinculados devem ser resolvidos durante a consulta. Se
+                `None`, repassa a decisão para o método `get_or_raise`. Padrão é None.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                contendo os dados do documento localizado.
+
+        Raises:
+            Exception: A mesma exceção lançada por `get_or_raise` (geralmente indicando
+                que o recurso não foi encontrado) caso o documento não exista.
+        """
         obj = await self.get_or_raise(identifier, fetch_links=fetch_links)
         return Mapper.to_response(obj, self.response_schema)
 
     async def get_by(self, **filters) -> ResponseSchemaType:
+        """
+        Busca um único documento com base em filtros e o mapeia para o esquema de resposta.
+
+        Args:
+            **filters: Critérios de filtragem flexíveis (argumentos nomeados)
+                utilizados para a consulta no repositório.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                contendo os dados do documento localizado.
+
+        Raises:
+            Exception: A exceção gerada por `self.not_found_exception()` caso
+                nenhum registro corresponda aos filtros informados.
+        """
         obj = await self.repository.find_by(**filters)
 
         if not obj:
@@ -104,6 +169,28 @@ class BaseService(
         request: CreateSchemaType,
         identifier_value: PydanticObjectId | None = None,
     ) -> ResponseSchemaType:
+        """
+        Cria um novo documento no banco de dados e o mapeia para o esquema de resposta.
+
+        Args:
+            request (CreateSchemaType): O objeto Pydantic contendo os dados validados
+                necessários para a criação do novo registro.
+            identifier_value (PydanticObjectId | None, opcional): Um identificador
+                opcional utilizado para verificar se o documento já existe no banco
+                de dados antes da criação. Padrão é None.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                representando o documento recém-criado.
+
+        Raises:
+            Exception: A exceção configurada em `self.already_exists_exception` caso
+                um documento com o `identifier_value` já exista no repositório.
+            RuntimeError: Se o documento for salvo no repositório, mas não possuir
+                um ID gerado.
+            Exception: A exceção gerada por `get_or_raise` caso falhe ao tentar
+                recarregar o documento após a criação.
+        """
         if identifier_value is not None and self.already_exists_exception:
             obj_exists = await self.repository.get(identifier_value)
             if obj_exists:
@@ -127,6 +214,23 @@ class BaseService(
             unique_filter: dict,
             **model_data
     ) -> ResponseSchemaType:
+        """
+        Executa a criação interna de um documento após verificar sua unicidade.
+
+        Args:
+            unique_filter (dict): Um dicionário contendo os critérios de busca
+                utilizados para garantir que o documento não seja duplicado.
+            **model_data: Argumentos nomeados contendo os dados a serem
+                preenchidos na criação da nova instância do modelo.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                representando o documento recém-criado.
+
+        Raises:
+            Exception: A exceção configurada em `self.already_exists_exception`
+                caso a validação de unicidade falhe (o documento já exista).
+        """
         if await self.repository.find_by(**unique_filter):
             raise self.already_exists_exception(**unique_filter)
 
@@ -145,6 +249,30 @@ class BaseService(
         request: UpdateSchemaType,
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
+        """
+        Atualiza um documento existente no banco de dados e o mapeia para o esquema de resposta.
+
+        Args:
+            identifier (PydanticObjectId | str): O identificador único do documento a
+                ser atualizado.
+            request (UpdateSchemaType): O objeto Pydantic contendo os dados parciais ou
+                totais validados para a atualização do registro.
+            fetch_links (bool | None, opcional): Flag para determinar se os documentos
+                vinculados devem ser resolvidos ao recarregar o registro após a atualização.
+                Se `None`, assume o comportamento padrão da classe. Padrão é None.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                representando o documento atualizado.
+
+        Raises:
+            Exception: A exceção gerada por `self.not_found_exception()` caso o documento
+                não seja encontrado para a atualização.
+            RuntimeError: Se o documento for atualizado com sucesso, mas o objeto retornado
+                não possuir um ID.
+            Exception: A exceção gerada por `get_or_raise` caso falhe ao tentar recarregar
+                o documento após a atualização.
+        """
         updated_obj = await self.repository.update(
             identifier,
             request.model_dump(exclude_unset=True),
@@ -167,8 +295,28 @@ class BaseService(
         return Mapper.to_response(updated_obj_with_rels, self.response_schema)
 
     async def delete(self, identifier: Any) -> None:
+        """
+        Exclui um documento do banco de dados com base no seu identificador.
+
+        Args:
+            identifier (Any): O identificador único do documento a ser excluído.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: A exceção gerada por `get_or_raise` (geralmente indicando que
+                o recurso não foi encontrado) caso o documento não exista no banco
+                antes da tentativa de exclusão.
+        """
         await self.get_or_raise(identifier)
         await self.repository.delete(identifier)
 
     async def count(self) -> int:
+        """
+        Retorna a contagem total de documentos armazenados no repositório.
+
+        Returns:
+            int: O número total de documentos encontrados no repositório.
+        """
         return await self.repository.count()

@@ -197,6 +197,20 @@ class DocumentService(
     async def list_by_assignment(
         self, assignment_id: str, params: Params
     ) -> Page[DocumentMetadata]:
+        """
+        Lista os metadados de documentos vinculados a uma atribuição específica com paginação.
+
+        Args:
+            assignment_id (str): O identificador único da atribuição (assignment)
+                cujos documentos vinculados serão listados.
+            params (Params): Os parâmetros de paginação (como página e tamanho)
+                utilizados para limitar e deslocar os resultados da consulta.
+
+        Returns:
+            Page[DocumentMetadata]: Um objeto de resposta paginada contendo
+                os documentos vinculados à atribuição, devidamente convertidos e
+                validados no esquema de resposta.
+        """
         page_result = await self.repository.list_by_assignment(assignment_id, params)
 
         page_result.items = [

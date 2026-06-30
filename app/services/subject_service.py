@@ -74,6 +74,25 @@ class SubjectService(
             request: UpdateSubjectRequest,
             fetch_links: bool | None = None,
     ) -> SubjectResponse:
+        """
+        Atualiza o nome de uma disciplina existente e a mapeia para o esquema de resposta.
+
+        Args:
+            identifier (str): O código (cod) único da disciplina a ser atualizada.
+            request (UpdateSubjectRequest): O objeto Pydantic contendo os dados de
+                atualização (especificamente o novo `name` da disciplina).
+            fetch_links (bool | None, opcional): Parâmetro presente na assinatura, mas
+                não utilizado para condicionamento nesta implementação, uma vez que
+                `fetch_all_links()` é acionado incondicionalmente. Padrão é None.
+
+        Returns:
+            SubjectResponse: Uma instância validada do esquema de resposta
+                representando a disciplina atualizada.
+
+        Raises:
+            SubjectNotFoundException: Caso a disciplina não seja localizada no banco
+                de dados através do código (identifier) informado.
+        """
         subject = await self.repository.find_by(cod=identifier)
 
         if not subject:
@@ -84,9 +103,36 @@ class SubjectService(
         return cast(SubjectResponse, Mapper.to_response(subject, self.response_schema))
 
     async def get_by_cod(self, cod: str) -> SubjectResponse:
-       return await self.get_by(cod=cod)
+        """
+        Busca uma disciplina específica através do seu código identificador.
+
+        Args:
+            cod (str): O código único de identificação da disciplina a ser buscada.
+
+        Returns:
+            SubjectResponse: Uma instância validada do esquema de resposta
+                contendo os dados da disciplina localizada.
+
+        Raises:
+            Exception: A exceção de não encontrado (herdada do método `get_by`) caso
+                nenhuma disciplina corresponda ao código informado.
+        """
+        return await self.get_by(cod=cod)
 
     async def delete(self, cod: str) -> None:
+        """
+        Exclui uma disciplina do banco de dados com base no seu código identificador.
+
+        Args:
+            cod (str): O código único de identificação da disciplina a ser excluída.
+
+        Returns:
+            None
+
+        Raises:
+            SubjectNotFoundException: Caso a disciplina não seja localizada no
+                repositório através do código informado.
+        """
         subject = await self.repository.find_by(cod=cod)
         if not subject:
             raise SubjectNotFoundException()

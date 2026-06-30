@@ -24,6 +24,3 @@ class ErrorResponse(BaseModel):
             message=message,
             details=details,
         )
-
-    # sim, apaga a linha do email e deixa sem ela
-    # ele atualiza so o que tu botar

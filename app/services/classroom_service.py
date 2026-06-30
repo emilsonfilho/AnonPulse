@@ -49,10 +49,24 @@ class ClassroomService(
         )
 
     async def get_by_cod(self, cod: str) -> ClassroomResponse:
+        """
+        Busca uma sala de aula específica através do seu código identificador.
+
+        Args:
+            cod (str): O código único de identificação da sala de aula a ser buscada.
+
+        Returns:
+            ClassroomResponse: Uma instância validada do esquema de resposta
+                contendo os dados da sala de aula localizada.
+
+        Raises:
+            Exception: A exceção de não encontrado (herdada do método `get_by`) caso
+                nenhuma sala de aula corresponda ao código informado.
+        """
         return await self.get_by(cod=cod)
 
     async def create(self, request: CreateClassroomRequest) -> ClassroomResponse:
-        """Cria uma nova classroom.
+        """Cria uma turma.
 
         O identificador usado para checagem de existência é o atributo
         `cod` do request.
@@ -76,6 +90,26 @@ class ClassroomService(
         request: UpdateSchemaType,
         fetch_links: bool | None = None,
     ) -> ResponseSchemaType:
+        """
+        Atualiza o código de uma sala de aula existente e a mapeia para o esquema de resposta.
+
+        Args:
+            identifier (PydanticObjectId | str): O código (cod) atual da sala de aula
+                que será atualizada.
+            request (UpdateSchemaType): O objeto Pydantic contendo os dados de
+                atualização (espera-se que contenha o novo atributo `cod`).
+            fetch_links (bool | None, opcional): Parâmetro presente na assinatura,
+                mas não utilizado para condicionamento nesta implementação, uma vez
+                que `fetch_all_links()` é acionado incondicionalmente. Padrão é None.
+
+        Returns:
+            ResponseSchemaType: Uma instância validada do esquema de resposta
+                representando a sala de aula atualizada.
+
+        Raises:
+            ClassroomNotFoundException: Caso a sala de aula não seja localizada no
+                banco de dados através do código (identifier) informado.
+        """
         classroom = await self.repository.find_by(cod=identifier)
 
         if not classroom:

@@ -77,6 +77,25 @@ class StudentService(
             request: UpdateStudentRequest,
             fetch_links: bool | None = None,
     ) -> StudentResponse:
+        """
+        Atualiza os dados de um estudante, aplicando hash na matrícula, e o mapeia para o esquema de resposta.
+
+        Args:
+            identifier (str): O identificador único do estudante a ser atualizado.
+            request (UpdateStudentRequest): O objeto Pydantic contendo os dados de
+                atualização, especificamente a nova matrícula que será criptografada.
+            fetch_links (bool | None, opcional): Parâmetro presente na assinatura, mas
+                não utilizado para condicionamento nesta implementação, visto que
+                `fetch_all_links()` é executado incondicionalmente. Padrão é None.
+
+        Returns:
+            StudentResponse: Uma instância validada do esquema de resposta
+                representando o estudante atualizado.
+
+        Raises:
+            StudentNotFoundException: Caso o estudante não seja localizado no
+                banco de dados através do identificador informado.
+        """
         request.registration = HashService.generate_hash(
             request.registration, HashAlgorithm.SHA256
         )
@@ -96,6 +115,20 @@ class StudentService(
         )
 
     async def delete(self, identifier: Any) -> None:
+        """
+        Exclui um estudante e remove em cascata todas as suas matrículas associadas.
+
+        Args:
+            identifier (Any): O identificador único do estudante a ser excluído.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: A exceção gerada por `get_or_raise` (geralmente indicando que
+                o recurso não foi encontrado) caso o estudante não exista no banco
+                antes da tentativa de exclusão.
+        """
         from app.models.enrollment import Enrollment
 
         student = await self.get_or_raise(identifier)
